@@ -1,0 +1,27 @@
+﻿services:
+  backend:
+    image: backend
+    build:
+      context: backend
+    ports:
+      - "5163:8080"
+
+  db:
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'root-pass'
+    ports:
+      - '3307:3306'
+    volumes:
+      - matcha-db:/var/lib/mysql
+
+  frontend:
+    build:
+      context: frontend
+        
+volumes:
+  matcha-db:
