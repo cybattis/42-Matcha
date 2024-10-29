@@ -2,7 +2,8 @@
   backend:
     image: backend
     build:
-      context: backend
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
       - "5163:8080"
 
@@ -10,10 +11,10 @@
     image: mysql:latest
     restart: always
     environment:
-      MYSQL_DATABASE: 'db'
-      MYSQL_USER: 'user'
-      MYSQL_PASSWORD: 'password'
-      MYSQL_ROOT_PASSWORD: 'root-pass'
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
       - '3307:3306'
     volumes:
