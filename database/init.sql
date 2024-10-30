@@ -1,3 +1,23 @@
+CREATE TABLE gender (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(30) UNIQUE NOT NULL
+);
+
+CREATE TABLE tag (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(30) UNIQUE NOT NULL
+);
+
+CREATE TABLE status (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(30) UNIQUE NOT NULL
+);
+
+CREATE TABLE reaction (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(30) UNIQUE NOT NULL
+);
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(200) NOT NULL,
@@ -10,15 +30,23 @@ CREATE TABLE users (
     birth_date TIMESTAMP,
     gender_id INT,
     fame INT,
-    profile_picture_id INT,
     biography VARCHAR(250),
     profile_completed BOOLEAN DEFAULT FALSE,
     created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_banned BOOLEAN DEFAULT FALSE,
     ban_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     localisation VARCHAR(100),
-    FOREIGN KEY (gender_id) REFERENCES gender(id),
-    FOREIGN KEY (profile_picture_id) REFERENCES pictures(id)
+    FOREIGN KEY (gender_id) REFERENCES gender(id)
+);
+
+CREATE TABLE pictures (
+    userid INT PRIMARY KEY,
+    picture1 MEDIUMTEXT,
+    picture2 MEDIUMTEXT,
+    picture3 MEDIUMTEXT,
+    picture4 MEDIUMTEXT,
+    picture5 MEDIUMTEXT,
+    FOREIGN KEY (userid) REFERENCES users(id)
 );
 
 CREATE TABLE liked (
@@ -49,28 +77,6 @@ CREATE TABLE users_tags (
     FOREIGN KEY (tagid) REFERENCES tag(id)
 );
 
-CREATE TABLE tag (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30) UNIQUE NOT NULL
-);
-
-CREATE TABLE pictures (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    userid INT NOT NULL,
-    picture_position INT UNIQUE,
-    picture1 MEDIUMTEXT,
-    picture2 MEDIUMTEXT,
-    picture3 MEDIUMTEXT,
-    picture4 MEDIUMTEXT,
-    picture5 MEDIUMTEXT,
-    FOREIGN KEY (userid) REFERENCES users(id)
-);
-
-CREATE TABLE gender (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30) UNIQUE NOT NULL
-);
-
 CREATE TABLE attracted_by (
     userid INT NOT NULL,
     genderid INT NOT NULL,
@@ -79,28 +85,33 @@ CREATE TABLE attracted_by (
 );
 
 CREATE TABLE `match` (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     first_userid INT NOT NULL,
     second_userid INT NOT NULL,
     created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (first_userid, second_userid),
     FOREIGN KEY (first_userid) REFERENCES users(id),
-    FOREIGN KEY (second_userid) REFERENCES users(id)
+    FOREIGN KEY (second_userid) REFERENCES users(id),
+    UNIQUE (first_userid, second_userid)
 );
 
 CREATE TABLE message (
     id INT AUTO_INCREMENT PRIMARY KEY,
     matchid INT NOT NULL,
+    sender INT NOT NULL,
+    receiver INT NOT NULL,
     message_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     content VARCHAR(255),
+    sender_reactionid INT,
+    receiver_reactionid INT,
     message_status_id INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (sender) REFERENCES users(id),
+    FOREIGN KEY (receiver) REFERENCES users(id),
+    FOREIGN KEY (sender_reactionid) REFERENCES reaction(id),
+    FOREIGN KEY (receiver_reactionid) REFERENCES reaction(id),
     FOREIGN KEY (message_status_id) REFERENCES status(id),
-    FOREIGN KEY (matchid) REFERENCES `match`(first_userid)
+    FOREIGN KEY (matchid) REFERENCES `match`(id)
 );
 
-CREATE TABLE status (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30) UNIQUE NOT NULL
-);
 
 CREATE TABLE notification (
     id INT AUTO_INCREMENT PRIMARY KEY,
