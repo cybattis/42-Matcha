@@ -9,7 +9,7 @@
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTP_PORTS=8081
-      - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+      - DB_CONNECTION_STRING=$DB_CONNECTION_STRING
     networks:
       - back-net
       - front-net
@@ -47,6 +47,9 @@
       - front-net
     ports:
       - "3000:4242"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - db
         
