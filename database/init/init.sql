@@ -3,7 +3,7 @@ CREATE TABLE gender (
     name VARCHAR(30) UNIQUE NOT NULL
 );
 
-CREATE TABLE tag (
+CREATE TABLE tags (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(30) UNIQUE NOT NULL
 );
@@ -74,7 +74,7 @@ CREATE TABLE users_tags (
     tagid INT NOT NULL,
     PRIMARY KEY (userid, tagid),
     FOREIGN KEY (userid) REFERENCES users(id),
-    FOREIGN KEY (tagid) REFERENCES tag(id)
+    FOREIGN KEY (tagid) REFERENCES tags(id)
 );
 
 CREATE TABLE attracted_by (
