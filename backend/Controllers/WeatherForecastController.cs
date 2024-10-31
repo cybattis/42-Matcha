@@ -1,3 +1,4 @@
+using backend.Database;
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,6 +8,8 @@ namespace backend.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
+    private DbHelper _db;
+    
     private static readonly string[] Summaries = new[]
     {
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -17,6 +20,7 @@ public class WeatherForecastController : ControllerBase
     public WeatherForecastController(ILogger<WeatherForecastController> logger)
     {
         _logger = logger;
+        _db = new DbHelper();
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
