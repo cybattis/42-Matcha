@@ -8,5 +8,8 @@ export default defineConfig({
     port: 4242,
     strictPort: true,
     host: true,
+    watch: {
+      usePolling: true,
+    },
   },
 });
