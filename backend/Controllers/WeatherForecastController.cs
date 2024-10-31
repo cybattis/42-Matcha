@@ -8,7 +8,7 @@ namespace backend.Controllers;
 [Route("[controller]")]
 public class WeatherForecastController : ControllerBase
 {
-    private DbHelper _db;
+    private IDbHelper _db;
     
     private static readonly string[] Summaries = new[]
     {
@@ -17,10 +17,10 @@ public class WeatherForecastController : ControllerBase
 
     private readonly ILogger<WeatherForecastController> _logger;
 
-    public WeatherForecastController(ILogger<WeatherForecastController> logger)
+    public WeatherForecastController(ILogger<WeatherForecastController> logger, IDbHelper db)
     {
         _logger = logger;
-        _db = new DbHelper();
+        _db = db;
     }
 
     [HttpGet(Name = "GetWeatherForecast")]
