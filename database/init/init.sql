@@ -22,6 +22,7 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(200) NOT NULL,
     password VARCHAR(200) NOT NULL,
+    salt VARCHAR(8) NOT NULL,
     username VARCHAR(50),
     first_name VARCHAR(50),
     last_name VARCHAR(50),
@@ -29,6 +30,7 @@ CREATE TABLE users (
     is_verified BOOLEAN DEFAULT FALSE,
     birth_date TIMESTAMP,
     gender_id INT,
+    sexual_orientation INT, -- 1 hetero / 2 homo / 3 bi
     fame INT,
     biography VARCHAR(250),
     profile_completed BOOLEAN DEFAULT FALSE,
@@ -40,7 +42,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE pictures (
-    userid INT PRIMARY KEY,
+    id INT PRIMARY KEY,
     picture1 MEDIUMTEXT,
     picture2 MEDIUMTEXT,
     picture3 MEDIUMTEXT,
@@ -75,13 +77,6 @@ CREATE TABLE users_tags (
     PRIMARY KEY (userid, tagid),
     FOREIGN KEY (userid) REFERENCES users(id),
     FOREIGN KEY (tagid) REFERENCES tags(id)
-);
-
-CREATE TABLE attracted_by (
-    userid INT NOT NULL,
-    genderid INT NOT NULL,
-    FOREIGN KEY (userid) REFERENCES users(id),
-    FOREIGN KEY (genderid) REFERENCES gender(id)
 );
 
 CREATE TABLE `match` (
