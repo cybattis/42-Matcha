@@ -23,32 +23,33 @@ CREATE TABLE users (
     email VARCHAR(200) NOT NULL,
     password VARCHAR(200) NOT NULL,
     salt VARCHAR(8) NOT NULL,
-    username VARCHAR(50),
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
+    username VARCHAR(50) NOT NULL,
+    birth_date DATE NOT NULL,
     email_verification_link VARCHAR(255),
     is_verified BOOLEAN DEFAULT FALSE,
-    birth_date TIMESTAMP,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
     gender_id INT,
     sexual_orientation INT, -- 1 hetero / 2 homo / 3 bi
-    fame INT,
+    localisation VARCHAR(100),
     biography VARCHAR(250),
+    profile_completion_percentage INT DEFAULT 0,
     profile_completed BOOLEAN DEFAULT FALSE,
+    fame INT DEFAULT 0,
     created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_banned BOOLEAN DEFAULT FALSE,
     ban_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    localisation VARCHAR(100),
     FOREIGN KEY (gender_id) REFERENCES gender(id)
 );
 
 CREATE TABLE pictures (
     id INT PRIMARY KEY,
-    picture1 MEDIUMTEXT,
+    picture1 MEDIUMTEXT NOT NULL,
     picture2 MEDIUMTEXT,
     picture3 MEDIUMTEXT,
     picture4 MEDIUMTEXT,
     picture5 MEDIUMTEXT,
-    FOREIGN KEY (userid) REFERENCES users(id)
+    FOREIGN KEY (id) REFERENCES users(id)
 );
 
 CREATE TABLE liked (
@@ -72,11 +73,18 @@ CREATE TABLE blocked (
 );
 
 CREATE TABLE users_tags (
-    userid INT NOT NULL,
-    tagid INT NOT NULL,
-    PRIMARY KEY (userid, tagid),
+    userid INT PRIMARY KEY,
+    tag1 INT UNIQUE,
+    tag2 INT UNIQUE,
+    tag3 INT UNIQUE,
+    tag4 INT UNIQUE,
+    tag5 INT UNIQUE,
     FOREIGN KEY (userid) REFERENCES users(id),
-    FOREIGN KEY (tagid) REFERENCES tags(id)
+    FOREIGN KEY (tag1) REFERENCES tags(id),
+    FOREIGN KEY (tag2) REFERENCES tags(id),
+    FOREIGN KEY (tag3) REFERENCES tags(id),
+    FOREIGN KEY (tag4) REFERENCES tags(id),
+    FOREIGN KEY (tag5) REFERENCES tags(id)
 );
 
 CREATE TABLE `match` (
@@ -113,6 +121,7 @@ CREATE TABLE notification (
     userid INT,
     content VARCHAR(255) NOT NULL,
     statusid INT NOT NULL,
+    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userid) REFERENCES users(id),
     FOREIGN KEY (statusid) REFERENCES status(id)
 );

@@ -18,7 +18,10 @@
         condition: service_healthy
 
   db:
-    image: mysql:latest
+    image: db
+    build:
+      context: .
+      dockerfile: database/Dockerfile
     restart: always
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -31,7 +34,6 @@
       - "3307:3306"
     volumes:
       - db:/var/lib/mysql
-      - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
