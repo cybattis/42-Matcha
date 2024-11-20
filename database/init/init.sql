@@ -30,7 +30,7 @@ CREATE TABLE users (
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     gender_id INT,
-    sexual_orientation INT, -- 1 hetero / 2 homo / 3 bi
+    sexual_orientation INT CHECK (sexual_orientation BETWEEN 1 AND 3), -- 1 hetero / 2 homo / 3 bi
     localisation VARCHAR(100),
     biography VARCHAR(250),
     profile_completion_percentage INT DEFAULT 0,
@@ -38,18 +38,27 @@ CREATE TABLE users (
     fame INT DEFAULT 0,
     created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_banned BOOLEAN DEFAULT FALSE,
-    ban_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ban_date TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (gender_id) REFERENCES gender(id)
 );
 
+CREATE TABLE users_tags (
+    user_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY (user_id, tag_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (tag_id) REFERENCES tags(id)
+);
+
 CREATE TABLE pictures (
-    id INT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
     picture1 MEDIUMTEXT NOT NULL,
     picture2 MEDIUMTEXT,
     picture3 MEDIUMTEXT,
     picture4 MEDIUMTEXT,
     picture5 MEDIUMTEXT,
-    FOREIGN KEY (id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE liked (
@@ -72,21 +81,6 @@ CREATE TABLE blocked (
     FOREIGN KEY (to_userid) REFERENCES users(id)
 );
 
-CREATE TABLE users_tags (
-    userid INT PRIMARY KEY,
-    tag1 INT UNIQUE,
-    tag2 INT UNIQUE,
-    tag3 INT UNIQUE,
-    tag4 INT UNIQUE,
-    tag5 INT UNIQUE,
-    FOREIGN KEY (userid) REFERENCES users(id),
-    FOREIGN KEY (tag1) REFERENCES tags(id),
-    FOREIGN KEY (tag2) REFERENCES tags(id),
-    FOREIGN KEY (tag3) REFERENCES tags(id),
-    FOREIGN KEY (tag4) REFERENCES tags(id),
-    FOREIGN KEY (tag5) REFERENCES tags(id)
-);
-
 CREATE TABLE `match` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_userid INT NOT NULL,
@@ -99,22 +93,21 @@ CREATE TABLE `match` (
 
 CREATE TABLE message (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    matchid INT NOT NULL,
+    match_id INT NOT NULL,
     sender INT NOT NULL,
     receiver INT NOT NULL,
     message_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     content VARCHAR(255),
-    sender_reactionid INT,
-    receiver_reactionid INT,
+    sender_reaction_id INT,
+    receiver_reaction_id INT,
     message_status_id INT NOT NULL DEFAULT 0,
     FOREIGN KEY (sender) REFERENCES users(id),
     FOREIGN KEY (receiver) REFERENCES users(id),
-    FOREIGN KEY (sender_reactionid) REFERENCES reaction(id),
-    FOREIGN KEY (receiver_reactionid) REFERENCES reaction(id),
+    FOREIGN KEY (sender_reaction_id) REFERENCES reaction(id),
+    FOREIGN KEY (receiver_reaction_id) REFERENCES reaction(id),
     FOREIGN KEY (message_status_id) REFERENCES status(id),
-    FOREIGN KEY (matchid) REFERENCES `match`(id)
+    FOREIGN KEY (match_id) REFERENCES `match`(id)
 );
-
 
 CREATE TABLE notification (
     id INT AUTO_INCREMENT PRIMARY KEY,

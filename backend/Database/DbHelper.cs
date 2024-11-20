@@ -9,7 +9,8 @@ public class DbHelper: IDbHelper
 
     public DbHelper()
     {
-        string myConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? "";
+        string myConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") 
+                                    ?? "Server=localhost;Port=3307;Database=db;user=user;password=password;";
         Console.WriteLine($"DB_CONNECTION_STRING: {myConnectionString}");
 
         try {

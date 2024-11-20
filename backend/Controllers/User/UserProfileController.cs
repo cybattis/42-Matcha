@@ -38,17 +38,14 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                             SexualOrientation = reader["sexual_orientation"] as int?,
                             Biography = reader["biography"].ToString() ?? "",
                             Localisation = reader["localisation"].ToString() ?? "",
-                            Tag1 = reader["tag1"] as int?,
-                            Tag2 = reader["tag2"] as int?,
-                            Tag3 = reader["tag3"] as int?,
-                            Tag4 = reader["tag4"] as int?,
-                            Tag5 = reader["tag5"] as int?,
-                            Picture1 = reader["picture1"].ToString() ?? "",
-                            Picture2 = reader["picture2"].ToString() ?? "",
-                            Picture3 = reader["picture3"].ToString() ?? "",
-                            Picture4 = reader["picture4"].ToString() ?? "",
-                            Picture5 = reader["picture5"].ToString() ?? ""
                         };
+                        
+                        if (reader.NextResult())
+                        {
+                            while (reader.Read()) {
+                                profile.Tags.Add(reader["tag_id"] as int? ?? 0);
+                            }
+                        }
                         
                         return Ok(profile);
                     }
@@ -87,6 +84,13 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 cmd.Parameters.AddWithValue("@_sexual_orientation", data.SexualOrientation);
                 cmd.Parameters.AddWithValue("@_biography", data.Biography);
                 cmd.Parameters.AddWithValue("@_localisation", data.Localisation);
+                for (int i = 0; i < 5; i++) {
+                    if (i >= data.Tags.Count) {
+                        cmd.Parameters.AddWithValue("@_tag"+ (i + 1), null);
+                        continue;
+                    }
+                    cmd.Parameters.AddWithValue("@_tag"+ (i + 1), data.Tags[i]);
+                }
                 cmd.ExecuteNonQuery();
             }
             return Ok("Profile successfully created");
