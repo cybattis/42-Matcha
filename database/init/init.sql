@@ -18,6 +18,7 @@ CREATE TABLE reaction (
     name VARCHAR(30) UNIQUE NOT NULL
 );
 
+
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(200) NOT NULL,
@@ -72,12 +73,19 @@ CREATE TABLE blocked (
 );
 
 CREATE TABLE users_tags (
-    userid INT NOT NULL,
-    tagid INT NOT NULL,
-    PRIMARY KEY (userid, tagid),
-    FOREIGN KEY (userid) REFERENCES users(id),
-    FOREIGN KEY (tagid) REFERENCES tags(id)
-);
+    userid INT PRIMARY KEY,
+    tag1 INT UNIQUE,
+    tag2 INT UNIQUE,
+    tag3 INT UNIQUE,
+    tag4 INT UNIQUE,
+    tag5 INT UNIQUE,
+    FOREIGN KEY userid REFERENCES users(id),
+    FOREIGN KEY tag1 REFERENCES tags(id),
+    FOREIGN KEY tag2 REFERENCES tags(id),
+    FOREIGN KEY tag3 REFERENCES tags(id),
+    FOREIGN KEY tag4 REFERENCES tags(id),
+    FOREIGN KEY tag5 REFERENCES tags(id)
+)
 
 CREATE TABLE `match` (
     id INT AUTO_INCREMENT PRIMARY KEY,
