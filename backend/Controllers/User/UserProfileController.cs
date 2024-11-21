@@ -1,8 +1,7 @@
 using System.Data;
+using System.Net.Mime;
 using backend.Database;
-using backend.Models;
 using backend.Models.Users;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 
@@ -14,44 +13,47 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
 {
     private readonly IDbHelper _db = new DbHelper();
     
-    [Route("[action]/{id:int}")] 
+    /// <summary>
+    /// Create user profile
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <response code="200">Success</response>
+    /// <response code="400">Bad request</response>
     [HttpGet]
+    [Route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public ActionResult Get(int id)
     {
         try {
-            using (MySqlCommand cmd = new MySqlCommand("GetUserProfile", _db.GetConnection()))
+            using MySqlConnection conn = _db.GetOpenConnection();
+            using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userId", id);
+            
+            using MySqlDataReader reader = cmd.ExecuteReader();
+            if (reader.Read())
             {
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@userId", id);
-                using (MySqlDataReader reader = cmd.ExecuteReader())
+                var profile = new UserProfile
                 {
-                    if (reader.Read())
-                    {
-                        var profile = new UserProfile
-                        {
-                            FirstName = reader["first_name"].ToString() ?? "",
-                            LastName = reader["last_name"].ToString() ?? "",
-                            GenderId = reader["gender_id"] as int?,
-                            SexualOrientation = reader["sexual_orientation"] as int?,
-                            Biography = reader["biography"].ToString() ?? "",
-                            Localisation = reader["localisation"].ToString() ?? "",
-                        };
-                        
-                        if (reader.NextResult())
-                        {
-                            while (reader.Read()) {
-                                profile.Tags.Add(reader["tag_id"] as int? ?? 0);
-                            }
-                        }
-                        
-                        return Ok(profile);
+                    FirstName = reader["first_name"].ToString() ?? "",
+                    LastName = reader["last_name"].ToString() ?? "",
+                    GenderId = reader["gender_id"] as int?,
+                    SexualOrientation = reader["sexual_orientation"] as int?,
+                    Biography = reader["biography"].ToString() ?? "",
+                    Localisation = reader["localisation"].ToString() ?? "",
+                };
+
+                if (reader.NextResult())
+                {
+                    while (reader.Read()) {
+                        profile.Tags.Add(reader["tag_id"] as int? ?? 0);
                     }
-                    return new BadRequestResult();
                 }
+                return Ok(profile);
             }
+            return new BadRequestResult();
         }
         catch (MySqlException ex)
         {
@@ -64,35 +66,47 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// Create user profile
     /// </summary>
     /// <param name="id">User ID</param>
-    /// <param name="data">User data</param>
+    /// <param name="data">User input data</param>
     /// <response code="200">profile created</response>
     /// <response code="400">Bad request</response>
-    [Route("Create/{id:int}")]
     [HttpPost]
+    [Route("Create/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult CreateProfile(int id, [FromBody] UserProfile data)
+    public ActionResult CreateProfile(int id, [FromForm] UserProfile data)
     {
         try {
-            using (MySqlCommand cmd = new MySqlCommand("CreateUserProfile", _db.GetConnection()))
-            {
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@userId", id);
-                cmd.Parameters.AddWithValue("@_first_name", data.FirstName);
-                cmd.Parameters.AddWithValue("@_last_name", data.LastName);
-                cmd.Parameters.AddWithValue("@_gender_id", data.GenderId);
-                cmd.Parameters.AddWithValue("@_sexual_orientation", data.SexualOrientation);
-                cmd.Parameters.AddWithValue("@_biography", data.Biography);
-                cmd.Parameters.AddWithValue("@_localisation", data.Localisation);
-                for (int i = 0; i < 5; i++) {
-                    if (i >= data.Tags.Count) {
-                        cmd.Parameters.AddWithValue("@_tag"+ (i + 1), null);
-                        continue;
-                    }
-                    cmd.Parameters.AddWithValue("@_tag"+ (i + 1), data.Tags[i]);
+            using MySqlConnection conn = _db.GetOpenConnection();
+            using MySqlCommand cmd = new MySqlCommand("CreateUserProfile", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userId", id);
+            cmd.Parameters.AddWithValue("@_first_name", data.FirstName);
+            cmd.Parameters.AddWithValue("@_last_name", data.LastName);
+            cmd.Parameters.AddWithValue("@_gender_id", data.GenderId);
+            cmd.Parameters.AddWithValue("@_sexual_orientation", data.SexualOrientation);
+            cmd.Parameters.AddWithValue("@_biography", data.Biography);
+            cmd.Parameters.AddWithValue("@_localisation", data.Localisation);
+            // Tags
+            for (int i = 0; i < 5; i++) {
+                if (data.Tags[i] == 0) { // TOFIX
+                    Console.WriteLine("Tag is null");
+                    cmd.Parameters.AddWithValue("@_tag"+ (i + 1), null);
+                    continue;
                 }
-                cmd.ExecuteNonQuery();
+                cmd.Parameters.AddWithValue("@_tag"+ (i + 1), data.Tags[i]);
             }
+            // Pictures
+            for (int i = 0; i < 5; i++) {
+                if (i >= data.Images.Count) {
+                    cmd.Parameters.AddWithValue("@_picture"+ (i + 1), null);
+                    continue;
+                }
+
+                Console.WriteLine(data.Images[i].Length);
+                
+                // cmd.Parameters.AddWithValue("@_picture"+ (i + 1), data.Images[i].FileName);
+            }
+            cmd.ExecuteNonQuery();
             return Ok("Profile successfully created");
         }
         catch (MySqlException ex)
@@ -109,8 +123,8 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <param name="data">User data</param>
     /// <response code="201">profile updated</response>
     /// <response code="400">Bad request</response>
-    [Route("Update/{id:int}")]
     [HttpPost]
+    [Route("Update/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult UpdateProfile(int id, [FromBody] UserProfile data)

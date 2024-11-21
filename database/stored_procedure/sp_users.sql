@@ -9,14 +9,16 @@ END //
 # GetUserAuthData
 CREATE PROCEDURE GetUserAuthData(IN userID INT)
 BEGIN
-    SELECT username, password, email, birth_date  FROM users WHERE id = userID;
+    SELECT username, password, email, birth_date FROM users WHERE id = userID;
 END //
 
 # GetUserProfile
 CREATE PROCEDURE GetUserProfile(IN userID INT)
 BEGIN
-    SELECT first_name, last_name, gender_id, sexual_orientation, biography, profile_completion_percentage, localisation FROM users WHERE id = userID;
+    SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
+           profile_completion_percentage, localisation FROM users WHERE id = userID;
     SELECT * FROM users_tags WHERE user_id = userID;
+    SELECT * FROM pictures WHERE user_id = userID;
 END //
 
 # CreateUserProfile
@@ -44,41 +46,51 @@ BEGIN
         biography = _biography 
     WHERE id = userID;
     
-    IF _tag1 IS NOT NULL THEN
-        INSERT INTO users_tags (user_id, tag_id)
-        VALUES (userID, _tag1)
-        ON DUPLICATE KEY UPDATE
-            tag_id = VALUES(tag_id);
-    END IF;
-    
-    IF _tag2 IS NOT NULL THEN
-        INSERT INTO users_tags (user_id, tag_id)
-        VALUES (userID, _tag2)
-        ON DUPLICATE KEY UPDATE
-            tag_id = VALUES(tag_id);
-    END IF;
-    
-    IF _tag3 IS NOT NULL THEN
-        INSERT INTO users_tags (user_id, tag_id)
-        VALUES (userID, _tag3)
-        ON DUPLICATE KEY UPDATE
-            tag_id = VALUES(tag_id);
-    END IF;
-    
-    IF _tag4 IS NOT NULL THEN
-        INSERT INTO users_tags (user_id, tag_id)
-        VALUES (userID, _tag4)
-        ON DUPLICATE KEY UPDATE
-            tag_id = VALUES(tag_id);
-    END IF;
-    
-    IF _tag5 IS NOT NULL THEN
-        INSERT INTO users_tags (user_id, tag_id)
-        VALUES (userID, _tag5)
-        ON DUPLICATE KEY UPDATE
-            tag_id = VALUES(tag_id);
-    END IF;
+    CALL InsertTag(userID, _tag1, _tag2, _tag3, _tag4, _tag5);
+#   Insert pictures
+#   CALL InsertPicture(userID, _image_data);
         
+END //
+
+CREATE FUNCTION InsertTag(userID INT, tag1 INT, tag2 INT, tag3 INT, tag4 INT, tag5 INT)
+    RETURNS INT
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE currentTag INT;
+
+    -- Declare a cursor to loop through the tags
+    DECLARE tagCursor CURSOR FOR
+        SELECT tag
+            FROM (
+                SELECT tag1 AS tag
+                UNION ALL SELECT tag2
+                UNION ALL SELECT tag3
+                UNION ALL SELECT tag4
+                UNION ALL SELECT tag5
+            ) AS TagList;
+
+    -- Declare a handler for the end of the cursor
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN tagCursor;
+
+    read_loop: LOOP
+        FETCH tagCursor INTO currentTag;
+
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Perform the insert or update logic
+        IF currentTag IS NOT NULL THEN
+            INSERT INTO users_tags (user_id, tag_id)
+            VALUES (userID, currentTag)
+            ON DUPLICATE KEY UPDATE
+                tag_id = VALUES(tag_id);
+        END IF;
+    END LOOP;
+
+    CLOSE tagCursor;
 END //
 
 DELIMITER ;

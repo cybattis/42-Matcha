@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Models.Users;
 
@@ -22,5 +23,5 @@ public class UserProfile
     public List<int> Tags {get;set;} = new();
     
     // Pictures
-    public List<string> Pictures {get;set;} = new();
+    public List<IFormFile> Images {get;set;} = new();
 }

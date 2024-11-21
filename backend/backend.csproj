@@ -18,6 +18,18 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+      <Content Include="..\database\Dockerfile">
+        <Link>database\Dockerfile</Link>
+      </Content>
+      <Content Include="..\database\init\init.sql">
+        <Link>database\init\init.sql</Link>
+      </Content>
+      <Content Include="..\database\init\seed.sql">
+        <Link>database\init\seed.sql</Link>
+      </Content>
+      <Content Include="..\database\stored_procedure\sp_users.sql">
+        <Link>database\stored_procedure\sp_users.sql</Link>
+      </Content>
     </ItemGroup>
 
 </Project>
