@@ -48,7 +48,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 if (reader.NextResult())
                 {
                     while (reader.Read()) {
-                        profile.Tags.Add(reader["tag_id"] as int? ?? 0);
+                        // profile.Tags.Add(reader["tag_id"] as int? ?? 0);
                     }
                 }
                 return Ok(profile);
@@ -79,17 +79,18 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             using MySqlConnection conn = _db.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("CreateUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userId", id);
+            cmd.Parameters.AddWithValue("@_user_id", id);
             cmd.Parameters.AddWithValue("@_first_name", data.FirstName);
             cmd.Parameters.AddWithValue("@_last_name", data.LastName);
             cmd.Parameters.AddWithValue("@_gender_id", data.GenderId);
             cmd.Parameters.AddWithValue("@_sexual_orientation", data.SexualOrientation);
             cmd.Parameters.AddWithValue("@_biography", data.Biography);
             cmd.Parameters.AddWithValue("@_localisation", data.Localisation);
+            
             // Tags
             for (int i = 0; i < 5; i++) {
-                if (data.Tags[i] == 0) { // TOFIX
-                    Console.WriteLine("Tag is null");
+                if (i >= data.Tags.Count) {
+                    Console.WriteLine("Tag is null: " + i);
                     cmd.Parameters.AddWithValue("@_tag"+ (i + 1), null);
                     continue;
                 }
@@ -101,11 +102,14 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     cmd.Parameters.AddWithValue("@_picture"+ (i + 1), null);
                     continue;
                 }
-
-                Console.WriteLine(data.Images[i].Length);
                 
-                // cmd.Parameters.AddWithValue("@_picture"+ (i + 1), data.Images[i].FileName);
+                // Read the image binary data from the HTTP request
+                using var memoryStream = new MemoryStream();
+                data.Images[i].CopyTo(memoryStream);
+                var imageBytes = memoryStream.ToArray();
+                cmd.Parameters.Add("@_picture"+ (i + 1), MySqlDbType.Blob).Value = imageBytes;
             }
+            
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully created");
         }
