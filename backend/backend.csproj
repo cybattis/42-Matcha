@@ -18,9 +18,6 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-      <Content Include="..\database\Dockerfile">
-        <Link>database\Dockerfile</Link>
-      </Content>
       <Content Include="..\database\init\init.sql">
         <Link>database\init\init.sql</Link>
       </Content>
@@ -30,6 +27,23 @@
       <Content Include="..\database\stored_procedure\sp_users.sql">
         <Link>database\stored_procedure\sp_users.sql</Link>
       </Content>
+      <Content Remove="Database\stored_procedure\**" />
+      <Content Remove="Database\init\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Database\stored_procedure\**" />
+      <Compile Remove="Database\init\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Database\stored_procedure\**" />
+      <EmbeddedResource Remove="Database\init\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Database\stored_procedure\**" />
+      <None Remove="Database\init\**" />
     </ItemGroup>
 
 </Project>

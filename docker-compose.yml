@@ -18,10 +18,9 @@
 #        condition: service_healthy
 
   db:
-    image: db
-    build:
-      context: .
-      dockerfile: database/Dockerfile
+    image: mysql:latest
+    container_name: database
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -34,6 +33,9 @@
       - "3307:3306"
     volumes:
       - db:/var/lib/mysql
+      - "./database/init/init.sql:/docker-entrypoint-initdb.d/init.sql"
+      - "./database/init/seed.sql:/docker-entrypoint-initdb.d/seed.sql"
+      - "./database/stored_procedure/sp_users.sql:/docker-entrypoint-initdb.d/sp_users.sql"
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
