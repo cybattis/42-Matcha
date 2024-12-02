@@ -18,7 +18,7 @@ BEGIN
     SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
            profile_completion_percentage, localisation FROM users WHERE id = userID;
     SELECT * FROM users_tags WHERE user_id = userID;
-    SELECT * FROM pictures WHERE user_id = userID;
+    SELECT image_data FROM pictures WHERE user_id = userID;
 END //
 
 #  InsertTags
@@ -64,7 +64,7 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id)
             VALUES (userID, currentTag)
             ON DUPLICATE KEY UPDATE
-                tag_id = VALUES(currentTag);
+                tag_id = VALUES(tag_id);
         END IF;
     END LOOP;
 
@@ -113,7 +113,7 @@ BEGIN
             INSERT INTO pictures (user_id, image_data)
                 VALUES (userID, currentPicture)
                 ON DUPLICATE KEY UPDATE
-                    image_data = VALUES(currentPicture);
+                    image_data = VALUES(image_data);
                 END IF;
         END LOOP;
     

@@ -45,11 +45,17 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     Localisation = reader["localisation"].ToString() ?? "",
                 };
 
+                // Tags
+                if (reader.NextResult()) {
+                    while (reader.Read())
+                        profile.Tags.Add(reader["tag_id"] as int? ?? 0);
+                } 
+                
+                // Pictures
                 if (reader.NextResult())
                 {
-                    while (reader.Read()) {
-                        // profile.Tags.Add(reader["tag_id"] as int? ?? 0);
-                    }
+                    while (reader.Read())
+                        profile.Images.Add(reader["image_data"] as byte[] ?? new byte[0]);
                 }
                 return Ok(profile);
             }
@@ -90,7 +96,6 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             // Tags
             for (int i = 0; i < 5; i++) {
                 if (i >= data.Tags.Count) {
-                    Console.WriteLine("Tag is null: " + i);
                     cmd.Parameters.AddWithValue("@_tag"+ (i + 1), null);
                     continue;
                 }
@@ -98,14 +103,27 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             }
             // Pictures
             for (int i = 0; i < 5; i++) {
-                if (i >= data.Images.Count) {
+                if (i >= data.InputImages.Count) {
                     cmd.Parameters.AddWithValue("@_picture"+ (i + 1), null);
                     continue;
                 }
                 
-                // Read the image binary data from the HTTP request
                 using var memoryStream = new MemoryStream();
-                data.Images[i].CopyTo(memoryStream);
+                
+                // Validate image format try to convert to JPEG or PNG
+                if (data.InputImages[i].ContentType != MediaTypeNames.Image.Jpeg &&
+                    data.InputImages[i].ContentType != MediaTypeNames.Image.Png) {
+                    
+                    // data.InputImages[i].CopyTo(memoryStream);
+                    // var image = Image.FromStream(memoryStream);
+                }
+                
+                // Validate image size
+                if (data.InputImages[i].Length > 500000) // 5MB
+                    return new BadRequestResult();
+                
+                // Read the image binary data from the HTTP request
+                data.InputImages[i].CopyTo(memoryStream);
                 var imageBytes = memoryStream.ToArray();
                 cmd.Parameters.Add("@_picture"+ (i + 1), MySqlDbType.Blob).Value = imageBytes;
             }
