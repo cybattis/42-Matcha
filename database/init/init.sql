@@ -53,7 +53,8 @@ CREATE TABLE users_tags (
 CREATE TABLE pictures (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    image_data MEDIUMBLOB NOT NULL,
+    position INT NOT NULL,
+    image_url TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 

@@ -55,7 +55,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 if (reader.NextResult())
                 {
                     while (reader.Read())
-                        profile.Images.Add(reader["image_data"] as byte[] ?? new byte[0]);
+                        profile.Images.Add(reader["image_url"] as string ?? "");
                 }
                 return Ok(profile);
             }
@@ -101,37 +101,10 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 }
                 cmd.Parameters.AddWithValue("@_tag"+ (i + 1), data.Tags[i]);
             }
-            // Pictures
-            for (int i = 0; i < 5; i++) {
-                if (i >= data.InputImages.Count) {
-                    cmd.Parameters.AddWithValue("@_picture"+ (i + 1), null);
-                    continue;
-                }
-                
-                using var memoryStream = new MemoryStream();
-                
-                // Validate image format try to convert to JPEG or PNG
-                if (data.InputImages[i].ContentType != MediaTypeNames.Image.Jpeg &&
-                    data.InputImages[i].ContentType != MediaTypeNames.Image.Png) {
-                    
-                    // data.InputImages[i].CopyTo(memoryStream);
-                    // var image = Image.FromStream(memoryStream);
-                }
-                
-                // Validate image size
-                if (data.InputImages[i].Length > 500000) // 5MB
-                    return new BadRequestResult();
-                
-                // Read the image binary data from the HTTP request
-                data.InputImages[i].CopyTo(memoryStream);
-                var imageBytes = memoryStream.ToArray();
-                cmd.Parameters.Add("@_picture"+ (i + 1), MySqlDbType.Blob).Value = imageBytes;
-            }
-            
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully created");
         }
-        catch (MySqlException ex)
+        catch (MySqlException ex )
         {
             logger.LogError(ex.Message);
             return new BadRequestResult();

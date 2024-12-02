@@ -29,9 +29,6 @@ public class UserProfile
     
     public List<int> Tags {get;set;} = new();
     
-    [JsonIgnore] // In GET request
-    public List<IFormFile> InputImages {get;set;} = new();
-    
     [SwaggerIgnore] // In POST request
-    public List<byte[]> Images {get;set;} = new();
+    public List<string> Images {get;set;} = new();
 }
