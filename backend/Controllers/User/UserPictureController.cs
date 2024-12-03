@@ -31,17 +31,17 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     {
         try {
             if (image.Position is < 1 or > 5)
-                return new BadRequestObjectResult("Invalid image position");
+                return ValidationProblem("Invalid image position");
             
             // Check if image is valid
             if (image.Data.Length == 0)
-                return new BadRequestObjectResult("Image is empty");
+                return ValidationProblem("Image is empty");
             if (image.Data.ContentType != "image/jpeg" && image.Data.ContentType != "image/png")
-                return new BadRequestObjectResult("Invalid image type");
+                return ValidationProblem("Invalid image type");
             if (image.Data.Length > 5 * 1024 * 1024) // 5MB
-                return new BadRequestObjectResult("Image is too large");
+                return ValidationProblem("Image is too large");
             if (image.Data.Length < 1 * 1024) // 1KB
-                return new BadRequestObjectResult("Image is too small");
+                return ValidationProblem("Image is too small");
             
             using MySqlConnection conn = _db.GetOpenConnection();
             
@@ -54,7 +54,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             // Check if an image already exist at that position
             if (reader.Read() && reader.HasRows) {
                 logger.LogError("Image already present at that position delete it first");
-                return new BadRequestObjectResult("Image already present at that position");
+                return ValidationProblem("Image already present at that position");
             }
             reader.Close();
             
@@ -64,7 +64,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             var isValid = Files.IsImageFileValid(bytes);
             if (!isValid)
-                return new BadRequestObjectResult("Image type not supported");
+                return ValidationProblem("Image type not supported");
 
             var userFolder = "images/";
             // Check if file path exist
@@ -144,7 +144,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
         try {
             if (position is < 1 or > 5) {
                 logger.LogError("Invalid image position");
-                return new BadRequestObjectResult("Invalid image position");
+                return ValidationProblem("Invalid image position");
             }
             
             using MySqlConnection conn = _db.GetOpenConnection();
@@ -157,7 +157,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             // Delete image from disk
             if (!reader.Read()) {
                 logger.LogError("Image not found in database");
-                return new BadRequestObjectResult("Image not found");
+                return ValidationProblem("Image not found");
             }
             
             var url = reader["image_url"].ToString() ?? "";
@@ -165,7 +165,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
                 System.IO.File.Delete(url);
             else {
                 logger.LogError("Image file does not exist");
-                return new BadRequestObjectResult("Image does not exist");
+                return ValidationProblem("Image does not exist");
             }
             
             using MySqlCommand deleteImageCmd = new MySqlCommand("DeleteImage", conn);
@@ -177,8 +177,8 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             return result >= 1 ? Ok("Image deleted") : Problem("Fail to delete image in database", null, 500);
             
         } catch (Exception e) {
-            logger.LogError(e, "Failed to delete picture");
-            return new BadRequestResult();
+            logger.LogError(e, e.Message);
+            return Problem(e.Message);
         }
     }
 }

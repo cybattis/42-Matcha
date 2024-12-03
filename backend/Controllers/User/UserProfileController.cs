@@ -60,7 +60,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 reader.Close();
                 return Ok(profile);
             }
-            return new BadRequestResult();
+            return ValidationProblem();
         }
         catch (MySqlException e)
         {
@@ -124,21 +124,6 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult Update(int id, [FromBody] UserProfile data)
-    {
-        return new AcceptedResult();
-    }
-    
-    /// <summary>
-    /// Delete user profile
-    /// </summary>
-    /// <param name="id">User ID</param>
-    /// <response code="201">profile updated</response>
-    /// <response code="400">Bad request</response>
-    [HttpDelete]
-    [Route("[action]/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult Delete(int id)
     {
         return new AcceptedResult();
     }
