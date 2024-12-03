@@ -32,9 +32,9 @@ CREATE TABLE users (
     birth_date TIMESTAMP,
     gender_id INT,
     sexual_orientation INT, -- 1 hetero / 2 homo / 3 bi
-    fame INT,
+    fame INT DEFAULT 1000,
     biography VARCHAR(250),
-    profile_completed BOOLEAN DEFAULT FALSE,
+    profile_completed INT DEFAULT 0,
     created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_banned BOOLEAN DEFAULT FALSE,
     ban_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

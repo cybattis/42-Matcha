@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using Org.BouncyCastle.Tls;
 using utils.Checks;
+using utils.Crypt;
+using utils.Notify;
 
 namespace backend.Controllers.Auth {
 
@@ -11,9 +13,6 @@ namespace backend.Controllers.Auth {
     [Route("Auth/[controller]")]
     public class NewAccountController : ControllerBase
     {
-        private DbHelper db = new ();
-        private MySqlConnection dbClient;
-
         private class NewAccountResponse {
             public string? UserName { get; set; }
             public string? Password { get; set; }
@@ -54,28 +53,36 @@ namespace backend.Controllers.Auth {
         public IActionResult CreateNewAccount([FromBody] NewAccountModel newAccount)
         {
             try {
-                dbClient = db.GetConnection();
-                if (!CheckUserInfo(newAccount)) {
-                    return new ObjectResult(new
+                DbHelper db = new ();
+                using (MySqlConnection dbClient = db.GetConnection()){
+                    if (!CheckUserInfo(newAccount)) {
+                        return new ObjectResult(new
+                        {
+                            Error = "InvalidEmail",
+                            Message = "L'adresse e-mail est invalide.",
+                            Details = ResponseMessage
+                        })
+                        {
+                            StatusCode = 400
+                        };
+                    }
+                    string verificationLink = Environment.GetEnvironmentVariable("ROOT_URL") + "/Auth/" + Guid.NewGuid().ToString();
+                    (string salt, string hashedPassword) = Crypt.cryptPassWord("userPassword123");
+                    newAccount.Password = hashedPassword;
+                    using (MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient))
                     {
-                        Error = "InvalidEmail",
-                        Message = "L'adresse e-mail est invalide.",
-                        Details = ResponseMessage
-                    })
-                    {
-                        StatusCode = 400
-                    };
+                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@userName", newAccount.UserName);
+                        cmd.Parameters.AddWithValue("@userPassword", newAccount.Password);
+                        cmd.Parameters.AddWithValue("@userMail", newAccount.Mail);
+                        cmd.Parameters.AddWithValue("@userBirthDate", newAccount.BirthDate);
+                        cmd.Parameters.AddWithValue("@verificationLink", verificationLink);
+                        cmd.Parameters.AddWithValue("@salt", verificationLink);
+                        cmd.ExecuteNonQuery();
+                    }
+                    //TODO envoie un mail
+                    Notify.SendVerificationEmail(newAccount.Mail, verificationLink);
                 }
-                using (MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient))
-                {
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@userName", newAccount.UserName);
-                    cmd.Parameters.AddWithValue("@userPassword", newAccount.Password);
-                    cmd.Parameters.AddWithValue("@userMail", newAccount.Mail);
-                    cmd.Parameters.AddWithValue("@userBirthDate", newAccount.BirthDate);
-                    cmd.ExecuteNonQuery();
-                }
-                //TODO envoie un mail
                 return Ok(new {
                         Message = "Account created successfully."
                     });
@@ -89,4 +96,4 @@ namespace backend.Controllers.Auth {
             }
         }
     }
-}	
+}

@@ -19,4 +19,11 @@ BEGIN
     END IF;
 END //
 
+CREATE PROCEDURE GetUserByUsername(IN inputUsername VARCHAR(50))
+BEGIN
+    SELECT password, salt
+    FROM users
+    WHERE username = inputUsername;
+END //
+
 DELIMITER ;
