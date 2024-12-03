@@ -2,7 +2,14 @@ namespace backend.Models.Users;
 
 public class UserPicture
 {
-    public int position { get; set; }
+    public int Position { get; set; }
     
-    public IFormFile data { get; set; }
+    public IFormFile Data { get; set; } = null!;
+}
+
+public class SwapPicture
+{
+    public int Position { get; set; }
+    
+    public int NewPosition { get; set; }
 }

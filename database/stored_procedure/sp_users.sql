@@ -13,7 +13,7 @@ BEGIN
 END //
 
 # GetUserProfile
-CREATE PROCEDURE GetUserProfile(IN userID INT)
+CREATE PROCEDURE GetUserProfile(IN userID INT) 
 BEGIN
     SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
            profile_completion_percentage, localisation FROM users WHERE id = userID;
@@ -103,10 +103,10 @@ END //
 # =================================================================================================
 
 # Upload image
-CREATE PROCEDURE AddImage(
-    _userID INT,
-    _position INT,
-    _image_url TEXT
+CREATE PROCEDURE UploadImage(
+    IN _userID INT,
+    IN _position INT,
+    IN _image_url TEXT
 )
 BEGIN
     IF _position < 1 OR _position > 5 THEN
@@ -120,8 +120,8 @@ END //
 
 # DeleteImage
 CREATE PROCEDURE DeleteImage(
-    _userID INT,
-    _position INT
+    IN _userID INT,
+    IN _position INT
 )
 BEGIN
     IF _position < 1 OR _position > 5
@@ -134,9 +134,9 @@ END //
 
 # SwapImages
 CREATE PROCEDURE SwapImages(
-    _userID INT,
-    _position1 INT,
-    _position2 INT
+    IN _userID INT,
+    IN _position1 INT,
+    IN _position2 INT
 )
 BEGIN
     IF _position1 < 1 OR _position2 < 1 OR _position1 > 5 OR _position2 > 5
@@ -156,11 +156,13 @@ END //
 
 # Get user Images
 CREATE PROCEDURE GetUserImage(
-    _userID INT,
-    _position INT
+    IN _userID INT,
+    IN _position INT
 )
 BEGIN
-    SELECT image_url FROM pictures WHERE user_id = _userID AND position = _position;
+    SELECT 1
+    FROM pictures
+    WHERE user_id = _userID AND position = _position;
 END //
 
 DELIMITER ;

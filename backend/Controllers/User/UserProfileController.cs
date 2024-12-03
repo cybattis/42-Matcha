@@ -57,14 +57,15 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     while (reader.Read())
                         profile.Images.Add(reader["image_url"] as string ?? "");
                 }
+                reader.Close();
                 return Ok(profile);
             }
             return new BadRequestResult();
         }
-        catch (MySqlException ex)
+        catch (MySqlException e)
         {
-            logger.LogError(ex.Message);
-            return Problem(statusCode: 500, detail: ex.Message);
+            logger.LogError(e.Message);
+            return Problem(statusCode: 500, detail: e.Message);
         }
     }  
 
@@ -76,10 +77,10 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <response code="200">profile created</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [Route("Create/{id:int}")]
+    [Route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult CreateProfile(int id, [FromForm] UserProfile data)
+    public ActionResult Create(int id, [FromForm] UserProfile data)
     {
         try {
             using MySqlConnection conn = _db.GetOpenConnection();
@@ -95,7 +96,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             
             // Tags
             for (int i = 0; i < 5; i++) {
-                if (i >= data.Tags.Count) {
+                if (i >= data.Tags.Count || data.Tags[i] == 0) {
                     cmd.Parameters.AddWithValue("@_tag"+ (i + 1), null);
                     continue;
                 }
@@ -104,10 +105,10 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully created");
         }
-        catch (MySqlException ex )
+        catch (MySqlException e)
         {
-            logger.LogError(ex.Message);
-            return new BadRequestResult();
+            logger.LogError(e.Message);
+            return Problem(statusCode: 500, detail: e.Message);
         }
     }
     
@@ -118,11 +119,26 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <param name="data">User data</param>
     /// <response code="201">profile updated</response>
     /// <response code="400">Bad request</response>
-    [HttpPost]
-    [Route("Update/{id:int}")]
+    [HttpPatch]
+    [Route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult UpdateProfile(int id, [FromBody] UserProfile data)
+    public ActionResult Update(int id, [FromBody] UserProfile data)
+    {
+        return new AcceptedResult();
+    }
+    
+    /// <summary>
+    /// Delete user profile
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <response code="201">profile updated</response>
+    /// <response code="400">Bad request</response>
+    [HttpDelete]
+    [Route("[action]/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public ActionResult Delete(int id)
     {
         return new AcceptedResult();
     }
