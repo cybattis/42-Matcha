@@ -4,7 +4,7 @@ CREATE PROCEDURE CheckUserNameTaken(
 BEGIN
     SELECT COUNT(*) 
     FROM Users 
-    WHERE UserName = username;
+    WHERE users.username = username;
 END;
 
 CREATE PROCEDURE CheckMailTaken(
@@ -13,5 +13,5 @@ CREATE PROCEDURE CheckMailTaken(
 BEGIN
     SELECT COUNT(*) 
     FROM Users 
-    WHERE Mail = userMail;
+    WHERE email = userMail;
 END;
