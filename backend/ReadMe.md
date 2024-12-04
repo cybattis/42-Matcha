@@ -13,3 +13,7 @@ login/NewAccount
     ... si existe deja
     ... si erreur
 
+# regle de nomage
+ Password :
+        au moins 1 majuscule 1 minuscule 1 caractere special 1 chiffre et entre 8 et 32 caracteres
+        ne pas contenir le username
