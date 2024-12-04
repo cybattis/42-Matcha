@@ -1,14 +1,10 @@
 using System.ComponentModel;
-using System.Text.Json.Serialization;
-using Google.Protobuf.WellKnownTypes;
-using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace backend.Models.Users;
 
-public class UserProfile
+public class UserProfileModel
 {
-    // User info
     [DefaultValue("Jean")]
     public string? FirstName {get;set;}
     
@@ -27,8 +23,9 @@ public class UserProfile
     [DefaultValue("Lyon")]
     public string? Localisation {get;set;}
     
+    // For GET request
+    [SwaggerIgnore]
     public List<int> Tags {get;set;} = new();
-    
-    [SwaggerIgnore] // In POST request
+    [SwaggerIgnore]
     public List<string> Images {get;set;} = new();
 }

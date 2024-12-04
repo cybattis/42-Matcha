@@ -27,7 +27,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult Upload(int id, [FromForm] UserPicture image)
+    public ActionResult Upload(int id, [FromForm] UserPictureModel image)
     {
         try {
             if (image.Position is < 1 or > 5)

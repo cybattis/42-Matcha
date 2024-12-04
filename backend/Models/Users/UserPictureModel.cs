@@ -1,6 +1,6 @@
 namespace backend.Models.Users;
 
-public class UserPicture
+public class UserPictureModel
 {
     public int Position { get; set; }
     

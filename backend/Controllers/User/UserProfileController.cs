@@ -14,7 +14,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     private readonly IDbHelper _db = new DbHelper();
     
     /// <summary>
-    /// Create user profile
+    /// Get user profile
     /// </summary>
     /// <param name="id">User ID</param>
     /// <response code="200">Success</response>
@@ -30,12 +30,12 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             using MySqlConnection conn = _db.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userId", id);
+            cmd.Parameters.AddWithValue("@userID", id);
             
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (reader.Read())
             {
-                var profile = new UserProfile
+                var profile = new UserProfileModel
                 {
                     FirstName = reader["first_name"].ToString() ?? "",
                     LastName = reader["last_name"].ToString() ?? "",
@@ -52,8 +52,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 } 
                 
                 // Pictures
-                if (reader.NextResult())
-                {
+                if (reader.NextResult()) {
                     while (reader.Read())
                         profile.Images.Add(reader["image_url"] as string ?? "");
                 }
@@ -70,7 +69,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     }  
 
     /// <summary>
-    /// Create user profile
+    /// Update user profile
     /// </summary>
     /// <param name="id">User ID</param>
     /// <param name="data">User input data</param>
@@ -80,7 +79,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     [Route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult Create(int id, [FromForm] UserProfile data)
+    public ActionResult Update(int id, [FromForm] UserProfileModel data)
     {
         try {
             using MySqlConnection conn = _db.GetOpenConnection();
@@ -93,20 +92,10 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             cmd.Parameters.AddWithValue("@_sexual_orientation", data.SexualOrientation);
             cmd.Parameters.AddWithValue("@_biography", data.Biography);
             cmd.Parameters.AddWithValue("@_localisation", data.Localisation);
-            
-            // Tags
-            for (int i = 0; i < 5; i++) {
-                if (i >= data.Tags.Count || data.Tags[i] == 0) {
-                    cmd.Parameters.AddWithValue("@_tag"+ (i + 1), null);
-                    continue;
-                }
-                cmd.Parameters.AddWithValue("@_tag"+ (i + 1), data.Tags[i]);
-            }
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully created");
         }
-        catch (MySqlException e)
-        {
+        catch (MySqlException e) {
             logger.LogError(e.Message);
             return Problem(statusCode: 500, detail: e.Message);
         }
@@ -116,15 +105,27 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// Update user profile
     /// </summary>
     /// <param name="id">User ID</param>
-    /// <param name="data">User data</param>
-    /// <response code="201">profile updated</response>
+    /// <param name="tagId">tag id</param>
+    /// <response code="200">Tag updated</response>
     /// <response code="400">Bad request</response>
-    [HttpPatch]
+    [HttpPost]
     [Route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult Update(int id, [FromBody] UserProfile data)
+    public ActionResult UpdateTag(int id, [FromForm] int tagId)
     {
-        return new AcceptedResult();
+        try {
+            using MySqlConnection conn = _db.GetOpenConnection();
+            using MySqlCommand cmd = new MySqlCommand("UpdateTag", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@_userID", id);
+            cmd.Parameters.AddWithValue("@_tagID", tagId);
+            cmd.ExecuteNonQuery();
+            return Ok("Tag updated");
+        }
+        catch (MySqlException e) {
+            logger.LogError(e.Message);
+            return Problem(statusCode: 500, detail: e.Message);
+        }
     }
 }
