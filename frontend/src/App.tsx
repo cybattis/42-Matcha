@@ -1,18 +1,20 @@
 import './App.css'
 import axios from "axios";
+import {useState} from "react";
 
 function App() {
     axios.defaults.baseURL = 'http://localhost:5163';
+    const [image, setImage] = useState<string>("");
     
     function getData() { 
-        axios.get('/WeatherForecast')
+        axios.get('/UserProfile/Get/1')
             .then(function (response) {
                 console.log(response.data);
                 console.log(response.status);
                 console.log(response.statusText);
                 console.log(response.headers);
                 console.log(response.config);
-                
+                setImage('data:image/jpeg;base64,' + response.data.images_data[0]);
             })
             .catch(function (error) {
                 if (error.response) {
@@ -37,6 +39,7 @@ function App() {
   return (
     <>
         <button onClick={getData}>TEST</button>
+        <img src={image}/>
     </>
   )
 }
