@@ -46,7 +46,6 @@ CREATE TABLE users (
 CREATE TABLE users_tags (
     user_id INT NOT NULL,
     tag_id INT NOT NULL,
-    PRIMARY KEY (user_id, tag_id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
@@ -54,11 +53,8 @@ CREATE TABLE users_tags (
 CREATE TABLE pictures (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    picture1 MEDIUMTEXT NOT NULL,
-    picture2 MEDIUMTEXT,
-    picture3 MEDIUMTEXT,
-    picture4 MEDIUMTEXT,
-    picture5 MEDIUMTEXT,
+    position INT NOT NULL,
+    image_url TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 

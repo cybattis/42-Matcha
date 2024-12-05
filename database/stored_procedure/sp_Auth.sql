@@ -9,11 +9,11 @@ CREATE PROCEDURE InsertNewAccount(
 )
 BEGIN
     -- Vérifie si le UserName existe déjà
-    IF EXISTS (SELECT 1 FROM accounts WHERE username = userName) THEN
+    IF EXISTS (SELECT 1 FROM db.users WHERE users.username = userName) THEN
         SET resultMessage = 'Error: UserName already exists';
     ELSE
         -- Insère un nouvel utilisateur
-        INSERT INTO accounts (username, password, mail, birthdate)
+        INSERT INTO db.users (username, password, email, birth_date)
         VALUES (userName, userPassword, userMail, userBirthDate);
         SET resultMessage = 'Success: Account created';
     END IF;

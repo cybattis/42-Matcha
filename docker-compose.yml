@@ -1,27 +1,26 @@
 ﻿services:
-  backend:
-    image: backend
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    restart: always
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - DB_CONNECTION_STRING=$DB_CONNECTION_STRING
-    networks:
-      - back-net
-      - front-net
-    ports:
-      - "5163:8080"
-    depends_on:
-      db:
-        condition: service_healthy
+#  backend:
+#    image: backend
+#    build:
+#      context: .
+#      dockerfile: backend/Dockerfile
+#    restart: always
+#    environment:
+#      - ASPNETCORE_ENVIRONMENT=Development
+#      - DB_CONNECTION_STRING=$DB_CONNECTION_STRING
+#    networks:
+#      - back-net
+#      - front-net
+#    ports:
+#      - "5163:8080"
+#    depends_on:
+#      db:
+#        condition: service_healthy
 
   db:
-    image: db
-    build:
-      context: .
-      dockerfile: database/Dockerfile
+    image: mysql:latest
+    container_name: database
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     restart: always
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
@@ -34,6 +33,11 @@
       - "3307:3306"
     volumes:
       - db:/var/lib/mysql
+      - "./database/init/init.sql:/docker-entrypoint-initdb.d/init.sql"
+      - "./database/init/seed.sql:/docker-entrypoint-initdb.d/seed.sql"
+      - "./database/stored_procedure/sp_users.sql:/docker-entrypoint-initdb.d/sp_users.sql"
+      - "./database/stored_procedure/sp_Auth.sql:/docker-entrypoint-initdb.d/sp_Auth.sql"
+      - "./database/stored_procedure/sp_Checks.sql:/docker-entrypoint-initdb.d/sp_Checks.sql"
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
