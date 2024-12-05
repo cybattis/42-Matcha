@@ -1,12 +1,61 @@
 # Populating table
-INSERT INTO tags (name)
-    VALUES ('Sports'), ('Video Games'), ('Music'), ('Reading'), ('Hikes');
-
 INSERT INTO gender (name)
     VALUES ('Hetero'), ('Homosexual'), ('Bisexual');
 
 INSERT INTO `status`(name)
     VALUES ('Pending'), ('Sent'), ('Delivered'), ('Read'), ('Error'), ('Edited');
+
+INSERT INTO tags (name)
+    VALUES ('Dessin / Peinture'), 
+           ('Écriture'), 
+           ('Photographie'), 
+           ('DIY'), 
+           ('Musique'), 
+           ('Cinema'), 
+           ('Théâtre');
+
+INSERT INTO tags (name)
+    VALUES ('Lecture'), 
+           ('Histoire'), 
+           ('Langues'), 
+           ('Philosophie');
+
+INSERT INTO tags (name)
+    VALUES ('Fitness / Musculation'),
+           ('Randonnée'),
+           ('Yoga ou méditation'),
+           ('Cyclisme'),
+           ('Natation'),
+           ('Sports d’équipe (football, basketball, volleyball)'),
+           ('Escalade');
+
+INSERT INTO tags (name)
+    VALUES ('Programmation'),
+           ('Jeux vidéo'),
+           ('Électronique'),
+           ('Jeux de société'),
+           ('Échecs');
+
+INSERT INTO tags (name)
+    VALUES ('Cuisine'),
+           ('Pâtisserie'),
+           ('Végétarisme / Véganisme'),
+           ('Restauration'),
+           ('Vin / Bière / Alcool');
+
+INSERT INTO tags (name)
+    VALUES ('Voyages'),
+           ('Camping'),
+           ('Croisières'),
+           ('Road trips'),
+           ('Tourisme');
+
+INSERT INTO tags (name)
+    VALUES ('Animaux'),
+           ('Jardinage'),
+           ('Écologie'),
+           ('Bricolage'),
+           ('Décoration');
 
 # Creating tests users
 INSERT INTO users (email, password, salt, username, birth_date)
@@ -16,16 +65,4 @@ INSERT INTO users (email, password, salt, username, birth_date, first_name, last
     VALUES ('abcd.mail@gmail.com', 'abcd', 'salt', 'nono42', '1985-11-12', 'Jojo', 'Nono');
 
 INSERT INTO users_tags (user_id, tag_id)
-    VALUES (2, 1);
-
-INSERT INTO users_tags (user_id, tag_id)
-    VALUES (2, 2);
-
-INSERT INTO users_tags (user_id, tag_id)
-    VALUES (2, 3);
-
-INSERT INTO users_tags (user_id, tag_id)
-    VALUES (2, 4);
-
-INSERT INTO users_tags (user_id, tag_id)
-    VALUES (2, 5);
+    VALUES (2, 1), (2, 2), (2, 3), (2, 4), (2, 5);
