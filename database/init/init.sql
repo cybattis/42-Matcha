@@ -32,7 +32,7 @@ CREATE TABLE users (
     gender_id INT,
     sexual_orientation INT CHECK (sexual_orientation BETWEEN 1 AND 3), -- 1 hetero / 2 homo / 3 bi
     localisation VARCHAR(100),
-    biography VARCHAR(250),
+    biography VARCHAR(280),
     profile_completion_percentage INT DEFAULT 0,
     profile_completed BOOLEAN DEFAULT FALSE,
     fame INT DEFAULT 0,

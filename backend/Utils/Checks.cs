@@ -100,6 +100,7 @@ namespace utils.Checks{
             var regex = new Regex("^[a-zA-Z][a-zA-Z0-9_-]{5,20}$");
             return regex.IsMatch(UserName);
         }
+        
         public static bool IsValidUserName(string? UserName){
             if (string.IsNullOrEmpty(UserName)){
                 return false;

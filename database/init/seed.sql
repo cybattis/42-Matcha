@@ -26,7 +26,7 @@ INSERT INTO tags (name)
            ('Yoga ou méditation'),
            ('Cyclisme'),
            ('Natation'),
-           ('Sports d’équipe (football, basketball, volleyball)'),
+           ('Sports d’équipe'),
            ('Escalade');
 
 INSERT INTO tags (name)

@@ -35,6 +35,8 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (reader.Read())
             {
+                // var isValid = Utils.ValidateProfileData(reader);
+
                 var profile = new UserProfileModel
                 {
                     FirstName = reader["first_name"].ToString() ?? "",
