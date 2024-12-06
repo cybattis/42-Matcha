@@ -1,144 +1,231 @@
-using System;
-using System.ComponentModel;
 using System.Net.Mail;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using backend.Database;
+using backend.Models.Users;
 using MySql.Data.MySqlClient;
 
-namespace utils.Checks{
+namespace backend.Utils;
 
-    public class Checks {
+public static class Checks {
 
-        public static bool IsValidMail(string? email)
+    public static bool IsValidMail(string? email)
+    {
+        // Vérification si l'e-mail est null
+        if (string.IsNullOrEmpty(email))
         {
-            // Vérification si l'e-mail est null
-            if (string.IsNullOrEmpty(email))
-            {
-                return false;
-            }
+            return false;
+        }
 
-            // Validation du format de l'e-mail
-            try
-            {
-                var mailAddress = new MailAddress(email);
-            }
-            catch (FormatException)
-            {
-                return false; // Format invalide
-            }
+        // Validation du format de l'e-mail
+        try
+        {
+            var mailAddress = new MailAddress(email);
+        }
+        catch (FormatException)
+        {
+            return false; // Format invalide
+        }
 
-            // Vérification en base de données
-            try
+        // Vérification en base de données
+        try
+        {
+            DbHelper db = new();
+            using (MySqlConnection dbClient = db.GetConnection())
             {
-                DbHelper db = new();
-                using (MySqlConnection dbClient = db.GetConnection())
+                dbClient.Open();
+
+                using (MySqlCommand cmd = new MySqlCommand("CheckMailTaken", dbClient))
                 {
-                    dbClient.Open();
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@userMail", email);
 
-                    using (MySqlCommand cmd = new MySqlCommand("CheckMailTaken", dbClient))
+                    // La procédure stockée renvoie un entier ou un booléen
+                    object? result = cmd.ExecuteScalar();
+
+                    // Si la procédure renvoie 1 ou "true", l'e-mail est déjà pris
+                    if (result != null && Convert.ToInt32(result) > 0)
                     {
-                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@userMail", email);
-
-                        // La procédure stockée renvoie un entier ou un booléen
-                        object? result = cmd.ExecuteScalar();
-
-                        // Si la procédure renvoie 1 ou "true", l'e-mail est déjà pris
-                        if (result != null && Convert.ToInt32(result) > 0)
-                        {
-                            return false; // E-mail déjà pris
-                        }
+                        return false; // E-mail déjà pris
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                // Log l'erreur ou gérer comme nécessaire
-                Console.WriteLine($"Erreur lors de la vérification de l'e-mail : {ex.Message}");
-                return false;
-            }
-
-            return true; // E-mail valide et disponible
+        }
+        catch (Exception ex)
+        {
+            // Log l'erreur ou gérer comme nécessaire
+            Console.WriteLine($"Erreur lors de la vérification de l'e-mail : {ex.Message}");
+            return false;
         }
 
+        return true; // E-mail valide et disponible
+    }
 
-        public static bool IsValidPassword(string? password, string? UserName)
+
+    public static bool IsValidPassword(string? password, string? UserName)
+    {
+        if (password == null)
         {
-            if (password == null)
-            {
-                return false;
-            }
-            string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$";
-            if (!Regex.IsMatch(password, pattern))
-            {
-                return false;
-            }
-            if (password.Contains(UserName))
-            {
-                return false;
-            }
-            return true;
+            return false;
         }
-
-        public static bool IsValidBirthDate(DateTime? BirthDate)
+        string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$";
+        if (!Regex.IsMatch(password, pattern))
         {
-            if (BirthDate == null){
-                return false;
-            }
-            DateTime today = DateTime.Today;
-            int age = today.Year - BirthDate.Value.Year;
+            return false;
+        }
+        if (password.Contains(UserName))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    public static bool IsValidBirthDate(DateTime? BirthDate)
+    {
+        if (BirthDate == null){
+            return false;
+        }
+        DateTime today = DateTime.Today;
+        int age = today.Year - BirthDate.Value.Year;
             
-            if (BirthDate.Value.Date > today.AddYears(-age))
-            {
-                age--;
-            }
-            return age >= 18;
+        if (BirthDate.Value.Date > today.AddYears(-age))
+        {
+            age--;
         }
+        return age >= 18;
+    }
 
-        public static bool IsValidUserNameFormat(string UserName){
-            var regex = new Regex("^[a-zA-Z][a-zA-Z0-9_-]{5,20}$");
-            return regex.IsMatch(UserName);
-        }
+    public static bool IsValidUserNameFormat(string UserName){
+        var regex = new Regex("^[a-zA-Z][a-zA-Z0-9_-]{5,20}$");
+        return regex.IsMatch(UserName);
+    }
         
-        public static bool IsValidUserName(string? UserName){
-            if (string.IsNullOrEmpty(UserName)){
-                return false;
-            }
-            if (!IsValidUserNameFormat(UserName))
+    public static bool IsValidUserName(string? UserName){
+        if (string.IsNullOrEmpty(UserName)){
+            return false;
+        }
+        if (!IsValidUserNameFormat(UserName))
+        {
+            return false;
+        }
+        try
+        {
+            DbHelper db = new();
+            using (MySqlConnection dbClient = db.GetConnection())
             {
-                return false;
-            }
-            try
-            {
-                DbHelper db = new();
-                using (MySqlConnection dbClient = db.GetConnection())
+                dbClient.Open();
+
+                using (MySqlCommand cmd = new MySqlCommand("CheckUserNameTaken", dbClient))
                 {
-                    dbClient.Open();
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@username", UserName);
 
-                    using (MySqlCommand cmd = new MySqlCommand("CheckUserNameTaken", dbClient))
+                    // La procédure stockée doit renvoyer un entier ou un booléen
+                    object? result = cmd.ExecuteScalar();
+
+                    // Si la procédure renvoie 1 ou "true", le nom est pris
+                    if (result != null && Convert.ToInt32(result) > 0)
                     {
-                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@username", UserName);
-
-                        // La procédure stockée doit renvoyer un entier ou un booléen
-                        object? result = cmd.ExecuteScalar();
-
-                        // Si la procédure renvoie 1 ou "true", le nom est pris
-                        if (result != null && Convert.ToInt32(result) > 0)
-                        {
-                            return false; // Nom d'utilisateur déjà pris
-                        }
+                        return false; // Nom d'utilisateur déjà pris
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                // Log l'erreur ou gérer comme nécessaire
-                Console.WriteLine($"Erreur lors de la vérification du nom d'utilisateur : {ex.Message}");
-                return false;
-            }
-            return true;
         }
+        catch (Exception ex)
+        {
+            // Log l'erreur ou gérer comme nécessaire
+            Console.WriteLine($"Erreur lors de la vérification du nom d'utilisateur : {ex.Message}");
+            return false;
+        }
+        return true;
+    }
+    
+    public static bool IsAlpa(string str)
+    {
+        foreach (char c in str)
+        {
+            if (!char.IsLetter(c))
+                return false;
+        }
+        return true;
+    }
+    
+    public static bool IsNumeric(string str)
+    {
+        foreach (char c in str)
+        {
+            if (!char.IsDigit(c))
+                return false;
+        }
+        return true;
+    }
+    
+    public static bool IsDecimal(string str)
+    {
+        return decimal.TryParse(str, out _);
+    }
+    
+    public static bool IsAlphaNumeric(string str)
+    {
+        foreach (char c in str)
+        {
+            if (!char.IsLetterOrDigit(c))
+                return false;
+        }
+        return true;
+    }
+    
+    public static bool HasValidLength(string str, int min, int max)
+    {
+        return str.Length >= min && str.Length <= max;
+    }
+    
+    public static bool IsCoordinate(string str)
+    {
+        var parts = str.Split(',');
+        if (parts.Length != 2)
+            return false;
+
+        if (!IsDecimal(parts[0]) || !IsDecimal(parts[1]))
+            return false;
+
+        var latitude = decimal.Parse(parts[0]);
+        var longitude = decimal.Parse(parts[1]);
+
+        return latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
+    }
+    
+    public static bool IsValidBiography(string str)
+    {
+        var regex = new Regex(@"^[ A-Za-z0-9_@./#&+-]{0,280}$");
+        return regex.IsMatch(str);
+    }
+    
+    public class ValidationResult
+    {
+        public bool IsValid { get; set; }
+        public string Message { get; set; } = "";
+    }
+
+    public static ValidationResult ValidateProfileData(UserProfileModel data)
+    {
+        if (data.FirstName == null || !IsAlpa(data.FirstName!))
+            return new ValidationResult { IsValid = false, Message = "Invalid first name" };
+        
+        if (data.LastName == null || !IsAlpa(data.LastName!))
+            return new ValidationResult { IsValid = false, Message = "Invalid last name" };
+        
+        if (data.GenderId is null or < 0 or > 2)
+            return new ValidationResult { IsValid = false, Message = "Invalid"};
+        
+        if (data.SexualOrientation is null or < 0 or > 3)
+            return new ValidationResult { IsValid = false, Message = "Invalid sexual orientation" };
+        
+        if (data.Biography == null || !IsValidBiography(data.Biography!))
+            return new ValidationResult { IsValid = false, Message = "Invalid biography" };
+        
+        if (data.Localisation == null || !HasValidLength(data.Localisation!, 0, 25) || !IsCoordinate(data.Localisation!))
+            return new ValidationResult { IsValid = false, Message = "Invalid coordinates" };
+        
+        return new ValidationResult { IsValid = true };
     }
 }
