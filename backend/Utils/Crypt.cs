@@ -2,7 +2,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace utils.Crypt{
+namespace Utils.Crypt{
     public class Crypt {
 public static (string salt, string hashedPassword) cryptPassWord(string password)
         {

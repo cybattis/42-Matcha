@@ -36,6 +36,8 @@ CREATE TABLE users (
     biography VARCHAR(250),
     profile_completion_percentage INT DEFAULT 0,
     profile_completed BOOLEAN DEFAULT FALSE,
+    forgoten_password_link VARCHAR(255),
+    forgoten_password_expiration DATETIME,
     fame INT DEFAULT 0,
     created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_banned BOOLEAN DEFAULT FALSE,

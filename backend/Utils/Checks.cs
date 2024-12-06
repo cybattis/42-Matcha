@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using backend.Database;
 using MySql.Data.MySqlClient;
 
-namespace utils.Checks{
+namespace Utils.Checks{
 
     public class Checks {
 
@@ -32,7 +32,7 @@ namespace utils.Checks{
             try
             {
                 DbHelper db = new();
-                using (MySqlConnection dbClient = db.GetConnection())
+                using (MySqlConnection dbClient = db.GetOpenConnection())
                 {
                     dbClient.Open();
 

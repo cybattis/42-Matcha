@@ -19,11 +19,33 @@ BEGIN
     END IF;
 END //
 
-CREATE PROCEDURE GetUserByUsername(IN inputUsername VARCHAR(50))
+CREATE PROCEDURE GetUserPasswordByUsername(IN inputUsername VARCHAR(50))
 BEGIN
     SELECT password, salt
     FROM users
     WHERE username = inputUsername;
+END //
+
+CREATE PROCEDURE GetUserMailByUsername(IN inputUsername VARCHAR(50))
+BEGIN
+    SELECT email
+    FROM users
+    WHERE username = inputUsername;
+END //
+
+CREATE PROCEDURE VerifyAccount(IN inputVerifyLink VARCHAR(250))
+BEGIN
+    SELECT user_id, is_verified, email_verification_link, profile_completed
+    FROM users
+    WHERE email_verification_link = inputVerifyLink
+END //
+
+CREATE PROCEDURE forgotenPasswordLink(IN inputForgotenPasswordLink VARCHAR(250), IN inputUsername)
+BEGIN
+    UPDATE users
+    SET forgoten_password_link = inputForgotenPasswordLink,
+        forgoten_password_expiration = NOW() + INTERVAL 1 HOUR
+    WHERE email = inputUsername;
 END //
 
 DELIMITER ;
