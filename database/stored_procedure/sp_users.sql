@@ -1,7 +1,7 @@
 DELIMITER //
 
 # GetUser
-CREATE PROCEDURE GetUser(IN userID INT)
+CREATE PROCEDURE GetUserByID(IN userID INT)
 BEGIN
     SELECT *  FROM users WHERE id = userID;
 END //
@@ -23,86 +23,81 @@ END //
 
 # UpdateUserProfile
 CREATE PROCEDURE UpdateUserProfile(
-    IN _user_id INT,
-    IN _first_name VARCHAR(50),
-    IN _last_name VARCHAR(50),
-    IN _gender_id INT,
-    IN _sexual_orientation INT,
-    IN _localisation VARCHAR(100),
-    IN _biography VARCHAR(250)
+    IN userID INT,
+    IN firstName VARCHAR(50),
+    IN lastName VARCHAR(50),
+    IN genderID INT,
+    IN sexualOrientation INT,
+    IN localisation VARCHAR(100),
+    IN biography VARCHAR(250)
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
     END;
-
+    
     START TRANSACTION;
-    
-    SELECT 
-        COUNT(first_name != '') +
-        COUNT(last_name != '') +
-        COUNT(biography != '') AS before_count
-        FROM users WHERE id = _user_id;
-    
-    UPDATE users SET first_name = _first_name 
-                 WHERE id = _user_id AND first_name != _first_name;
-    
-    UPDATE users SET last_name = _last_name 
-                 WHERE id = _user_id AND last_name != _last_name;
-    
-#     IF (SELECT COUNT(users.gender_id) FROM users WHERE id = _user_id) = 0 THEN
-#         UPDATE users SET gender_id = _gender_id 
-#                      WHERE id = _user_id AND gender_id != _gender_id;
-#     ELSE
-#         INSERT INTO users (_user_id, gender_id)
-#             VALUES (_userID, _gender_id);
-    
-    UPDATE users SET sexual_orientation = _sexual_orientation 
-                 WHERE id = _user_id AND sexual_orientation != _sexual_orientation;
-    
-    UPDATE users SET localisation = _localisation 
-                 WHERE id = _user_id AND localisation != _localisation;
-    
-    UPDATE users SET biography = _biography 
-                 WHERE id = _user_id AND biography != _biography;
 
-    SELECT
-        COUNT(first_name != '') +
-        COUNT(last_name != '') +
-        COUNT(biography != '') AS after_count
-        FROM users WHERE id = _user_id;
+    UPDATE users SET first_name = firstName 
+                 WHERE id = userID AND first_name != firstName;
     
-    UPDATE users SET profile_completion_percentage = profile_completion_percentage + (@after_count - @before_count) * 5
-                 WHERE id = _user_id;
+    UPDATE users SET last_name = lastName 
+                 WHERE id = userID AND last_name != lastName;
+    
+    UPDATE users SET gender_id = genderID 
+                 WHERE id = userID;
+
+    UPDATE users SET users.sexual_orientation = sexualOrientation 
+                 WHERE id = userID;
+    
+    UPDATE users SET users.localisation = localisation 
+                 WHERE id = userID AND users.localisation != localisation;
+    
+    UPDATE users SET biography = biography 
+                 WHERE id = userID AND users.biography != biography;
     
     COMMIT;
+
+    CALL UpdateProfileCompletionPercentage(userID);
+END //
+
+# UpdateProfileCompletionPercentage
+CREATE PROCEDURE UpdateProfileCompletionPercentage(IN userID INT)
+BEGIN
+    SELECT COUNT(*) INTO @tags_count FROM users_tags WHERE user_id = userID;
+    SELECT COUNT(*) INTO @images_count FROM pictures WHERE user_id = userID;
+
+    SELECT
+        COUNT(CASE WHEN first_name IS NOT NULL AND first_name != '' THEN 1 END) AS first_name_non_empty,
+        COUNT(CASE WHEN last_name IS NOT NULL AND last_name != '' THEN 1 END) AS last_name_non_empty,
+        COUNT(CASE WHEN biography IS NOT NULL AND biography != '' THEN 1 END) AS biography_non_empty
+    FROM users WHERE id = userID INTO @first_name, @last_name, @biography;
+
+    SET @percentage = @tags_count * 4 + @images_count * 10 + (@first_name + @last_name + @biography) * 10;
+    SELECT @percentage;
     
+    UPDATE users SET profile_completion_percentage = @percentage WHERE id = userID;
 END //
 
 #  InsertTags
 CREATE PROCEDURE UpdateTag(
-    IN _userID INT,
-    IN _tagID INT
+    IN userID INT,
+    IN tagID INT
 )
 BEGIN
     SELECT COUNT(*) INTO @count
     FROM users_tags
-    WHERE user_id = _userID AND tag_id = _tagID;
+    WHERE user_id = userID AND tag_id = tagID;
     
     IF @count = 0 THEN
         INSERT INTO users_tags (user_id, tag_id)
-            VALUES (_userID, _tagID);
-        UPDATE users
-            SET profile_completion_percentage = profile_completion_percentage + 5
-            WHERE id = _userID;
+            VALUES (userID, tagID);
     ELSE
         DELETE FROM users_tags
-        WHERE user_id = _userID AND tag_id = _tagID;
-        UPDATE users
-            SET profile_completion_percentage = profile_completion_percentage - 5
-            WHERE id = _userID;
+        WHERE user_id = userID AND tag_id = tagID;
     END IF;
+    CALL UpdateProfileCompletionPercentage(userID);
 END //
     
 # IMAGE PROCEDURES
@@ -110,50 +105,45 @@ END //
 
 # Upload image
 CREATE PROCEDURE UploadImage(
-    IN _userID INT,
-    IN _position INT,
-    IN _image_url TEXT
+    IN userID INT,
+    IN position INT,
+    IN imageUrl TEXT
 )
 BEGIN
-    IF _position < 1 OR _position > 5 THEN
+    IF position < 1 OR position > 5 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Position must be between 1 and 5';
     END IF;
     
-    INSERT INTO pictures (user_id, position, image_url)
-        VALUES (_userID, _position, _image_url);
-
-    UPDATE users
-        SET profile_completion_percentage = profile_completion_percentage + 10
-        WHERE id = _userID;
+    INSERT INTO pictures (user_id, pictures.position, image_url)
+        VALUES (userID, position, imageUrl);
+    CALL UpdateProfileCompletionPercentage(userID);
 END //
 
 # DeleteImage
 CREATE PROCEDURE DeleteImage(
-    IN _userID INT,
-    IN _position INT
+    IN userID INT,
+    IN position INT
 )
 BEGIN
-    IF _position < 1 OR _position > 5
+    IF position < 1 OR position > 5
     THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Position must be between 1 and 5';
     END IF;
-    DELETE FROM pictures WHERE user_id = _userID AND position = _position;
     
-    UPDATE users
-        SET profile_completion_percentage = profile_completion_percentage - 10
-        WHERE id = _userID;
+    DELETE FROM pictures WHERE user_id = userID AND pictures.position = position;
+    CALL UpdateProfileCompletionPercentage(userID);
 END //
 
 # SwapImages
 CREATE PROCEDURE SwapImages(
-    IN _userID INT,
-    IN _position1 INT,
-    IN _position2 INT
+    IN userID INT,
+    IN position1 INT,
+    IN position2 INT
 )
 BEGIN
-    IF _position1 < 1 OR _position2 < 1 OR _position1 > 5 OR _position2 > 5
+    IF position1 < 1 OR position2 < 1 OR position1 > 5 OR position2 > 5
     THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Position must be between 1 and 5';
@@ -161,22 +151,22 @@ BEGIN
     
     UPDATE pictures
     SET position = CASE position
-        WHEN _position1 THEN _position2
-        WHEN _position2 THEN _position1
+        WHEN position1 THEN position2
+        WHEN position2 THEN position1
         ELSE position
     END
-    WHERE user_id = _userID AND position IN (_position1, _position2);
+    WHERE user_id = userID AND position IN (position1, position2);
 END //
 
 # Get user Images
 CREATE PROCEDURE GetUserImage(
-    IN _userID INT,
-    IN _position INT
+    IN userID INT,
+    IN position INT
 )
 BEGIN
-    SELECT 1
+    SELECT image_url
     FROM pictures
-    WHERE user_id = _userID AND position = _position;
+    WHERE user_id = userID AND pictures.position = position;
 END //
 
 DELIMITER ;

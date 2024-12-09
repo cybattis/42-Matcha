@@ -89,13 +89,13 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             using MySqlConnection conn = _db.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("UpdateUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@_user_id", id);
-            cmd.Parameters.AddWithValue("@_first_name", data.FirstName);
-            cmd.Parameters.AddWithValue("@_last_name", data.LastName);
-            cmd.Parameters.AddWithValue("@_gender_id", data.GenderId);
-            cmd.Parameters.AddWithValue("@_sexual_orientation", data.SexualOrientation);
-            cmd.Parameters.AddWithValue("@_biography", data.Biography);
-            cmd.Parameters.AddWithValue("@_localisation", data.Localisation);
+            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@firstName", data.FirstName);
+            cmd.Parameters.AddWithValue("@lastName", data.LastName);
+            cmd.Parameters.AddWithValue("@genderID", data.GenderId);
+            cmd.Parameters.AddWithValue("@sexualOrientation", data.SexualOrientation);
+            cmd.Parameters.AddWithValue("@biography", data.Biography);
+            cmd.Parameters.AddWithValue("@localisation", data.Localisation);
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully updated");
         }
@@ -122,8 +122,8 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             using MySqlConnection conn = _db.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("UpdateTag", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@_userID", id);
-            cmd.Parameters.AddWithValue("@_tagID", tagId);
+            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@tagID", tagId);
             cmd.ExecuteNonQuery();
             return Ok("Tag updated");
         }
