@@ -1,7 +1,7 @@
 DELIMITER //
 
 # GetUser
-CREATE PROCEDURE GetUser(IN userID INT)
+CREATE PROCEDURE GetUserByID(IN userID INT)
 BEGIN
     SELECT *  FROM users WHERE id = userID;
 END //
@@ -16,92 +16,134 @@ END //
 CREATE PROCEDURE GetUserProfile(IN userID INT) 
 BEGIN
     SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
-           profile_completion_percentage, localisation FROM users WHERE id = userID;
+           profile_completion_percentage, coordinates FROM users WHERE id = userID;
     SELECT * FROM users_tags WHERE user_id = userID;
     SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
 END //
 
-# CreateUserProfile
-CREATE PROCEDURE CreateUserProfile(
-    IN _user_id INT,
-    IN _first_name VARCHAR(50),
-    IN _last_name VARCHAR(50),
-    IN _gender_id INT,
-    IN _sexual_orientation INT,
-    IN _localisation VARCHAR(100),
-    IN _biography VARCHAR(250)
+# UpdateUserProfile
+CREATE PROCEDURE UpdateUserProfile(
+    IN userID INT,
+    IN firstName VARCHAR(50),
+    IN lastName VARCHAR(50),
+    IN genderID INT,
+    IN sexualOrientation INT,
+    IN coordinates VARCHAR(100),
+    IN biography VARCHAR(250)
 )
 BEGIN
-    UPDATE users
-    SET first_name = _first_name,
-        last_name = _last_name,
-        gender_id = _gender_id,
-        sexual_orientation = _sexual_orientation,
-        localisation = _localisation,
-        biography = _biography
-    WHERE id = _user_id;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+    
+    START TRANSACTION;
+
+    UPDATE users SET first_name = firstName 
+                 WHERE id = userID AND first_name != firstName;
+    
+    UPDATE users SET last_name = lastName 
+                 WHERE id = userID AND last_name != lastName;
+    
+    UPDATE users SET gender_id = genderID 
+                 WHERE id = userID;
+
+    UPDATE users SET users.sexual_orientation = sexualOrientation 
+                 WHERE id = userID;
+    
+    UPDATE users SET users.coordinates = coordinates 
+                 WHERE id = userID AND users.coordinates != coordinates;
+    
+    UPDATE users SET biography = biography 
+                 WHERE id = userID AND users.biography != biography;
+    
+    COMMIT;
+
+    CALL UpdateProfileCompletionPercentage(userID);
+END //
+
+# UpdateProfileCompletionPercentage
+CREATE PROCEDURE UpdateProfileCompletionPercentage(IN userID INT)
+BEGIN
+    SELECT COUNT(*) INTO @tags_count FROM users_tags WHERE user_id = userID;
+    SELECT COUNT(*) INTO @images_count FROM pictures WHERE user_id = userID;
+
+    SELECT
+        COUNT(CASE WHEN first_name IS NOT NULL AND first_name != '' THEN 1 END) AS first_name_non_empty,
+        COUNT(CASE WHEN last_name IS NOT NULL AND last_name != '' THEN 1 END) AS last_name_non_empty,
+        COUNT(CASE WHEN biography IS NOT NULL AND biography != '' THEN 1 END) AS biography_non_empty
+    FROM users WHERE id = userID INTO @first_name, @last_name, @biography;
+
+    SET @percentage = @tags_count * 4 + @images_count * 10 + (@first_name + @last_name + @biography) * 10;
+    SELECT @percentage;
+    
+    UPDATE users SET profile_completion_percentage = @percentage WHERE id = userID;
 END //
 
 #  InsertTags
 CREATE PROCEDURE UpdateTag(
-    IN _userID INT,
-    IN _tagID INT
+    IN userID INT,
+    IN tagID INT
 )
 BEGIN
     SELECT COUNT(*) INTO @count
     FROM users_tags
-    WHERE user_id = _userID AND tag_id = _tagID;
+    WHERE user_id = userID AND tag_id = tagID;
     
     IF @count = 0 THEN
         INSERT INTO users_tags (user_id, tag_id)
-            VALUES (_userID, _tagID);
+            VALUES (userID, tagID);
     ELSE
         DELETE FROM users_tags
-        WHERE user_id = _userID AND tag_id = _tagID;
+        WHERE user_id = userID AND tag_id = tagID;
     END IF;
+    CALL UpdateProfileCompletionPercentage(userID);
 END //
-
+    
 # IMAGE PROCEDURES
 # =================================================================================================
 
 # Upload image
 CREATE PROCEDURE UploadImage(
-    IN _userID INT,
-    IN _position INT,
-    IN _image_url TEXT
+    IN userID INT,
+    IN position INT,
+    IN imageUrl TEXT
 )
 BEGIN
-    IF _position < 1 OR _position > 5 THEN
+    IF position < 1 OR position > 5 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Position must be between 1 and 5';
     END IF;
     
-    INSERT INTO pictures (user_id, position, image_url)
-        VALUES (_userID, _position, _image_url);
+    INSERT INTO pictures (user_id, pictures.position, image_url)
+        VALUES (userID, position, imageUrl);
+    CALL UpdateProfileCompletionPercentage(userID);
 END //
 
 # DeleteImage
 CREATE PROCEDURE DeleteImage(
-    IN _userID INT,
-    IN _position INT
+    IN userID INT,
+    IN position INT
 )
 BEGIN
-    IF _position < 1 OR _position > 5
+    IF position < 1 OR position > 5
     THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Position must be between 1 and 5';
     END IF;
-    DELETE FROM pictures WHERE user_id = _userID AND position = _position;
+    
+    DELETE FROM pictures WHERE user_id = userID AND pictures.position = position;
+    CALL UpdateProfileCompletionPercentage(userID);
 END //
 
 # SwapImages
 CREATE PROCEDURE SwapImages(
-    IN _userID INT,
-    IN _position1 INT,
-    IN _position2 INT
+    IN userID INT,
+    IN position1 INT,
+    IN position2 INT
 )
 BEGIN
-    IF _position1 < 1 OR _position2 < 1 OR _position1 > 5 OR _position2 > 5
+    IF position1 < 1 OR position2 < 1 OR position1 > 5 OR position2 > 5
     THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Position must be between 1 and 5';
@@ -109,22 +151,113 @@ BEGIN
     
     UPDATE pictures
     SET position = CASE position
-        WHEN _position1 THEN _position2
-        WHEN _position2 THEN _position1
+        WHEN position1 THEN position2
+        WHEN position2 THEN position1
         ELSE position
     END
-    WHERE user_id = _userID AND position IN (_position1, _position2);
+    WHERE user_id = userID AND position IN (position1, position2);
 END //
 
 # Get user Images
 CREATE PROCEDURE GetUserImage(
-    IN _userID INT,
-    IN _position INT
+    IN userID INT,
+    IN position INT
 )
 BEGIN
-    SELECT 1
+    SELECT image_url
     FROM pictures
-    WHERE user_id = _userID AND position = _position;
+    WHERE user_id = userID AND pictures.position = position;
+END //
+
+# Insert generated user
+CREATE PROCEDURE AddGeneratedUser(
+    IN _username VARCHAR(50),
+    IN _password VARCHAR(128),
+    IN _email VARCHAR(50),
+    IN birthDate DATE,
+    IN firstName VARCHAR(50),
+    IN lastName VARCHAR(50),
+    IN genderID INT,
+    IN sexualOrientation INT,
+    IN coordinates VARCHAR(100),
+    IN _biography VARCHAR(280),
+    IN tag1 INT,
+    IN tag2 INT,
+    IN tag3 INT,
+    IN tag4 INT,
+    IN tag5 INT,
+    IN image1 TEXT,
+    IN image2 TEXT,
+    IN image3 TEXT,
+    IN image4 TEXT,
+    IN image5 TEXT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+    
+    START TRANSACTION;
+
+    INSERT INTO users (username, password, email, birth_date, first_name, last_name, 
+                       gender_id, sexual_orientation, coordinates, users.biography, salt, db.users.is_verified)
+        VALUES (_username, _password, _email, birthDate, firstName, lastName, 
+                genderID, sexualOrientation, coordinates, _biography, 'salt', 1);
+    
+    COMMIT ;
+    
+    SELECT LAST_INSERT_ID() INTO @userID;
+    
+    START TRANSACTION;
+    
+    IF tag1 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag1);
+    END IF;
+    
+    IF tag2 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag2);
+    END IF;
+    
+    IF tag3 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag3);
+    END IF;
+    
+    IF tag4 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag4);
+    END IF;
+    
+    IF tag5 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag5);
+    END IF;
+    
+    COMMIT;
+    
+    START TRANSACTION;
+    
+    IF image1 IS NOT NULL THEN
+        CALL UploadImage(@userID, 1, image1);
+    END IF;
+    
+    IF image2 IS NOT NULL THEN
+        CALL UploadImage(@userID, 2, image2);
+    END IF;
+    
+    IF image3 IS NOT NULL THEN
+        CALL UploadImage(@userID, 3, image3);
+    END IF;
+    
+    IF image4 IS NOT NULL THEN
+        CALL UploadImage(@userID, 4, image4);
+    END IF;
+    
+    IF image5 IS NOT NULL THEN
+        CALL UploadImage(@userID, 5, image5);
+    END IF;
+    
+    COMMIT;
+    
+    CALL UpdateProfileCompletionPercentage(@userID);
 END //
 
 DELIMITER ;

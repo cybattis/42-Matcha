@@ -1,7 +1,7 @@
 using System.Data;
-using System.Net.Mime;
 using backend.Database;
 using backend.Models.Users;
+using backend.Utils;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 
@@ -42,7 +42,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     GenderId = reader["gender_id"] as int?,
                     SexualOrientation = reader["sexual_orientation"] as int?,
                     Biography = reader["biography"].ToString() ?? "",
-                    Localisation = reader["localisation"].ToString() ?? "",
+                    Coordinates = reader["coordinates"].ToString() ?? "",
                 };
 
                 // Tags
@@ -66,14 +66,14 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             logger.LogError(e.Message);
             return Problem(statusCode: 500, detail: e.Message);
         }
-    }  
+    }
 
     /// <summary>
     /// Update user profile
     /// </summary>
     /// <param name="id">User ID</param>
     /// <param name="data">User input data</param>
-    /// <response code="200">profile created</response>
+    /// <response code="200">profile updated</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
     [Route("[action]/{id:int}")]
@@ -81,19 +81,23 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult Update(int id, [FromForm] UserProfileModel data)
     {
+        var result = Checks.ValidateProfileData(data);
+        if (!result.IsValid)
+            return BadRequest(result.Message);
+        
         try {
             using MySqlConnection conn = _db.GetOpenConnection();
-            using MySqlCommand cmd = new MySqlCommand("CreateUserProfile", conn);
+            using MySqlCommand cmd = new MySqlCommand("UpdateUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@_user_id", id);
-            cmd.Parameters.AddWithValue("@_first_name", data.FirstName);
-            cmd.Parameters.AddWithValue("@_last_name", data.LastName);
-            cmd.Parameters.AddWithValue("@_gender_id", data.GenderId);
-            cmd.Parameters.AddWithValue("@_sexual_orientation", data.SexualOrientation);
-            cmd.Parameters.AddWithValue("@_biography", data.Biography);
-            cmd.Parameters.AddWithValue("@_localisation", data.Localisation);
+            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@firstName", data.FirstName);
+            cmd.Parameters.AddWithValue("@lastName", data.LastName);
+            cmd.Parameters.AddWithValue("@genderID", data.GenderId);
+            cmd.Parameters.AddWithValue("@sexualOrientation", data.SexualOrientation);
+            cmd.Parameters.AddWithValue("@biography", data.Biography);
+            cmd.Parameters.AddWithValue("@coordinates", data.Coordinates);
             cmd.ExecuteNonQuery();
-            return Ok("Profile successfully created");
+            return Ok("Profile successfully updated");
         }
         catch (MySqlException e) {
             logger.LogError(e.Message);
@@ -102,7 +106,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     }
     
     /// <summary>
-    /// Update user profile
+    /// Update user tag
     /// </summary>
     /// <param name="id">User ID</param>
     /// <param name="tagId">tag id</param>
@@ -118,8 +122,8 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             using MySqlConnection conn = _db.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("UpdateTag", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@_userID", id);
-            cmd.Parameters.AddWithValue("@_tagID", tagId);
+            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@tagID", tagId);
             cmd.ExecuteNonQuery();
             return Ok("Tag updated");
         }

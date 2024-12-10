@@ -47,8 +47,8 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
             getImageCmd.CommandType = CommandType.StoredProcedure;
-            getImageCmd.Parameters.AddWithValue("@_userID", id);
-            getImageCmd.Parameters.AddWithValue("@_position", image.Position);
+            getImageCmd.Parameters.AddWithValue("@userID", id);
+            getImageCmd.Parameters.AddWithValue("@position", image.Position);
             using MySqlDataReader reader = getImageCmd.ExecuteReader();
             
             // Check if an image already exist at that position
@@ -78,9 +78,9 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             // Save image url to database
             using MySqlCommand cmd = new MySqlCommand("UploadImage", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@_userId", id);
-            cmd.Parameters.AddWithValue("@_position", image.Position);
-            cmd.Parameters.AddWithValue("@_image_url", url);
+            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@position", image.Position);
+            cmd.Parameters.AddWithValue("@imageUrl", url);
             var result = cmd.ExecuteNonQuery();
             
             return result >= 1 ? Ok("Image uploaded") : Problem("Fail to upload image to database", null, 500);
@@ -103,7 +103,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult SwapImage(int id, [FromBody] SwapPicture swap)
+    public ActionResult Swap(int id, [FromBody] SwapPicture swap)
     {
         try {
             if (swap.Position is < 1 or > 5)
@@ -114,9 +114,9 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             using MySqlConnection conn = _db.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("SwapImages", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@_userId", id);
-            cmd.Parameters.AddWithValue("@_position1", swap.Position);
-            cmd.Parameters.AddWithValue("@_position2", swap.NewPosition);
+            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@position1", swap.Position);
+            cmd.Parameters.AddWithValue("@position2", swap.NewPosition);
             var result = cmd.ExecuteNonQuery();
             
             return result >= 1 ? Ok("Image swap") : Problem("Fail to swap images", null, 500);
@@ -139,7 +139,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult Delete(int id, int position)
+    public ActionResult Delete(int id, [FromForm] int position)
     {
         try {
             if (position is < 1 or > 5) {
@@ -149,9 +149,12 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             using MySqlConnection conn = _db.GetOpenConnection();
             
+            Console.WriteLine("ID " + id + " Position " + position);
+            
             using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
-            getImageCmd.Parameters.AddWithValue("@_userId", id);
-            getImageCmd.Parameters.AddWithValue("@_position", position);
+            getImageCmd.CommandType = CommandType.StoredProcedure;
+            getImageCmd.Parameters.AddWithValue("@userID", id);
+            getImageCmd.Parameters.AddWithValue("@position", position);
             using var reader = getImageCmd.ExecuteReader();
             
             // Delete image from disk
@@ -161,6 +164,8 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             }
             
             var url = reader["image_url"].ToString() ?? "";
+            reader.Close();
+            
             if (System.IO.File.Exists(url))
                 System.IO.File.Delete(url);
             else {
@@ -170,8 +175,8 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             using MySqlCommand deleteImageCmd = new MySqlCommand("DeleteImage", conn);
             deleteImageCmd.CommandType = CommandType.StoredProcedure;
-            deleteImageCmd.Parameters.AddWithValue("@_userId", id);
-            deleteImageCmd.Parameters.AddWithValue("@_position", position);
+            deleteImageCmd.Parameters.AddWithValue("@userID", id);
+            deleteImageCmd.Parameters.AddWithValue("@position", position);
             var result = deleteImageCmd.ExecuteNonQuery();
             
             return result >= 1 ? Ok("Image deleted") : Problem("Fail to delete image in database", null, 500);
