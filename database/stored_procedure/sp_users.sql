@@ -16,7 +16,7 @@ END //
 CREATE PROCEDURE GetUserProfile(IN userID INT) 
 BEGIN
     SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
-           profile_completion_percentage, localisation FROM users WHERE id = userID;
+           profile_completion_percentage, coordinates FROM users WHERE id = userID;
     SELECT * FROM users_tags WHERE user_id = userID;
     SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
 END //
@@ -28,7 +28,7 @@ CREATE PROCEDURE UpdateUserProfile(
     IN lastName VARCHAR(50),
     IN genderID INT,
     IN sexualOrientation INT,
-    IN localisation VARCHAR(100),
+    IN coordinates VARCHAR(100),
     IN biography VARCHAR(250)
 )
 BEGIN
@@ -51,8 +51,8 @@ BEGIN
     UPDATE users SET users.sexual_orientation = sexualOrientation 
                  WHERE id = userID;
     
-    UPDATE users SET users.localisation = localisation 
-                 WHERE id = userID AND users.localisation != localisation;
+    UPDATE users SET users.coordinates = coordinates 
+                 WHERE id = userID AND users.coordinates != coordinates;
     
     UPDATE users SET biography = biography 
                  WHERE id = userID AND users.biography != biography;
@@ -167,6 +167,97 @@ BEGIN
     SELECT image_url
     FROM pictures
     WHERE user_id = userID AND pictures.position = position;
+END //
+
+# Insert generated user
+CREATE PROCEDURE AddGeneratedUser(
+    IN _username VARCHAR(50),
+    IN _password VARCHAR(50),
+    IN _email VARCHAR(50),
+    IN birthDate DATE,
+    IN firstName VARCHAR(50),
+    IN lastName VARCHAR(50),
+    IN genderID INT,
+    IN sexualOrientation INT,
+    IN coordinates VARCHAR(100),
+    IN _biography VARCHAR(250),
+    IN tag1 INT,
+    IN tag2 INT,
+    IN tag3 INT,
+    IN tag4 INT,
+    IN tag5 INT,
+    IN image1 TEXT,
+    IN image2 TEXT,
+    IN image3 TEXT,
+    IN image4 TEXT,
+    IN image5 TEXT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+    END;
+    
+    START TRANSACTION;
+
+    INSERT INTO users (username, password, email, birth_date, first_name, last_name, 
+                       gender_id, sexual_orientation, coordinates, users.biography, salt)
+        VALUES (_username, _password, _email, birthDate, firstName, lastName, 
+                genderID, sexualOrientation, coordinates, _biography, 'salt');
+    
+    COMMIT ;
+    
+    SELECT LAST_INSERT_ID() INTO @userID;
+    
+    START TRANSACTION;
+    
+    IF tag1 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag1);
+    END IF;
+    
+    IF tag2 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag2);
+    END IF;
+    
+    IF tag3 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag3);
+    END IF;
+    
+    IF tag4 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag4);
+    END IF;
+    
+    IF tag5 IS NOT NULL THEN
+        CALL UpdateTag(@userID, tag5);
+    END IF;
+    
+    COMMIT;
+    
+    START TRANSACTION;
+    
+    IF image1 IS NOT NULL THEN
+        CALL UploadImage(@userID, 1, image1);
+    END IF;
+    
+    IF image2 IS NOT NULL THEN
+        CALL UploadImage(@userID, 2, image2);
+    END IF;
+    
+    IF image3 IS NOT NULL THEN
+        CALL UploadImage(@userID, 3, image3);
+    END IF;
+    
+    IF image4 IS NOT NULL THEN
+        CALL UploadImage(@userID, 4, image4);
+    END IF;
+    
+    IF image5 IS NOT NULL THEN
+        CALL UploadImage(@userID, 5, image5);
+    END IF;
+    
+    COMMIT;
+    
+    CALL UpdateProfileCompletionPercentage(@userID);
 END //
 
 DELIMITER ;

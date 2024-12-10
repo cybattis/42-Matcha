@@ -31,7 +31,7 @@ CREATE TABLE users (
     last_name VARCHAR(50) DEFAULT '',
     gender_id INT CHECK (gender_id BETWEEN 1 AND 2), -- 1 Male / 2 Female
     sexual_orientation INT CHECK (sexual_orientation BETWEEN 1 AND 3), -- 1 hetero / 2 homo / 3 bi
-    localisation VARCHAR(100) DEFAULT '',
+    coordinates VARCHAR(100) DEFAULT '',
     biography VARCHAR(280) DEFAULT '',
     profile_completion_percentage INT DEFAULT 0,    
     fame INT DEFAULT 0,

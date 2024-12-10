@@ -223,7 +223,7 @@ public static class Checks {
         if (data.Biography == null || !IsValidBiography(data.Biography!))
             return new ValidationResult { IsValid = false, Message = "Invalid biography" };
         
-        if (data.Localisation == null || !HasValidLength(data.Localisation!, 0, 25) || !IsCoordinate(data.Localisation!))
+        if (data.Coordinates == null || !HasValidLength(data.Coordinates!, 0, 25) || !IsCoordinate(data.Coordinates!))
             return new ValidationResult { IsValid = false, Message = "Invalid coordinates" };
         
         return new ValidationResult { IsValid = true };

@@ -42,7 +42,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     GenderId = reader["gender_id"] as int?,
                     SexualOrientation = reader["sexual_orientation"] as int?,
                     Biography = reader["biography"].ToString() ?? "",
-                    Localisation = reader["localisation"].ToString() ?? "",
+                    Coordinates = reader["coordinates"].ToString() ?? "",
                 };
 
                 // Tags
@@ -95,7 +95,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             cmd.Parameters.AddWithValue("@genderID", data.GenderId);
             cmd.Parameters.AddWithValue("@sexualOrientation", data.SexualOrientation);
             cmd.Parameters.AddWithValue("@biography", data.Biography);
-            cmd.Parameters.AddWithValue("@localisation", data.Localisation);
+            cmd.Parameters.AddWithValue("@coordinates", data.Coordinates);
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully updated");
         }

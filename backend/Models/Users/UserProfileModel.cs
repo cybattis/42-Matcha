@@ -21,7 +21,7 @@ public class UserProfileModel
     public string? Biography {get;set;}
 
     [DefaultValue("45.7736192,4.7579136")] // 45.7736192 4.7579136 → École 42 position
-    public string? Localisation {get;set;}
+    public string? Coordinates {get;set;}
 
     // For GET request
     [SwaggerIgnore]
