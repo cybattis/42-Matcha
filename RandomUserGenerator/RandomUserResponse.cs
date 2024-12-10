@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace RandomUserGenerator;
@@ -7,6 +8,19 @@ public class RandomUserResponse
 {
     [JsonPropertyName("results")]
     public RandomUser[] Results { get; set; } = Array.Empty<RandomUser>();
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        foreach (var user in Results)
+        {
+            user.Name.First = user.Name.First.First().ToString().ToUpper() + user.Name.First.Substring(1);
+            user.Name.Last = user.Name.Last.First().ToString().ToUpper() + user.Name.Last.Substring(1);
+            sb.Append($"Name: {user.Name.First} {user.Name.Last}\n");
+            sb.Append(user.Gender);
+        }
+        return sb.ToString();
+    }
 }
 
 [Serializable]

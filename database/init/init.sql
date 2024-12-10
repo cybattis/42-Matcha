@@ -21,7 +21,7 @@ CREATE TABLE reaction (
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(200) NOT NULL,
-    password VARCHAR(200) NOT NULL,
+    password VARCHAR(128) NOT NULL,
     salt VARCHAR(8) NOT NULL,
     username VARCHAR(50) NOT NULL,
     birth_date DATE NOT NULL,
