@@ -1,9 +1,7 @@
 using System.Data;
-using System.Text;
 using backend.Database;
 using backend.Models.Users;
 using backend.Utils;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 
@@ -13,8 +11,6 @@ namespace backend.Controllers.User;
 [Route("[controller]")]
 public class UserPictureController(ILogger<UserPictureController> logger) : ControllerBase
 {
-    private readonly IDbHelper _db = new DbHelper();
-    
     /// <summary>
     /// Upload user picture
     /// </summary>
@@ -43,7 +39,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             if (image.Data.Length < 1 * 1024) // 1KB
                 return ValidationProblem("Image is too small");
             
-            using MySqlConnection conn = _db.GetOpenConnection();
+            using MySqlConnection conn = DbHelper.GetOpenConnection();
             
             using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
             getImageCmd.CommandType = CommandType.StoredProcedure;
@@ -111,7 +107,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             if (swap.NewPosition is < 1 or > 5)
                 return ValidationProblem("Invalid image position of second image");
             
-            using MySqlConnection conn = _db.GetOpenConnection();
+            using MySqlConnection conn = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("SwapImages", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
@@ -147,7 +143,9 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
                 return ValidationProblem("Invalid image position");
             }
             
-            using MySqlConnection conn = _db.GetOpenConnection();
+            using MySqlConnection conn = DbHelper.GetOpenConnection();
+            
+            Console.WriteLine("ID " + id + " Position " + position);
             
             Console.WriteLine("ID " + id + " Position " + position);
             
