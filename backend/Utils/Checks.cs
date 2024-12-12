@@ -30,24 +30,20 @@ public static class Checks {
         try
         {
             DbHelper db = new();
-            using (MySqlConnection dbClient = db.GetOpenConnection())
+            using MySqlConnection dbClient = DbHelper.GetOpenConnection();
+            dbClient.Open();
+
+            using MySqlCommand cmd = new MySqlCommand("CheckMailTaken", dbClient);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userMail", email);
+
+            // La procédure stockée renvoie un entier ou un booléen
+            var result = cmd.ExecuteScalar();
+
+            // Si la procédure renvoie 1 ou "true", l'e-mail est déjà pris
+            if (result != null && Convert.ToInt32(result) > 0)
             {
-                dbClient.Open();
-
-                using (MySqlCommand cmd = new MySqlCommand("CheckMailTaken", dbClient))
-                {
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@userMail", email);
-
-                    // La procédure stockée renvoie un entier ou un booléen
-                    object? result = cmd.ExecuteScalar();
-
-                    // Si la procédure renvoie 1 ou "true", l'e-mail est déjà pris
-                    if (result != null && Convert.ToInt32(result) > 0)
-                    {
-                        return false; // E-mail déjà pris
-                    }
-                }
+                return false; // E-mail déjà pris
             }
         }
         catch (Exception ex)
@@ -110,24 +106,20 @@ public static class Checks {
         try
         {
             DbHelper db = new();
-            using (MySqlConnection dbClient = db.GetConnection())
-            {
-                dbClient.Open();
+            using MySqlConnection dbClient = DbHelper.GetConnection();
+            dbClient.Open();
 
-                using (MySqlCommand cmd = new MySqlCommand("inputVerifyLink", dbClient))
-                {
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@username", UserName);
+            using MySqlCommand cmd = new MySqlCommand("inputVerifyLink", dbClient);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@username", UserName);
 
-                    // La procédure stockée doit renvoyer un entier ou un booléen
-                    object? result = cmd.ExecuteScalar();
+            // La procédure stockée doit renvoyer un entier ou un booléen
+            object? result = cmd.ExecuteScalar();
         
-                    // Si la procédure renvoie 1 ou "true", le nom est pris
-                    if (result != null && Convert.ToInt32(result) > 0)
-                    {
-                        return false; // Nom d'utilisateur déjà pris
-                    }
-                }
+            // Si la procédure renvoie 1 ou "true", le nom est pris
+            if (result != null && Convert.ToInt32(result) > 0)
+            {
+                return false; // Nom d'utilisateur déjà pris
             }
         }
         catch (Exception ex)
@@ -141,22 +133,12 @@ public static class Checks {
     
     public static bool IsAlpa(string str)
     {
-        foreach (char c in str)
-        {
-            if (!char.IsLetter(c))
-                return false;
-        }
-        return true;
+        return str.All(char.IsLetter);
     }
     
     public static bool IsNumeric(string str)
     {
-        foreach (char c in str)
-        {
-            if (!char.IsDigit(c))
-                return false;
-        }
-        return true;
+        return str.All(char.IsDigit);
     }
     
     public static bool IsDecimal(string str)
@@ -166,12 +148,7 @@ public static class Checks {
     
     public static bool IsAlphaNumeric(string str)
     {
-        foreach (char c in str)
-        {
-            if (!char.IsLetterOrDigit(c))
-                return false;
-        }
-        return true;
+        return str.All(char.IsLetterOrDigit);
     }
     
     public static bool HasValidLength(string str, int min, int max)

@@ -1,30 +1,31 @@
 using System.Net.Mail;
 
-namespace Utils.Notify ;
-public class Notify {
+namespace backend.Utils;
 
-    private static (string smtpHost, int smtpPort, string smtpUser, string smtpPass) setupSMPT()
+public static class Notify {
+
+    private static (string smtpHost, int smtpPort, string smtpUser, string smtpPass) SetupSmpt()
     {
-            string smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST") ?? "smtp.gmail.com";
-            int smtpPort    = int.Parse(Environment.GetEnvironmentVariable("SMTP_PORT") ?? "587");
-            string smtpUser = Environment.GetEnvironmentVariable("NO_REPLY_MAIL") ?? "3000"; // Votre adresse Gmail
-            string smtpPass = Environment.GetEnvironmentVariable("NO_REPLY_MAIL_PASSWORD") ?? "localhost:3000"; // Mot de passe d'application Gmail
-            return (smtpHost, smtpPort, smtpUser, smtpPass);
+        string smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST") ?? "smtp.gmail.com";
+        int smtpPort    = int.Parse(Environment.GetEnvironmentVariable("SMTP_PORT") ?? "587");
+        string smtpUser = Environment.GetEnvironmentVariable("NO_REPLY_MAIL") ?? "3000"; // Votre adresse Gmail
+        string smtpPass = Environment.GetEnvironmentVariable("NO_REPLY_MAIL_PASSWORD") ?? "localhost:3000"; // Mot de passe d'application Gmail
+        return (smtpHost, smtpPort, smtpUser, smtpPass);
     }
+    
     public static void SendVerificationEmail(string email, string verificationLink)
     {
         try
         {
-            // TODO a voir pour modif le ?? et mettre des vrai valeur par defaut
-            (string smtpHost, int smtpPort, string smtpUser, string smtpPass) = setupSMPT();
+            (string smtpHost, int smtpPort, string smtpUser, string smtpPass) = SetupSmpt();
 
-            using (MailMessage mail = new MailMessage())
-            {
-                mail.From = new MailAddress(smtpUser, "Matcha");
-                mail.To.Add(email);
-                mail.Subject = "Verify Your Email Address";
-                //TODO rendre ca plus joli
-                mail.Body = $@"
+            using MailMessage mail = new MailMessage();
+            mail.From = new MailAddress(smtpUser, "Matcha");
+            mail.To.Add(email);
+            mail.Subject = "Verify Your Email Address";
+            
+            //TODO rendre ca plus joli
+            mail.Body = $@"
                     <html>
                     <body>
                         <h1>Welcome to Matcha!</h1>
@@ -33,15 +34,12 @@ public class Notify {
                         <p>If you didn't request this, you can ignore this email.</p>
                     </body>
                     </html>";
-                mail.IsBodyHtml = true;
+            mail.IsBodyHtml = true;
 
-                using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
-                {
-                    smtp.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPass);
-                    smtp.EnableSsl = true; // Sécurise la connexion
-                    smtp.Send(mail);
-                }
-            }
+            using SmtpClient smtp = new SmtpClient(smtpHost, smtpPort);
+            smtp.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPass);
+            smtp.EnableSsl = true; // Sécurise la connexion
+            smtp.Send(mail);
         }
         catch (Exception ex)
         {
@@ -50,38 +48,34 @@ public class Notify {
         }
     }
 
-    public static void SendForgotenPasswordMail(string email, string ForgotenPasswordLink)
+    public static void SendForgottenPasswordMail(string email, string forgottenPasswordLink)
     {
         try
         {
-            // TODO a voir pour modif le ?? et mettre des vrai valeur par defaut
-            (string smtpHost, int smtpPort, string smtpUser, string smtpPass) = setupSMPT();
+            (string smtpHost, int smtpPort, string smtpUser, string smtpPass) = SetupSmpt();
 
-            using (MailMessage mail = new MailMessage())
-            {
-                mail.From = new MailAddress(smtpUser, "Matcha");
-                mail.To.Add(email);
-                mail.Subject = "Verify Your Email Address";
-                //TODO rendre ca plus joli
-                mail.Body = $@"
+            using MailMessage mail = new MailMessage();
+            mail.From = new MailAddress(smtpUser, "Matcha");
+            mail.To.Add(email);
+            mail.Subject = "Verify Your Email Address";
+            
+            //TODO rendre ca plus joli
+            mail.Body = $@"
                     <html>
                     <body>
                         <h1>Forgot your password ?</h1>
                         <p>Click the link below to create a new password:</p>
-                        <a href='{ForgotenPasswordLink}'>Verify Email</a>
+                        <a href='{forgottenPasswordLink}'>Verify Email</a>
                         <p>This email is valid for 1 hour</p>
                         <p>If you didn't request this, you can ignore this email.</p>
                     </body>
                     </html>";
-                mail.IsBodyHtml = true;
+            mail.IsBodyHtml = true;
 
-                using (SmtpClient smtp = new SmtpClient(smtpHost, smtpPort))
-                {
-                    smtp.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPass);
-                    smtp.EnableSsl = true; // Sécurise la connexion
-                    smtp.Send(mail);
-                }
-            }
+            using SmtpClient smtp = new SmtpClient(smtpHost, smtpPort);
+            smtp.Credentials = new System.Net.NetworkCredential(smtpUser, smtpPass);
+            smtp.EnableSsl = true; // Sécurise la connexion
+            smtp.Send(mail);
         }
         catch (Exception ex)
         {

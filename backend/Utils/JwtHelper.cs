@@ -1,48 +1,40 @@
-using System;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Utils.Auth
+namespace backend.Utils;
+
+public class JwtHelper(string secretKey)
 {
-    public class JwtHelper
+    /// <summary>
+    /// Génère un JWT avec les informations de l'utilisateur.
+    /// </summary>
+    /// <param name="userId">L'identifiant unique de l'utilisateur</param>
+    /// <param name="username">Le nom d'utilisateur</param>
+    /// <returns>Un token JWT signé</returns>
+    public string GenerateJwtToken(int userId, string username)
     {
-        private readonly string _secretKey;
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        public JwtHelper(string secretKey)
+        var claims = new[]
         {
-            _secretKey = secretKey;
-        }
+            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()), // Identifiant utilisateur
+            new Claim("username", username),                          // Nom d'utilisateur
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // ID unique du JWT
+            new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64) // Date d'émission
+        };
 
-        /// <summary>
-        /// Génère un JWT avec les informations de l'utilisateur.
-        /// </summary>
-        /// <param name="userId">L'identifiant unique de l'utilisateur</param>
-        /// <param name="username">Le nom d'utilisateur</param>
-        /// <returns>Un token JWT signé</returns>
-        public string GenerateJwtToken(int userId, string username)
-        {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            issuer: "matcha",                // Issuer : Identifiant de l'application
+            audience: "matcha-users",        // Audience : Destinataires du token
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(1), // Expiration (1 heure)
+            signingCredentials: credentials    // Clé de signature
+        );
 
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()), // Identifiant utilisateur
-                new Claim("username", username),                          // Nom d'utilisateur
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // ID unique du JWT
-                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.Integer64) // Date d'émission
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: "matcha",                // Issuer : Identifiant de l'application
-                audience: "matcha-users",        // Audience : Destinataires du token
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(1), // Expiration (1 heure)
-                signingCredentials: credentials    // Clé de signature
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

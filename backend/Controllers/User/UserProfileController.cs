@@ -11,8 +11,6 @@ namespace backend.Controllers.User;
 [Route("[controller]")]
 public class UserProfileController(ILogger<UserProfileController> logger) : ControllerBase
 {
-    private readonly IDbHelper _db = new DbHelper();
-    
     /// <summary>
     /// Get user profile
     /// </summary>
@@ -27,7 +25,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     public ActionResult Get(int id)
     {
         try {
-            using MySqlConnection conn = _db.GetOpenConnection();
+            using MySqlConnection conn = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
@@ -56,7 +54,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     while (reader.Read())
                         profile.Images.Add(reader["image_url"] as string ?? "");
                 }
-                reader.Close();
+                // reader.Close();
                 return Ok(profile);
             }
             return ValidationProblem();
@@ -64,7 +62,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
         catch (MySqlException e)
         {
             logger.LogError(e.Message);
-            return Problem(statusCode: 500, detail: e.Message);
+            return Problem(detail: e.Message);
         }
     }
 
@@ -86,7 +84,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             return BadRequest(result.Message);
         
         try {
-            using MySqlConnection conn = _db.GetOpenConnection();
+            using MySqlConnection conn = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("UpdateUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
@@ -101,7 +99,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
         }
         catch (MySqlException e) {
             logger.LogError(e.Message);
-            return Problem(statusCode: 500, detail: e.Message);
+            return Problem(detail: e.Message);
         }
     }
     
@@ -119,7 +117,11 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     public ActionResult UpdateTag(int id, [FromForm] int tagId)
     {
         try {
-            using MySqlConnection conn = _db.GetOpenConnection();
+            if (tagId < 1)
+                return BadRequest("Invalid tag id");
+            
+            
+            using MySqlConnection conn = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("UpdateTag", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
@@ -129,7 +131,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
         }
         catch (MySqlException e) {
             logger.LogError(e.Message);
-            return Problem(statusCode: 500, detail: e.Message);
+            return Problem(detail: e.Message);
         }
     }
 }
