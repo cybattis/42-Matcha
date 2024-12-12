@@ -62,7 +62,7 @@ public static class GenerateUser
             using var memoryStream = new MemoryStream();
             
             // Insert images
-            var images = new List<string>();
+            // TODO: Add Human face pictures cartoon pictures
             var numberOfImages = random.Int(0, 4);
             for (int i = 0; i < numberOfImages; i++) {
                 var imageUrl = $"https://picsum.photos/400/500.jpg?random={random.Int(1, 1000)}";
