@@ -107,7 +107,8 @@ namespace backend.Controllers.Auth {
                 {
                     return BadRequest("Invalide username or email");
                 }
-                string ForgotenPasswordLink = Environment.GetEnvironmentVariable("ROOT_URL") + "/Auth/ForgotenPassword/" + Guid.NewGuid().ToString();
+                //Environment.GetEnvironmentVariable("ROOT_URL") + "/Auth/ForgotenPassword/" +
+                string ForgotenPasswordLink =  Guid.NewGuid().ToString();
                 DbHelper db = new();
                 using (MySqlConnection dbClient = db.GetOpenConnection())
                 {
