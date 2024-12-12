@@ -18,6 +18,7 @@ BEGIN
     WHERE email = userMail;
 END //
 
+
 CREATE PROCEDURE CheckUserExist(
     IN inputUsername VARCHAR(255),
     IN inputMail VARCHAR(255),
@@ -29,3 +30,5 @@ BEGIN
     WHERE username = inputUsername
       AND email = inputMail;
 END //
+
+DELIMITER ;

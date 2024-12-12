@@ -26,7 +26,7 @@ INSERT INTO tags (name)
            ('Yoga ou méditation'),
            ('Cyclisme'),
            ('Natation'),
-           ('Sports d’équipe (football, basketball, volleyball)'),
+           ('Sports d’équipe'),
            ('Escalade');
 
 INSERT INTO tags (name)
@@ -61,8 +61,5 @@ INSERT INTO tags (name)
 INSERT INTO users (email, password, salt, username, birth_date)
     VALUES ('jean.bono@gmail.com', '1234', 'salt', 'jojo42', '1993-10-02');
 
-INSERT INTO users (email, password, salt, username, birth_date, first_name, last_name)
-    VALUES ('abcd.mail@gmail.com', 'abcd', 'salt', 'nono42', '1985-11-12', 'Jojo', 'Nono');
-
-INSERT INTO users_tags (user_id, tag_id)
-    VALUES (2, 1), (2, 2), (2, 3), (2, 4), (2, 5);
+INSERT INTO users (email, password, salt, username, birth_date)
+    VALUES ('abcd.mail@gmail.com', 'abcd', 'salt', 'nono42', '1985-11-12');
