@@ -1,19 +1,14 @@
-import "./App.css";
-import axios from "axios";
-import useGeoLocation from "./Components/Geolocalization";
-
-const url = (axios.defaults.baseURL = "http://localhost:5163");
+import './App.css'
+import {HStack} from "@chakra-ui/react";
+import {LoginForm} from "@/components/LoginForm.tsx";
 
 function App() {
-  var geoData = useGeoLocation();
 
   return (
-    <div className="flex flex-col">
-      <h2>Location</h2>
-      <p>Latitude: {geoData.lat}</p>
-      <p>Longitude: {geoData.lon}</p>
-    </div>
-  );
+    <HStack>
+      <LoginForm />
+    </HStack>
+  )
 }
 
-export default App;
+export default App
