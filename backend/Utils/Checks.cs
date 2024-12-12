@@ -115,7 +115,7 @@ namespace Utils.Checks{
                 {
                     dbClient.Open();
 
-                    using (MySqlCommand cmd = new MySqlCommand("CheckUserNameTaken", dbClient))
+                    using (MySqlCommand cmd = new MySqlCommand("inputVerifyLink", dbClient))
                     {
                         cmd.CommandType = System.Data.CommandType.StoredProcedure;
                         cmd.Parameters.AddWithValue("@username", UserName);

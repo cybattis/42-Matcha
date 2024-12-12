@@ -4,6 +4,7 @@ using backend.Models.Users;
 using backend.Utils;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
+using Org.BouncyCastle.Cms;
 using Org.BouncyCastle.Tls;
 using Utils.Checks;
 using Utils.Crypt;
@@ -71,7 +72,7 @@ namespace backend.Controllers.Auth{
                     }
 
                     //TODO ENDPOINT VALID ACCOUNT
-                    string verificationLink = Environment.GetEnvironmentVariable("ROOT_URL") + "/Auth/verifyAccount/" + Guid.NewGuid().ToString();
+                    string verificationLink = Guid.NewGuid().ToString();
                     (string salt, string hashedPassword) = Crypt.cryptPassWord("userPassword123");
                     newAccount.Password = hashedPassword;
                     using (MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient))
@@ -82,7 +83,8 @@ namespace backend.Controllers.Auth{
                         cmd.Parameters.AddWithValue("@userMail", newAccount.Mail);
                         cmd.Parameters.AddWithValue("@userBirthDate", newAccount.BirthDate);
                         cmd.Parameters.AddWithValue("@verificationLink", verificationLink);
-                        cmd.Parameters.AddWithValue("@salt", verificationLink);
+                        cmd.Parameters.AddWithValue("@verificationIDExpiration", DateTime.UtcNow.AddHours(1));
+                        cmd.Parameters.AddWithValue("@salt", salt);
                         cmd.ExecuteNonQuery();
                     }
                     Notify.SendVerificationEmail(newAccount.Mail, verificationLink);
@@ -103,9 +105,69 @@ namespace backend.Controllers.Auth{
         [Route("[action]/{verificationID:string}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult verifyAccount(string verificationID){
-            
-            return Ok("Verification completed");
+        public IActionResult verifyAccount(string verificationID)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(verificationID))
+                {
+                    return BadRequest("Verification link incorrect");
+                }
+
+                DbHelper db = new();
+                using (MySqlConnection dbClient = db.GetOpenConnection())
+                {
+                    using (MySqlCommand cmd = new MySqlCommand("GetVerificationAccountInfo", dbClient))
+                    {
+                        cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@inputVerifyLink", verificationID);
+
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                // Extraire les colonnes retournées
+                                int userId = reader.GetInt32("user_id");
+                                bool isVerified = reader.GetBoolean("is_verified");
+                                string emailVerificationLink = reader.GetString("email_verification_link");
+                                bool profileCompleted = reader.GetBoolean("profile_completed");
+                                string email = reader.GetString("email");
+                                DateTime forgotenPasswordLinkExpiration = reader.GetDateTime("forgoten_password_link_expiration");
+                                // Vérifier l'état de l'utilisateur
+                                if (isVerified)
+                                {
+                                    return BadRequest("Account is already verified.");
+                                }
+                                if (emailVerificationLink != verificationID || forgotenPasswordLinkExpiration < DateTime.UtcNow)
+                                {
+                                    return BadRequest("Email expired.");
+                                }
+                                // Mettez à jour l'état de vérification ici si nécessaire
+                                using (MySqlCommand updateCmd = new MySqlCommand("assertAccountVerification", dbClient))
+                                {
+                                    updateCmd.Parameters.AddWithValue("@userId", userId);
+                                    updateCmd.ExecuteNonQuery();
+                                }
+
+                                return Ok("Verification completed successfully.");
+                            }
+                            else
+                            {
+                                return BadRequest("Verification link not found or invalid.");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return StatusCode(500, new
+                {
+                    Error = "ServerError",
+                    Message = "Une erreur interne est survenue. Veuillez réessayer."
+                });
+            }
         }
     }
 }

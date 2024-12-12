@@ -5,6 +5,8 @@ using MySql.Data.MySqlClient;
 using Utils.Crypt;
 using Utils.Notify;
 using System.Data;
+using Utils.Auth;
+using Utils.Checks;
 namespace backend.Controllers.Auth {
     [ApiController]
     [Route("Auth/")]
@@ -43,13 +45,16 @@ namespace backend.Controllers.Auth {
                             {
                                 string hashedPassword = reader.GetString("password");
                                 string salt = reader.GetString("salt");
+                                int userId = reader.GetInt32("user_id");
                                 // Vérification du mot de passe
                                 bool isPasswordValid = Crypt.VerifyPassword(newLogin.Password, salt, hashedPassword);
                                 if (isPasswordValid)
                                 {
+                                    string token = GenerateJwtToken(userId, newLogin.UserName);
                                     return Ok(new
                                     {
-                                        Message = "Connexion réussie."
+                                        Message = "Connexion réussie.",
+                                        Token = token
                                     });
                                 }
                                 else
@@ -83,11 +88,14 @@ namespace backend.Controllers.Auth {
                 });
             }
         }
-        private string GenerateJwtToken(string username)
+        private string GenerateJwtToken(int userId, string username)
         {
-            // Implémentez la logique de génération d'un JWT ici si vous utilisez des tokens
-            return "dummy-token-for-now"; // Remplacez par la vraie implémentation
+            string secretKey = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "DefaultSecretKey";
+            JwtHelper jwtHelper = new JwtHelper(secretKey);
+            return jwtHelper.GenerateJwtToken(userId, username);
         }
+
+        
         [HttpPost]
         [Route("[action]")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -95,7 +103,10 @@ namespace backend.Controllers.Auth {
         {
             try 
             {
-                //TODO check si forgotenPassword a bien une entree user avec username et mail valide
+                if (!Checks.IsValidMail(forgotenPassword.mail) && !Checks.IsValidUserName(forgotenPassword.UserName))
+                {
+                    return BadRequest("Invalide username or email");
+                }
                 string ForgotenPasswordLink = Environment.GetEnvironmentVariable("ROOT_URL") + "/Auth/ForgotenPassword/" + Guid.NewGuid().ToString();
                 DbHelper db = new();
                 using (MySqlConnection dbClient = db.GetOpenConnection())

@@ -5,6 +5,8 @@ CREATE PROCEDURE InsertNewAccount(
     IN userPassword VARCHAR(255),
     IN userMail VARCHAR(100),
     IN userBirthDate DATE,
+    IN verificationID,
+    IN verificationIDExpiration
     OUT resultMessage VARCHAR(255)
 )
 BEGIN
@@ -13,15 +15,15 @@ BEGIN
         SET resultMessage = 'Error: UserName already exists';
     ELSE
         -- Insère un nouvel utilisateur
-        INSERT INTO db.users (username, password, email, birth_date)
-        VALUES (userName, userPassword, userMail, userBirthDate);
+        INSERT INTO db.users (username, password, email, birth_date, verificationLink, email_verification_link_expiration)
+        VALUES (userName, userPassword, userMail, userBirthDate, verificationID, verificationIDExpiration);
         SET resultMessage = 'Success: Account created';
     END IF;
 END //
 
 CREATE PROCEDURE GetUserPasswordByUsername(IN inputUsername VARCHAR(50))
 BEGIN
-    SELECT password, salt
+    SELECT user_id, password, salt
     FROM users
     WHERE username = inputUsername;
 END //
@@ -33,11 +35,18 @@ BEGIN
     WHERE username = inputUsername;
 END //
 
-CREATE PROCEDURE VerifyAccount(IN inputVerifyLink VARCHAR(250))
+CREATE PROCEDURE getVerificationAccountInfo(IN inputVerifyLink VARCHAR(250))
 BEGIN
-    SELECT user_id, is_verified, email_verification_link, profile_completed
+    SELECT user_id, is_verified, email_verification_link, forgoten_password_link_expiration, email
     FROM users
     WHERE email_verification_link = inputVerifyLink
+END //
+
+CREATE PROCEDURE assertAccountVerification (IN user_id)
+BEGIN
+    UPDATE users
+    SET is_verified = TRUE WHERE user_id = @userId
+    SET profile_completion_percentage = 20
 END //
 
 CREATE PROCEDURE forgotenPasswordLink(IN inputForgotenPasswordLink VARCHAR(250), IN inputUsername)
@@ -47,5 +56,12 @@ BEGIN
         forgoten_password_expiration = NOW() + INTERVAL 1 HOUR
     WHERE email = inputUsername;
 END //
+
+CREATE PROCEDURE getuserid (IN imputUsername VARCHAR(255))
+BEGIN
+    SELECT user_id
+    FROM users
+    WHERE userName = imputUsername
+END
 
 DELIMITER ;
