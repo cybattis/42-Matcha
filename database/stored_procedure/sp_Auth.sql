@@ -5,6 +5,9 @@ CREATE PROCEDURE InsertNewAccount(
     IN userPassword VARCHAR(255),
     IN userMail VARCHAR(100),
     IN userBirthDate DATE,
+    IN verificationLink VARCHAR(255),
+    IN verificationLinkExpiration DATETIME,
+    IN inputSalt VARCHAR(255),
     OUT resultMessage VARCHAR(255)
 )
 BEGIN
@@ -13,17 +16,58 @@ BEGIN
         SET resultMessage = 'Error: UserName already exists';
     ELSE
         -- Insère un nouvel utilisateur
-        INSERT INTO db.users (username, password, email, birth_date)
-        VALUES (userName, userPassword, userMail, userBirthDate);
+        INSERT INTO db.users (username, password, email, birth_date, salt, email_verification_link, email_verification_link_expiration)
+            VALUES (userName, 
+                    userPassword, 
+                    userMail, 
+                    userBirthDate,
+                    inputSalt,
+                    verificationLink, 
+                    verificationLinkExpiration);
         SET resultMessage = 'Success: Account created';
     END IF;
 END //
 
-CREATE PROCEDURE GetUserByUsername(IN inputUsername VARCHAR(50))
+CREATE PROCEDURE GetUserPasswordByUsername(IN inputUsername VARCHAR(50))
 BEGIN
-    SELECT password, salt
+    SELECT id, password, salt
     FROM users
     WHERE username = inputUsername;
+END //
+
+CREATE PROCEDURE GetUserMailByUsername(IN inputUsername VARCHAR(50))
+BEGIN
+    SELECT email
+    FROM users
+    WHERE username = inputUsername;
+END //
+
+CREATE PROCEDURE getVerificationAccountInfo(IN inputVerifyLink VARCHAR(250))
+BEGIN
+    SELECT id, is_verified, email_verification_link, forgotten_password_link_expiration, email
+        FROM users
+        WHERE email_verification_link = inputVerifyLink;
+END //
+
+CREATE PROCEDURE assertAccountVerification (IN user_id INT)
+BEGIN
+    UPDATE users
+        SET is_verified = TRUE WHERE user_id = @userId;
+END //
+
+CREATE PROCEDURE forgotenPasswordLink(IN inputForgottenPasswordLink VARCHAR(250), IN inputUsername VARCHAR(50))
+BEGIN
+    UPDATE users
+        SET forgotten_password_link = inputForgottenPasswordLink,
+            forgotten_password_link_expiration = NOW() + INTERVAL 1 HOUR
+        WHERE email = inputUsername;
+END //
+
+CREATE PROCEDURE getuserid (IN imputUsername VARCHAR(255))
+BEGIN
+    SELECT id
+        FROM users
+        WHERE userName = imputUsername;
 END //
 
 DELIMITER ;
