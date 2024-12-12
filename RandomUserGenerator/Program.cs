@@ -35,8 +35,3 @@ Console.WriteLine("Done!");
 connection.Close();
 
 Console.WriteLine("Generation Complete!");
-
-
-
-
-
