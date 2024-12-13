@@ -1,9 +1,10 @@
 "use client"
 
-import {Button, Input, Stack} from "@chakra-ui/react"
+import {Button, Input, VStack} from "@chakra-ui/react"
 import {Field} from "@/components/ui/field"
 import {PasswordInput} from "@/components/ui/password-input"
 import {useForm} from "react-hook-form"
+import {Link} from "@tanstack/react-router";
 
 interface FormValues {
   username: string
@@ -21,7 +22,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onSubmit}>
-      <Stack gap="4" align="flex-start" maxW="sm">
+      <VStack gap="4" align="center" maxW="sm">
         <Field
           label="Username"
           invalid={!!errors.username}
@@ -41,9 +42,9 @@ export function LoginForm() {
             {...register("password", {required: "Password is required"})}
           />
         </Field>
-
-        <Button type="submit">Submit</Button>
-      </Stack>
+        <Link to={"/register"}>Does not have account ? Register</Link>
+        <Button type="submit" size="md">Submit</Button>
+      </VStack>
     </form>
   )
 }

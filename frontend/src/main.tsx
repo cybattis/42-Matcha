@@ -1,16 +1,33 @@
-import React from "react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
 import { ThemeProvider } from "next-themes"
-import App from "./App"
+import {StrictMode} from 'react'
+import { RouterProvider, createRouter } from '@tanstack/react-router'
 import {createRoot} from "react-dom/client";
 
-const root = createRoot(document.getElementById("root")!);
-root.render(
-  <React.StrictMode>
-    <ChakraProvider value={defaultSystem}>
-      <ThemeProvider attribute="class" disableTransitionOnChange>
-        <App />
-      </ThemeProvider>
-    </ChakraProvider>
-  </React.StrictMode>,
-)
+// Import the generated route tree
+import { routeTree } from './routeTree.gen'
+
+// Create a new router instance
+const router = createRouter({ routeTree })
+
+// Register the router instance for type safety
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
+
+// Render the app
+const rootElement = document.getElementById('root')!
+if (!rootElement.innerHTML) {
+  const root = createRoot(rootElement)
+  root.render(
+    <StrictMode>
+      <ChakraProvider value={defaultSystem}>
+        <ThemeProvider attribute="class" disableTransitionOnChange>
+          <RouterProvider router={router} />
+        </ThemeProvider>
+      </ChakraProvider>
+    </StrictMode>,
+  )
+}
