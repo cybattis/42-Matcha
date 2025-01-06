@@ -8,7 +8,7 @@ using MySql.Data.MySqlClient;
 namespace backend.Controllers.User;
 
 [ApiController]
-[Route("[controller]")]
+[route("[controller]")]
 public class UserProfileController(ILogger<UserProfileController> logger) : ControllerBase
 {
     /// <summary>
@@ -18,7 +18,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <response code="200">Success</response>
     /// <response code="400">Bad request</response>
     [HttpGet]
-    [Route("[action]/{id:int}")]
+    [route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -74,7 +74,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <response code="200">profile updated</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [Route("[action]/{id:int}")]
+    [route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult Update(int id, [FromForm] UserProfileModel data)
@@ -111,7 +111,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <response code="200">Tag updated</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [Route("[action]/{id:int}")]
+    [route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult UpdateTag(int id, [FromForm] int tagId)

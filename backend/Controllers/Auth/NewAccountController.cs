@@ -8,7 +8,7 @@ using MySql.Data.MySqlClient;
 namespace backend.Controllers.Auth;
 
 [ApiController]
-[Route("Auth/")]
+[route("Auth/")]
 public class NewAccountController : ControllerBase
 {
     private class NewAccountResponse {
@@ -44,7 +44,7 @@ public class NewAccountController : ControllerBase
     }
     
     [HttpPost]
-    [Route("[action]")]
+    [route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult CreateNewAccount([FromBody] NewAccountModel newAccount)
@@ -92,7 +92,7 @@ public class NewAccountController : ControllerBase
         }
     }
     [HttpPost]
-    [Route("[action]/{verificationID}")]
+    [route("[action]/{verificationID}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult VerifyAccount(string verificationID)

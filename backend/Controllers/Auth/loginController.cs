@@ -8,12 +8,12 @@ using backend.Utils;
 namespace backend.Controllers.Auth;
 
 [ApiController]
-[Route("Auth/")]
+[route("Auth/")]
 public class LoginController : ControllerBase
 {
 
     [HttpPost]
-    [Route("[action]")]
+    [route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -82,7 +82,7 @@ public class LoginController : ControllerBase
 
         
     [HttpPost]
-    [Route("[action]")]
+    [route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public IActionResult ForgotenPassword([FromBody] ForgottenPasswordModel forgottenPassword)
     {
