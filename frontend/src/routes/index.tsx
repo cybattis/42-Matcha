@@ -1,5 +1,5 @@
-import {createFileRoute, redirect} from '@tanstack/react-router'
-import {isAuthenticated} from "@/lib/auth.ts";
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { isAuthenticated } from '@/lib/auth.ts';
 
 export const Route = createFileRoute('/')({
   component: Index,
@@ -7,9 +7,8 @@ export const Route = createFileRoute('/')({
     if (isAuthenticated()) {
       throw redirect({
         to: '/app/home',
-      })
-    }
-    else {
+      });
+    } else {
       throw redirect({
         to: '/auth/login',
         search: {
@@ -18,11 +17,11 @@ export const Route = createFileRoute('/')({
           // potentially lag behind the actual current location)
           redirect: location.href,
         },
-      })
+      });
     }
   },
-})
+});
 
 function Index() {
-  return ;
+  return;
 }

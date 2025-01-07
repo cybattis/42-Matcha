@@ -5,70 +5,78 @@ import {
   MenuItem,
   useDisclosure,
   Stack,
-  Center, MenuRoot, MenuTrigger, MenuContent, MenuSeparator, Icon, Avatar,
-} from '@chakra-ui/react'
-import {ReactNode} from "react";
-import {useColorMode, useColorModeValue} from "@/components/ui/color-mode.tsx";
-import {MoonIcon, SunIcon} from "@/components/Icons.tsx";
+  Center,
+  MenuRoot,
+  MenuTrigger,
+  MenuContent,
+  MenuSeparator,
+  Icon,
+  Avatar,
+} from '@chakra-ui/react';
+import {ReactNode} from 'react';
+import {
+  useColorMode,
+  useColorModeValue,
+} from '@/components/ui/color-mode.tsx';
+import {MoonIcon, SunIcon} from '@/components/Icons.tsx';
+import {useNavigate} from "@tanstack/react-router";
 
-interface Props {
-  children: ReactNode
-}
-
-const NavLink = (props: Props) => {
-  const { children } = props
-
-  return (
-    <Box
-      as="a"
-      px={2}
-      py={1}
-      rounded={'md'}
-      _hover={{
-        textDecoration: 'none',
-        bg: useColorModeValue('gray.200', 'gray.700'),
-      }}
-      href={'#'}>
-      {children}
-    </Box>
-  )
-}
-
-export default function Navbar() {
-  const { colorMode, toggleColorMode } = useColorMode()
-  const { isOpen, onOpen, onClose } = useDisclosure()
+export function NavbarAuth() {
+  const {colorMode, toggleColorMode} = useColorMode();
   return (
     <>
-      <Box bg={useColorModeValue('gray.100', 'gray.900')} px={16}>
-        <Flex justifyContent={'space-between'}>
-          <Box>Logo</Box>
+      <Box bg={useColorModeValue('gray.100', 'gray.900')} px={20} py={2}>
+        <Flex justifyContent={'end'} alignItems="center" alignContent="end">
+          <Box w="100%" display="flex" justifyContent={'center'}>MATCHA</Box>
+          <Button onClick={toggleColorMode}>
+            {colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}
+          </Button>
+        </Flex>
+      </Box>
+    </>
+  );
+}
+
+
+export default function Navbar() {
+  const {colorMode, toggleColorMode} = useColorMode();
+  return (
+    <>
+      <Box bg={useColorModeValue('gray.100', 'gray.900')} pl={20} pr={5} py={2}>
+        <Flex justifyContent={'end'} alignItems="center" alignContent="end">
+          <Box></Box>
+          <Box w="100%" display="flex" justifyContent={'center'}>MATCHA</Box>
           <Stack direction={'row'}>
             <Button onClick={toggleColorMode}>
-              {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+              {colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}
             </Button>
-            <NavbarMenu />
+            <NavbarMenu/>
           </Stack>
         </Flex>
       </Box>
     </>
-  )
+  );
 }
 
 export const NavbarMenu = () => {
+  const navigate = useNavigate();
   return (
     <MenuRoot>
-      <MenuTrigger asChild>
-        <Button variant="outline" size="sm">
+      <MenuTrigger asChild pos="relative">
+        <Button variant="outline" size="md">
           Open
         </Button>
       </MenuTrigger>
-      <MenuContent>
-        <MenuItem value="new-txt">New Text File</MenuItem>
-        <MenuItem value="new-file">New File...</MenuItem>
-        <MenuItem value="new-win">New Window</MenuItem>
-        <MenuItem value="open-file">Open File...</MenuItem>
-        <MenuItem value="export">Export</MenuItem>
+      <MenuContent pos="absolute">
+        <MenuItem value="Profile">Profile</MenuItem>
+        <MenuItem value="settings">Settings</MenuItem>
+        <MenuItem value="logout" onClick={() => {
+          localStorage.removeItem('token');
+          navigate({
+            to: '/',
+          }).then(r => console.log(r));
+        }}>Logout</MenuItem>
       </MenuContent>
     </MenuRoot>
-  )
-}
+  );
+};

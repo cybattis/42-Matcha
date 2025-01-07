@@ -8,7 +8,7 @@ using MySql.Data.MySqlClient;
 namespace backend.Controllers.User;
 
 [ApiController]
-[route("[controller]")]
+[Route("[controller]")]
 public class UserPictureController(ILogger<UserPictureController> logger) : ControllerBase
 {
     /// <summary>
@@ -19,7 +19,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     /// <response code="200">Picture uploaded</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [route("[action]/{id:int}")]
+    [Route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -95,7 +95,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     /// <response code="200">Picture swapped</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [route("[action]/{id:int}")]
+    [Route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -131,7 +131,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     /// <response code="200">Picture deleted</response>
     /// <response code="400">Bad request</response>
     [HttpDelete]
-    [route("[action]/{id:int}")]
+    [Route("[action]/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

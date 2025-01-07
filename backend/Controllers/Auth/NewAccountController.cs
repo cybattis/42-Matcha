@@ -8,7 +8,7 @@ using MySql.Data.MySqlClient;
 namespace backend.Controllers.Auth;
 
 [ApiController]
-[route("Auth/")]
+[Route("Auth/")]
 public class NewAccountController : ControllerBase
 {
     private class NewAccountResponse {
@@ -44,7 +44,7 @@ public class NewAccountController : ControllerBase
     }
     
     [HttpPost]
-    [route("[action]")]
+    [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult CreateNewAccount([FromBody] NewAccountModel newAccount)
@@ -64,7 +64,7 @@ public class NewAccountController : ControllerBase
             }
 
             string verificationLink = Guid.NewGuid().ToString();
-            (string salt, string hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
+            (string salt, byte[] hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
 
             using MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -92,7 +92,7 @@ public class NewAccountController : ControllerBase
         }
     }
     [HttpPost]
-    [route("[action]/{verificationID}")]
+    [Route("[action]/{verificationID}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult VerifyAccount(string verificationID)

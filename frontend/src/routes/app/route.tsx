@@ -1,12 +1,12 @@
-import {Outlet, createFileRoute, redirect} from '@tanstack/react-router'
-import {isAuthenticated} from "@/lib/auth.ts";
+import {Outlet, createFileRoute, redirect} from '@tanstack/react-router';
+import {isAuthenticated} from '@/lib/auth.ts';
 import Footer from '@/components/Footer.tsx';
 import Navbar from '@/components/Navbar.tsx';
-import {Box, Container, Flex} from "@chakra-ui/react";
+import {Box, Container, Flex} from '@chakra-ui/react';
 
 export const Route = createFileRoute('/app')({
   component: LayoutComponent,
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({location}) => {
     if (!isAuthenticated()) {
       throw redirect({
         to: '/auth/login',
@@ -16,23 +16,19 @@ export const Route = createFileRoute('/app')({
           // potentially lag behind the actual current location)
           redirect: location.href,
         },
-      })
+      });
     }
   },
-})
+});
 
 function LayoutComponent() {
   return (
-    <Flex direction="column" h={"100vh"} w={"100vw"}>
-      <Box>
-        <Navbar/>
-      </Box>
+    <Flex direction="column" h={'100vh'} w={'100vw'}>
+      <Navbar/>
       <Box flexGrow="1">
         <Outlet/>
       </Box>
-      <Box>
-        <Footer/>
-      </Box>
+      <Footer/>
     </Flex>
-  )
+  );
 }

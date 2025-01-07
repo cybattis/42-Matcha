@@ -1,27 +1,43 @@
-"use client"
-
-import {Button, Input, VStack} from "@chakra-ui/react"
-import {Field} from "@/components/ui/field"
-import {PasswordInput} from "@/components/ui/password-input"
-import {useForm} from "react-hook-form"
-import {Link} from "@tanstack/react-router";
+import {Button, Input, Stack, VStack} from '@chakra-ui/react';
+import {Field} from '@/components/ui/field';
+import {PasswordInput} from '@/components/ui/password-input';
+import {Form, useForm} from 'react-hook-form';
+import {Link, useNavigate} from '@tanstack/react-router';
+import {Text} from '@chakra-ui/react';
+import * as axios from "axios";
 
 interface FormValues {
-  username: string
-  password: string
+  username: string;
+  password: string;
 }
 
 export function LoginForm() {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: {errors},
-  } = useForm<FormValues>()
+  } = useForm<FormValues>();
 
-  const onSubmit = handleSubmit((data) => console.log(data))
+  const onSubmit = handleSubmit((data) => {
+    console.log(data);
+    // send to server
+    axios.post('http://localhost:5163/Auth/Login', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({username: data.username, password: data.password}),
+    }).then((response) => {
+        localStorage.setItem('token', response.data.token);
+        // navigate({
+        //   to: '/app/home',
+        // }).then();
+      }
+    );
+  });
 
   return (
-    <form onSubmit={onSubmit}>
+    <Form onSubmit={onSubmit}>
       <VStack gap="4" align="center" maxW="sm">
         <Field
           label="Username"
@@ -29,22 +45,26 @@ export function LoginForm() {
           errorText={errors.username?.message}
         >
           <Input
-            {...register("username", {required: "Username is required"})}
+            {...register('username', {required: 'Username is required'})}
           />
         </Field>
-
         <Field
           label="Password"
           invalid={!!errors.password}
           errorText={errors.password?.message}
         >
           <PasswordInput
-            {...register("password", {required: "Password is required"})}
+            {...register('password', {required: 'Password is required'})}
           />
         </Field>
-        <Link to={"/register"}>Does not have account ? Register</Link>
-        <Button type="submit" size="md">Submit</Button>
+        <Stack direction="row" spacing={4}>
+          <Text>Does not have account ? </Text>
+          <Link to={'/auth/register'}>Register</Link>
+        </Stack>
+        <Button type="submit" size="md" cursor="pointer">
+          Submit
+        </Button>
       </VStack>
-    </form>
-  )
+    </Form>
+  );
 }

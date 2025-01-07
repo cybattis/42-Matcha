@@ -172,14 +172,15 @@ END //
 # Insert generated user
 CREATE PROCEDURE AddGeneratedUser(
     IN _username VARCHAR(50),
-    IN _password VARCHAR(128),
+    IN _password BINARY(32),
     IN _email VARCHAR(50),
+    IN _salt VARCHAR(16),
     IN birthDate DATE,
     IN firstName VARCHAR(50),
     IN lastName VARCHAR(50),
     IN genderID INT,
     IN sexualOrientation INT,
-    IN coordinates VARCHAR(100),
+    IN _coordinates VARCHAR(100),
     IN _biography VARCHAR(280),
     IN tag1 INT,
     IN tag2 INT,
@@ -203,7 +204,7 @@ BEGIN
     INSERT INTO users (username, password, email, birth_date, first_name, last_name, 
                        gender_id, sexual_orientation, coordinates, users.biography, salt, db.users.is_verified)
         VALUES (_username, _password, _email, birthDate, firstName, lastName, 
-                genderID, sexualOrientation, coordinates, _biography, 'salt', 1);
+                genderID, sexualOrientation, _coordinates, _biography, _salt, 1);
     
     COMMIT ;
     

@@ -1,20 +1,18 @@
-import {Icon} from "@chakra-ui/react";
-import {FaMoon} from "react-icons/fa";
-import {IoMdSunny} from "react-icons/io";
+import {Icon} from '@chakra-ui/react';
+import {MdDarkMode, MdLightMode} from "react-icons/md";
 
 export function MoonIcon() {
   return (
-    <Icon aria-label="Search database">
-      <FaMoon />
+    <Icon aria-label="Dark mode" fontSize="xl">
+      <MdDarkMode/>
     </Icon>
-  )
+  );
 }
 
 export function SunIcon() {
   return (
-    <Icon aria-label="Search database">
-      <IoMdSunny />
+    <Icon aria-label="Light mode" fontSize="xl">
+      <MdLightMode/>
     </Icon>
-  )
+  );
 }
-
