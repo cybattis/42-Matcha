@@ -56,7 +56,7 @@ public static class Checks {
     }
 
 
-    public static bool IsValidPassword(string? password, string? UserName)
+    public static bool IsValidPassword(string? password, string UserName)
     {
         if (password == null)
         {
@@ -107,14 +107,14 @@ public static class Checks {
             DbHelper db = new();
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
 
-            using MySqlCommand cmd = new MySqlCommand("getuserid", dbClient);
+            using MySqlCommand cmd = new MySqlCommand("CheckUserNameTaken", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("inputUsername", UserName);
+            cmd.Parameters.AddWithValue("@username", UserName);
 
-            // Exécute et récupère un entier
+            // La procédure stockée doit renvoyer un entier ou un booléen
             object? result = cmd.ExecuteScalar();
-
-            // Si l'ID est supérieur à 0, l'utilisateur existe
+        
+            // Si la procédure renvoie 1 ou "true", le nom est pris
             if (result != null && Convert.ToInt32(result) > 0)
             {
                 return false; // Nom d'utilisateur déjà pris

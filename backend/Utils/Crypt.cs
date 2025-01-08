@@ -5,7 +5,7 @@ namespace backend.Utils;
 
 public static class Crypt 
 {
-    public static (string salt, string hashedPassword) CryptPassWord(string password)
+    public static (string salt, byte[] hashedPassword) CryptPassWord(string password)
     {
         // Génère un sel aléatoire
         var saltBytes = new byte[16];
@@ -23,7 +23,6 @@ public static class Crypt
         {
             byte[] hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
             // string hashedPassword = Convert.ToBase64String(hashBytes);
-
             return (salt, hashedPassword);
         }
     }

@@ -60,7 +60,7 @@ public class NewAccountController : ControllerBase
             }
 
             string verificationLink = Guid.NewGuid().ToString();
-            (string salt, string hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
+            (string salt, byte [] hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
 
             using MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -70,7 +70,7 @@ public class NewAccountController : ControllerBase
             cmd.Parameters.AddWithValue("@userBirthDate", newAccount.BirthDate);
             cmd.Parameters.AddWithValue("@verificationLink", verificationLink);
             cmd.Parameters.AddWithValue("@verificationLinkExpiration", DateTime.UtcNow.AddHours(1));
-            cmd.Parameters.AddWithValue("@salt", salt);
+            cmd.Parameters.AddWithValue("@inputSalt", salt);
             cmd.ExecuteNonQuery();
 
             if (newAccount.Email != null) 

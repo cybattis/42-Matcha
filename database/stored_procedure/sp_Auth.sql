@@ -3,17 +3,16 @@ DELIMITER //
 -- InsertNewAccount
 CREATE PROCEDURE InsertNewAccount(
     IN userName VARCHAR(50),
-    IN userPassword VARCHAR(255),
+    IN userPassword BINARY(32),
     IN userMail VARCHAR(100),
     IN userBirthDate DATE,
     IN verificationLink VARCHAR(255),
     IN verificationLinkExpiration DATETIME,
-    IN inputSalt VARCHAR(255),
-    OUT resultMessage VARCHAR(255)
+    IN inputSalt VARCHAR(255)
 )
 BEGIN
-        INSERT INTO users (username, password, email, birth_date, email_verification_link, email_verification_link_expiration)
-        VALUES (userName, userPassword, userMail, userBirthDate, verificationID, verificationIDExpiration);
+        INSERT INTO users (username, password, email, birth_date, email_verification_link, email_verification_link_expiration, salt)
+        VALUES (userName, userPassword, userMail, userBirthDate, verificationLink, verificationLinkExpiration, inputSalt);
 END //
 
 -- GetUserPasswordByUsername
@@ -62,14 +61,9 @@ END //
 -- getuserid
 CREATE PROCEDURE getuserid (IN inputUsername VARCHAR(255))
 BEGIN
-    DECLARE userId INT DEFAULT 0;
-
-    SELECT id INTO userId
+    SELECT id
     FROM users
     WHERE username = inputUsername
-    LIMIT 1;
-
-    SELECT userId;
 END //
 
 DELIMITER ;
