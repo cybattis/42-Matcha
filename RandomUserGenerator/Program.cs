@@ -1,4 +1,5 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System.Data;
+using MySql.Data.MySqlClient;
 using RandomUserGenerator;
 
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? 
@@ -22,6 +23,12 @@ if (!Directory.Exists(imagesPath))
 
 await using MySqlConnection connection = new(connectionString);
 connection.Open();
+
+if (connection.State != ConnectionState.Open)
+{
+    Console.WriteLine("Failed to connect to the database.");
+    return;
+}
 
 Console.WriteLine("Generating User Data...");
 Console.WriteLine("Generating female users...");

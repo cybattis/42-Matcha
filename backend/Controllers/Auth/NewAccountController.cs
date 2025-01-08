@@ -64,7 +64,7 @@ public class NewAccountController : ControllerBase
             }
 
             string verificationLink = Guid.NewGuid().ToString();
-            (string salt, string hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
+            (string salt, byte[] hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
 
             using MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
