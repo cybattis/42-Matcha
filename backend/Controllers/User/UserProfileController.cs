@@ -65,6 +65,63 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             return Problem(detail: e.Message);
         }
     }
+    
+        /// <summary>
+    /// Get user profile
+    /// </summary>
+    /// <response code="200">Success</response>
+    /// <response code="400">Bad request</response>
+    [HttpGet]
+    [Route("[action]")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public ActionResult Me()
+    {
+        //Decode token
+        //Get user id from token
+        
+        try {
+            using MySqlConnection conn = DbHelper.GetOpenConnection();
+            using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userID", id);
+            
+            using MySqlDataReader reader = cmd.ExecuteReader();
+            if (reader.Read())
+            {
+                var profile = new UserProfileModel
+                {
+                    FirstName = reader["first_name"].ToString() ?? "",
+                    LastName = reader["last_name"].ToString() ?? "",
+                    GenderId = reader["gender_id"] as int?,
+                    SexualOrientation = reader["sexual_orientation"] as int?,
+                    Biography = reader["biography"].ToString() ?? "",
+                    Coordinates = reader["coordinates"].ToString() ?? "",
+                };
+
+                // Tags
+                if (reader.NextResult()) {
+                    while (reader.Read())
+                        profile.Tags.Add(reader["tag_id"] as int? ?? 0);
+                } 
+                
+                // Pictures
+                if (reader.NextResult()) {
+                    while (reader.Read())
+                        profile.Images.Add(reader["image_url"] as string ?? "");
+                }
+                // reader.Close();
+                return Ok(profile);
+            }
+            return ValidationProblem();
+        }
+        catch (MySqlException e)
+        {
+            logger.LogError(e.Message);
+            return Problem(detail: e.Message);
+        }
+    }
 
     /// <summary>
     /// Update user profile

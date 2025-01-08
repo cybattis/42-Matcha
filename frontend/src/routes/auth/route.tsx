@@ -11,7 +11,7 @@ function LayoutComponent() {
   return (
     <Flex direction="column" h={'100vh'} w={'100vw'}>
       <NavbarAuth/>
-      <Box flexGrow="1" p={5}>
+      <Box flexGrow="1" py={5}>
         <Outlet/>
       </Box>
       <Footer/>

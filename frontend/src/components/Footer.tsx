@@ -6,7 +6,7 @@ import {
   Text,
   VisuallyHidden,
 } from '@chakra-ui/react';
-import {FaGithub, FaInstagram, FaTwitter, FaYoutube} from 'react-icons/fa';
+import {FaGithub} from 'react-icons/fa';
 import {ReactNode} from 'react';
 import {useColorModeValue} from '@/components/ui/color-mode.tsx';
 
@@ -55,7 +55,7 @@ export default function Footer() {
       color={useColorModeValue('gray.700', 'gray.200')}
     >
       <Text>© 2022 Chakra Templates. All rights reserved</Text>
-      <SocialButton label={'Github'} href={'#'}>
+      <SocialButton label={'Github'} href={'https://github.com/cybattis/42-Matcha'}>
         <FaGithub/>
       </SocialButton>
     </Stack>

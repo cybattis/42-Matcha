@@ -2,30 +2,22 @@ DELIMITER //
 
 CREATE PROCEDURE InsertNewAccount(
     IN userName VARCHAR(50),
-    IN userPassword VARCHAR(255),
+    IN userPassword BINARY(32),
     IN userMail VARCHAR(100),
     IN userBirthDate DATE,
     IN verificationLink VARCHAR(255),
     IN verificationLinkExpiration DATETIME,
-    IN inputSalt VARCHAR(255),
-    OUT resultMessage VARCHAR(255)
+    IN inputSalt VARCHAR(255)
 )
 BEGIN
-    -- Vérifie si le UserName existe déjà
-    IF EXISTS (SELECT 1 FROM db.users WHERE users.username = userName) THEN
-        SET resultMessage = 'Error: UserName already exists';
-    ELSE
-        -- Insère un nouvel utilisateur
-        INSERT INTO db.users (username, password, email, birth_date, salt, email_verification_link, email_verification_link_expiration)
-            VALUES (userName, 
-                    userPassword, 
-                    userMail, 
-                    userBirthDate,
-                    inputSalt,
-                    verificationLink, 
-                    verificationLinkExpiration);
-        SET resultMessage = 'Success: Account created';
-    END IF;
+    INSERT INTO db.users (username, password, email, birth_date, salt, email_verification_link, email_verification_link_expiration)
+        VALUES (userName, 
+                userPassword, 
+                userMail, 
+                userBirthDate,
+                inputSalt,
+                verificationLink, 
+                verificationLinkExpiration);
 END //
 
 CREATE PROCEDURE GetUserPasswordByUsername(IN inputUsername VARCHAR(50))
@@ -63,11 +55,11 @@ BEGIN
         WHERE email = inputUsername;
 END //
 
-CREATE PROCEDURE getuserid (IN imputUsername VARCHAR(255))
+CREATE PROCEDURE getuserid (IN inputUsername VARCHAR(255))
 BEGIN
     SELECT id
         FROM users
-        WHERE userName = imputUsername;
+        WHERE userName = inputUsername;
 END //
 
 DELIMITER ;

@@ -19,18 +19,27 @@ import {
   useColorModeValue,
 } from '@/components/ui/color-mode.tsx';
 import {MoonIcon, SunIcon} from '@/components/Icons.tsx';
-import {useNavigate} from "@tanstack/react-router";
+import {Link, useNavigate} from "@tanstack/react-router";
+import {MdAccountCircle} from "react-icons/md";
 
 export function NavbarAuth() {
   const {colorMode, toggleColorMode} = useColorMode();
+  const navigate = useNavigate();
   return (
     <>
-      <Box bg={useColorModeValue('gray.100', 'gray.900')} px={20} py={2}>
+      <Box bg={useColorModeValue('gray.100', 'gray.900')} pr={2} pl={20} py={2}>
         <Flex justifyContent={'end'} alignItems="center" alignContent="end">
-          <Box w="100%" display="flex" justifyContent={'center'}>MATCHA</Box>
-          <Button onClick={toggleColorMode}>
-            {colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}
-          </Button>
+          <Box w="100%" display="flex" justifyContent={'center'} ml={10}><Link to={"/"}>MATCHA</Link></Box>
+          <Stack direction={'row'}>
+            <Button onClick={toggleColorMode}>
+              {colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}
+            </Button>
+            <Button variant="ghost" p='0' width={50}>
+              <Link to={'/auth/login'} className={'w-full h-full'}>
+                <MdAccountCircle className={'w-full h-full'}/>
+              </Link>
+            </Button>
+          </Stack>
         </Flex>
       </Box>
     </>
@@ -45,7 +54,7 @@ export default function Navbar() {
       <Box bg={useColorModeValue('gray.100', 'gray.900')} pl={20} pr={5} py={2}>
         <Flex justifyContent={'end'} alignItems="center" alignContent="end">
           <Box></Box>
-          <Box w="100%" display="flex" justifyContent={'center'}>MATCHA</Box>
+          <Box w="100%" display="flex" justifyContent={'center'}><Link to={"/"}>MATCHA</Link></Box>
           <Stack direction={'row'}>
             <Button onClick={toggleColorMode}>
               {colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}
