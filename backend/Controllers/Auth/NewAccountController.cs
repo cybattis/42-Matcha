@@ -24,21 +24,17 @@ public class NewAccountController : ControllerBase
     {
         if (!Checks.IsValidUserName(newAccount.UserName))
         {
-            ResponseMessage.UserName = "Nom d'utilisateur invalide:\nIl doit contenir entre 3 et 20 caracteres\nIl ne doit pas contenir de caractere speciaux";
-            return false;
+            ResponseMessage.UserName = $"Nom d'utilisateur invalide:\nIl doit contenir entre 3 et 20 caracteres\nIl ne doit pas contenir de caractere speciaux {newAccount.UserName}";
         }
-        if (Checks.IsValidPassword(newAccount.Password, newAccount.UserName))
+        if (!Checks.IsValidPassword(newAccount.Password, newAccount.UserName))
         {
             ResponseMessage.Password = "Mot de passe incorect:\nIl faut au moins 1 majuscule 1 minuscule 1 caractere special et 1 chiffre\nLe mot de passe doit faire au moins 8 caracteres";
-            return false;
         }
         if (!Checks.IsValidMail(newAccount.Email)) {
             ResponseMessage.Mail = "L'adresse e-mail est invalide. Veuillez fournir une adresse e-mail valide.";
-            return false;
         }
         if (!Checks.IsValidBirthDate(newAccount.BirthDate)) {
             ResponseMessage.BirthDate = "Vous devez etre majeur pour vous inscrire.";
-            return false;
         }
         return true;
     }
@@ -50,36 +46,35 @@ public class NewAccountController : ControllerBase
     public IActionResult CreateNewAccount([FromBody] NewAccountModel newAccount)
     {
         try {
-            DbHelper db = new ();
-            using (MySqlConnection dbClient = db.GetConnection()){
-                if (!CheckUserInfo(newAccount)) {
-                    return new ObjectResult(new
-                    {
-                        Error = "InvalidEmail",
-                        Message = "L'adresse e-mail est invalide.",
-                        Details = ResponseMessage
-                    })
-                    {
-                        StatusCode = 400
-                    };
-                }
-                string verificationLink = Environment.GetEnvironmentVariable("ROOT_URL") + "/Auth/" + Guid.NewGuid().ToString();
-                (string salt, string hashedPassword) = Crypt.cryptPassWord("userPassword123");
-                newAccount.Password = hashedPassword;
-                using (MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient))
+            using MySqlConnection dbClient = DbHelper.GetOpenConnection();
+            if (!CheckUserInfo(newAccount)) {
+                return new ObjectResult(new
                 {
-                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@userName", newAccount.UserName);
-                    cmd.Parameters.AddWithValue("@userPassword", newAccount.Password);
-                    cmd.Parameters.AddWithValue("@userMail", newAccount.Mail);
-                    cmd.Parameters.AddWithValue("@userBirthDate", newAccount.BirthDate);
-                    cmd.Parameters.AddWithValue("@verificationLink", verificationLink);
-                    cmd.Parameters.AddWithValue("@salt", verificationLink);
-                    cmd.ExecuteNonQuery();
-                }
-                //TODO envoie un mail
-                Notify.SendVerificationEmail(newAccount.Mail, verificationLink);
+                    Error = "InvalidEmail",
+                    Message = "L'adresse e-mail est invalide.",
+                    Details = ResponseMessage
+                })
+                {
+                    StatusCode = 400
+                };
             }
+
+            string verificationLink = Guid.NewGuid().ToString();
+            (string salt, string hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
+
+            using MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userName", newAccount.UserName);
+            cmd.Parameters.AddWithValue("@userPassword", hashedPassword);
+            cmd.Parameters.AddWithValue("@userMail", newAccount.Email);
+            cmd.Parameters.AddWithValue("@userBirthDate", newAccount.BirthDate);
+            cmd.Parameters.AddWithValue("@verificationLink", verificationLink);
+            cmd.Parameters.AddWithValue("@verificationLinkExpiration", DateTime.UtcNow.AddHours(1));
+            cmd.Parameters.AddWithValue("@salt", salt);
+            cmd.ExecuteNonQuery();
+
+            if (newAccount.Email != null) 
+                Notify.SendVerificationEmail(newAccount.Email, verificationLink);
             return Ok(new {
                 Message = "Account created successfully."
             });

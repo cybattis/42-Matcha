@@ -31,7 +31,6 @@ public static class Checks {
         {
             DbHelper db = new();
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
-            dbClient.Open();
 
             using MySqlCommand cmd = new MySqlCommand("CheckMailTaken", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -106,17 +105,16 @@ public static class Checks {
         try
         {
             DbHelper db = new();
-            using MySqlConnection dbClient = DbHelper.GetConnection();
-            dbClient.Open();
+            using MySqlConnection dbClient = DbHelper.GetOpenConnection();
 
-            using MySqlCommand cmd = new MySqlCommand("inputVerifyLink", dbClient);
+            using MySqlCommand cmd = new MySqlCommand("getuserid", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@username", UserName);
+            cmd.Parameters.AddWithValue("inputUsername", UserName);
 
-            // La procédure stockée doit renvoyer un entier ou un booléen
+            // Exécute et récupère un entier
             object? result = cmd.ExecuteScalar();
-        
-            // Si la procédure renvoie 1 ou "true", le nom est pris
+
+            // Si l'ID est supérieur à 0, l'utilisateur existe
             if (result != null && Convert.ToInt32(result) > 0)
             {
                 return false; // Nom d'utilisateur déjà pris
