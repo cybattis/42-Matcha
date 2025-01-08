@@ -1,14 +1,24 @@
 import {Button, Input, Stack, VStack} from '@chakra-ui/react';
 import {Field} from '@/components/ui/field';
 import {PasswordInput} from '@/components/ui/password-input';
-import {Form, useForm} from 'react-hook-form';
+import {useForm} from 'react-hook-form';
 import {Link, useNavigate} from '@tanstack/react-router';
 import {Text} from '@chakra-ui/react';
-import * as axios from "axios";
 
 interface FormValues {
   username: string;
   password: string;
+}
+
+async function TryLogin(data: FormValues) {
+  const reponse = await fetch('http://localhost:5163/auth/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  return reponse.json();
 }
 
 export function LoginForm() {
@@ -21,23 +31,15 @@ export function LoginForm() {
 
   const onSubmit = handleSubmit((data) => {
     console.log(data);
-    // send to server
-    axios.post('http://localhost:5163/Auth/Login', {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({username: data.username, password: data.password}),
-    }).then((response) => {
-        localStorage.setItem('token', response.data.token);
-        // navigate({
-        //   to: '/app/home',
-        // }).then();
-      }
-    );
+    TryLogin(data).then((res) => {
+      console.log(res);
+      localStorage.setItem('token', res.token);
+      window.location.href = '/app/home';
+    });
   });
 
   return (
-    <Form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit}>
       <VStack gap="4" align="center" maxW="sm">
         <Field
           label="Username"
@@ -65,6 +67,6 @@ export function LoginForm() {
           Submit
         </Button>
       </VStack>
-    </Form>
+    </form>
   );
 }
