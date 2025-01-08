@@ -80,6 +80,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     {
         //Decode token
         //Get user id from token
+        const int id = 3;
         
         try {
             using MySqlConnection conn = DbHelper.GetOpenConnection();
