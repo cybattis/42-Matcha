@@ -31,6 +31,7 @@
   },
   "include": [
     "src",
-    "../../../../sgoinfre/.WebStorm/system/javascript/typings/node/12.20.55/node_modules/@types/node/globals.d.ts"
+    "../../../../sgoinfre/.WebStorm/system/javascript/typings/node/12.20.55/node_modules/@types/node/globals.d.ts",
+    "src/**/*"
   ]
 }

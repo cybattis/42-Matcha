@@ -1,7 +1,7 @@
 import {Outlet, createFileRoute} from '@tanstack/react-router';
-import Footer from '@/components/Footer.tsx';
-import {NavbarAuth} from '@/components/Navbar.tsx';
 import {Box, Flex} from '@chakra-ui/react';
+import {NavbarAuth} from "@/components/navigation/Navbar.tsx";
+import Footer from "@/components/navigation/Footer.tsx";
 
 export const Route = createFileRoute('/auth')({
   component: LayoutComponent,

@@ -1,22 +1,19 @@
-import {Outlet, createFileRoute, redirect} from '@tanstack/react-router';
-import {isAuthenticated} from '@/lib/auth.ts';
-import Footer from '@/components/Footer.tsx';
-import Navbar from '@/components/Navbar.tsx';
-import {Box, Container, Flex} from '@chakra-ui/react';
+import {Outlet, createFileRoute, redirect, useNavigate} from '@tanstack/react-router';
+import {Box, Flex} from '@chakra-ui/react';
+import Navbar from "@/components/navigation/Navbar.tsx";
+import {MyRooterContext} from "@/routes/__root.tsx";
+import Footer from "@/components/navigation/Footer.tsx";
 
 export const Route = createFileRoute('/app')({
   component: LayoutComponent,
-  beforeLoad: async ({location}) => {
-    if (!isAuthenticated()) {
+  beforeLoad: ({context, location}: { context: MyRooterContext }) => {
+    if (!context.auth.isAuthenticated) {
       throw redirect({
         to: '/auth/login',
         search: {
-          // Use the current location to power a redirect after login
-          // (Do not use `router.state.resolvedLocation` as it can
-          // potentially lag behind the actual current location)
           redirect: location.href,
         },
-      });
+      })
     }
   },
 });

@@ -14,9 +14,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth/route'
 import { Route as AppRouteImport } from './routes/app/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as AuthVerifyImport } from './routes/auth/verify'
 import { Route as AuthRegisterImport } from './routes/auth/register'
 import { Route as AuthLoginImport } from './routes/auth/login'
-import { Route as AuthCheckEmailImport } from './routes/auth/check-email'
 import { Route as AppProfileImport } from './routes/app/profile'
 import { Route as AppHomeImport } from './routes/app/home'
 
@@ -40,6 +40,12 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AuthVerifyRoute = AuthVerifyImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+
 const AuthRegisterRoute = AuthRegisterImport.update({
   id: '/register',
   path: '/register',
@@ -49,12 +55,6 @@ const AuthRegisterRoute = AuthRegisterImport.update({
 const AuthLoginRoute = AuthLoginImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
-
-const AuthCheckEmailRoute = AuthCheckEmailImport.update({
-  id: '/check-email',
-  path: '/check-email',
   getParentRoute: () => AuthRouteRoute,
 } as any)
 
@@ -109,13 +109,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileImport
       parentRoute: typeof AppRouteImport
     }
-    '/auth/check-email': {
-      id: '/auth/check-email'
-      path: '/check-email'
-      fullPath: '/auth/check-email'
-      preLoaderRoute: typeof AuthCheckEmailImport
-      parentRoute: typeof AuthRouteImport
-    }
     '/auth/login': {
       id: '/auth/login'
       path: '/login'
@@ -128,6 +121,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/auth/register'
       preLoaderRoute: typeof AuthRegisterImport
+      parentRoute: typeof AuthRouteImport
+    }
+    '/auth/verify': {
+      id: '/auth/verify'
+      path: '/verify'
+      fullPath: '/auth/verify'
+      preLoaderRoute: typeof AuthVerifyImport
       parentRoute: typeof AuthRouteImport
     }
   }
@@ -150,15 +150,15 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 )
 
 interface AuthRouteRouteChildren {
-  AuthCheckEmailRoute: typeof AuthCheckEmailRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthVerifyRoute: typeof AuthVerifyRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-  AuthCheckEmailRoute: AuthCheckEmailRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthVerifyRoute: AuthVerifyRoute,
 }
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
@@ -171,9 +171,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteRouteWithChildren
   '/app/home': typeof AppHomeRoute
   '/app/profile': typeof AppProfileRoute
-  '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify': typeof AuthVerifyRoute
 }
 
 export interface FileRoutesByTo {
@@ -182,9 +182,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteRouteWithChildren
   '/app/home': typeof AppHomeRoute
   '/app/profile': typeof AppProfileRoute
-  '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify': typeof AuthVerifyRoute
 }
 
 export interface FileRoutesById {
@@ -194,9 +194,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteRouteWithChildren
   '/app/home': typeof AppHomeRoute
   '/app/profile': typeof AppProfileRoute
-  '/auth/check-email': typeof AuthCheckEmailRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify': typeof AuthVerifyRoute
 }
 
 export interface FileRouteTypes {
@@ -207,9 +207,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app/home'
     | '/app/profile'
-    | '/auth/check-email'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -217,9 +217,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app/home'
     | '/app/profile'
-    | '/auth/check-email'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/verify'
   id:
     | '__root__'
     | '/'
@@ -227,9 +227,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app/home'
     | '/app/profile'
-    | '/auth/check-email'
     | '/auth/login'
     | '/auth/register'
+    | '/auth/verify'
   fileRoutesById: FileRoutesById
 }
 
@@ -273,9 +273,9 @@ export const routeTree = rootRoute
     "/auth": {
       "filePath": "auth/route.tsx",
       "children": [
-        "/auth/check-email",
         "/auth/login",
-        "/auth/register"
+        "/auth/register",
+        "/auth/verify"
       ]
     },
     "/app/home": {
@@ -286,16 +286,16 @@ export const routeTree = rootRoute
       "filePath": "app/profile.tsx",
       "parent": "/app"
     },
-    "/auth/check-email": {
-      "filePath": "auth/check-email.tsx",
-      "parent": "/auth"
-    },
     "/auth/login": {
       "filePath": "auth/login.tsx",
       "parent": "/auth"
     },
     "/auth/register": {
       "filePath": "auth/register.tsx",
+      "parent": "/auth"
+    },
+    "/auth/verify": {
+      "filePath": "auth/verify.tsx",
       "parent": "/auth"
     }
   }

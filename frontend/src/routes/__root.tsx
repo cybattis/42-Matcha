@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Link,
   Outlet,
@@ -7,26 +6,36 @@ import {
 import {TanStackRouterDevtools} from '@tanstack/router-devtools';
 import {ReactQueryDevtools} from '@tanstack/react-query-devtools';
 import type {QueryClient} from '@tanstack/react-query';
+import {IAuthContext} from "@/auth.tsx";
+import {Box, Center, VStack} from "@chakra-ui/react";
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
-  {
+export interface MyRooterContext {
+  auth: IAuthContext;
+  queryClient: QueryClient;
+}
+
+export const Route = createRootRouteWithContext<MyRooterContext>()({
     component: RootComponent,
     notFoundComponent: () => {
       return (
-        <div>
-          <p>Error 404</p>
-          <Link to="/">Start Over</Link>
-        </div>
+        <Box w='100vw' h='100%'>
+          <VStack w='100vw'>
+            <p>Error 404</p>
+            <Link to="/">Start Over</Link>
+          </VStack>
+        </Box>
       );
     },
     errorComponent: ({error}) => {
       return (
-        <div>
-          <p>Error: {error.message}</p>
-          <Link to="/">Start Over</Link>
-        </div>
+        <Center w='100vw' h='100%'>
+          <VStack>
+            <p>Error: {error.message}</p>
+            <Link to="/">Start Over</Link>
+          </VStack>
+        </Center>
       );
-    }
+    },
   }
 );
 

@@ -46,7 +46,6 @@ export function LoginForm(props: {
             </Button>
           </Link>
         </Stack>
-
       </VStack>
     </form>
   );
