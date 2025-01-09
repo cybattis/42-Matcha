@@ -20,7 +20,7 @@
         "DB_CONNECTION_STRING": "Server=localhost;Port=3307;Database=db;user=user;password=password;",
         "JWT_SECRET": "this is my very big secret key!!!!",
         "NO_REPLY_MAIL": "noreply.matchaproject@gmail.com",
-        "NO_REPLY_MAIL_PASSWORD": "NoReply@M4tcha",
+        "NO_REPLY_MAIL_PASSWORD": "lhxz fazt oapt rrit",
         "SMTP_HOST": "smtp.gmail.com",
         "SMTP_PORT": "587"
       }

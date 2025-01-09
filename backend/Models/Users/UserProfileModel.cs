@@ -22,6 +22,15 @@ public class UserProfileModel
 
     [DefaultValue("45.7736192,4.7579136")] // 45.7736192 4.7579136 → École 42 position
     public string? Coordinates {get;set;}
+    
+    [DefaultValue(false)]
+    public bool? IsVerified {get;set;}
+    
+    [DefaultValue(0)]
+    public int? ProfileCompletionPercentage {get;set;}
+    
+    [DefaultValue(0)]
+    public int? FameRating {get;set;}
 
     // For GET request
     [SwaggerIgnore]

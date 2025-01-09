@@ -80,13 +80,12 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     {
         //Decode token
         //Get user id from token
-        const int id = 3;
         
         try {
             using MySqlConnection conn = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@userID", 2);
             
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (reader.Read())
@@ -99,6 +98,9 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     SexualOrientation = reader["sexual_orientation"] as int?,
                     Biography = reader["biography"].ToString() ?? "",
                     Coordinates = reader["coordinates"].ToString() ?? "",
+                    IsVerified = reader["is_verified"] as bool? ?? false,
+                    ProfileCompletionPercentage = reader["profile_completion_percentage"] as int? ?? 0,
+                    FameRating = reader["fame"] as int? ?? 0
                 };
 
                 // Tags
@@ -112,7 +114,10 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     while (reader.Read())
                         profile.Images.Add(reader["image_url"] as string ?? "");
                 }
-                // reader.Close();
+                reader.Close();
+                
+                Console.WriteLine(profile.IsVerified);
+                
                 return Ok(profile);
             }
             return ValidationProblem();
