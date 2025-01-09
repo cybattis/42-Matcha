@@ -8,8 +8,8 @@ public static class Notify {
     {
         string smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST") ?? "smtp.gmail.com";
         int smtpPort    = int.Parse(Environment.GetEnvironmentVariable("SMTP_PORT") ?? "587");
-        string smtpUser = Environment.GetEnvironmentVariable("NO_REPLY_MAIL") ?? "3000"; // Votre adresse Gmail
-        string smtpPass = Environment.GetEnvironmentVariable("NO_REPLY_MAIL_PASSWORD") ?? "localhost:3000"; // Mot de passe d'application Gmail
+        string smtpUser = Environment.GetEnvironmentVariable("NO_REPLY_MAIL") ?? "noreply.matchaproject@gmail.com"; // Votre adresse Gmail
+        string smtpPass = Environment.GetEnvironmentVariable("NO_REPLY_MAIL_PASSWORD") ?? "lhxz fazt oapt rrit"; // Mot de passe d'application Gmail
         return (smtpHost, smtpPort, smtpUser, smtpPass);
     }
     

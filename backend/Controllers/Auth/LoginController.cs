@@ -35,7 +35,7 @@ public class LoginController : ControllerBase
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("GetUserPasswordByUsername", dbClient);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@inputUsername", newLogin.UserName);
+            cmd.Parameters.AddWithValue("inputUsername", newLogin.UserName);
 
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (!reader.Read())
@@ -101,9 +101,9 @@ public class LoginController : ControllerBase
             using MySqlCommand cmd = new MySqlCommand("CheckUserExist", dbClient);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            cmd.Parameters.AddWithValue("@inputUsername", forgottenPassword.UserName);
-            cmd.Parameters.AddWithValue("@inputMail", forgottenPassword.Email);
-            MySqlParameter existsParam = new MySqlParameter("@userExists", MySqlDbType.Int32)
+            cmd.Parameters.AddWithValue("inputUsername", forgottenPassword.UserName);
+            cmd.Parameters.AddWithValue("inputMail", forgottenPassword.Email);
+            MySqlParameter existsParam = new MySqlParameter("userExists", MySqlDbType.Int32)
             {
                 Direction = ParameterDirection.Output
             };

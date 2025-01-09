@@ -64,13 +64,13 @@ public class NewAccountController : ControllerBase
 
             using MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userName", newAccount.UserName);
-            cmd.Parameters.AddWithValue("@userPassword", hashedPassword);
-            cmd.Parameters.AddWithValue("@userMail", newAccount.Email);
-            cmd.Parameters.AddWithValue("@userBirthDate", newAccount.BirthDate);
-            cmd.Parameters.AddWithValue("@verificationLink", verificationLink);
-            cmd.Parameters.AddWithValue("@verificationLinkExpiration", DateTime.UtcNow.AddHours(1));
-            cmd.Parameters.AddWithValue("@inputSalt", salt);
+            cmd.Parameters.AddWithValue("userName", newAccount.UserName);
+            cmd.Parameters.AddWithValue("userPassword", hashedPassword);
+            cmd.Parameters.AddWithValue("userMail", newAccount.Email);
+            cmd.Parameters.AddWithValue("userBirthDate", newAccount.BirthDate);
+            cmd.Parameters.AddWithValue("verificationLink", verificationLink);
+            cmd.Parameters.AddWithValue("verificationLinkExpiration", DateTime.UtcNow.AddHours(1));
+            cmd.Parameters.AddWithValue("inputSalt", salt);
             cmd.ExecuteNonQuery();
 
             if (newAccount.Email != null) 
@@ -102,7 +102,7 @@ public class NewAccountController : ControllerBase
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("GetVerificationAccountInfo", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@inputVerifyLink", verificationID);
+            cmd.Parameters.AddWithValue("inputVerifyLink", verificationID);
 
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (!reader.Read()) 
@@ -126,7 +126,7 @@ public class NewAccountController : ControllerBase
             }
             // Mettez à jour l'état de vérification ici si nécessaire
             using MySqlCommand updateCmd = new MySqlCommand("assertAccountVerification", dbClient);
-            updateCmd.Parameters.AddWithValue("@userId", userId);
+            updateCmd.Parameters.AddWithValue("userId", userId);
             updateCmd.ExecuteNonQuery();
 
             return Ok("Verification completed successfully.");
