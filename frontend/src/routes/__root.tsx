@@ -40,6 +40,7 @@ export const Route = createRootRouteWithContext<MyRooterContext>()({
 );
 
 function RootComponent() {
+
   return (
     <>
       <Outlet/>

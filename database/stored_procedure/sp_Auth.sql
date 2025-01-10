@@ -22,7 +22,7 @@ END //
 
 CREATE PROCEDURE GetUserPasswordByUsername(IN inputUsername VARCHAR(50))
 BEGIN
-    SELECT id, password, salt
+    SELECT id, password, salt, is_verified
     FROM users
     WHERE username = inputUsername;
 END //

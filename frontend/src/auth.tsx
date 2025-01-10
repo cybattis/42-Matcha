@@ -1,5 +1,4 @@
 import {createContext, ReactNode, useCallback, useContext, useEffect, useState} from "react";
-import {sleep} from "@/lib/utils.ts";
 
 export interface IAuthContext {
   isAuthenticated: boolean
@@ -35,9 +34,6 @@ export function AuthProvider({children}: { children: ReactNode }) {
   const login = useCallback(async (token: string) => {
     setUserToken(token);
     setToken(token);
-    if (!token) {
-      return false;
-    }
     setIsAuthenticated(true);
   }, [])
 

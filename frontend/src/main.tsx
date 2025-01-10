@@ -1,4 +1,4 @@
-import {ChakraProvider, defaultSystem} from '@chakra-ui/react';
+import {ChakraProvider, createToaster, defaultSystem} from '@chakra-ui/react';
 import {ThemeProvider} from 'next-themes';
 import {StrictMode} from 'react';
 import {RouterProvider, createRouter} from '@tanstack/react-router';
@@ -7,6 +7,7 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 
 import {routeTree} from './routeTree.gen';
 import {AuthProvider, useAuth} from "@/auth.tsx";
+import {Toaster} from "@/components/ui/toaster.tsx";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ function App() {
         <ChakraProvider value={defaultSystem}>
           <ThemeProvider attribute="class" disableTransitionOnChange>
             <InnerApp/>
+            <Toaster/>
           </ThemeProvider>
         </ChakraProvider>
       </QueryClientProvider>

@@ -1,15 +1,15 @@
 import {createFileRoute, Navigate, redirect} from '@tanstack/react-router';
-import {Text, VStack} from '@chakra-ui/react';
+import {VStack} from '@chakra-ui/react';
 import {useForm} from "react-hook-form";
 import {useAuth} from "@/auth.tsx";
 import {MyRooterContext} from "@/routes/__root.tsx";
 import {LoginForm} from "@/components/form/LoginForm.tsx";
-import {useEffect, useState} from "react";
+import {toaster} from "@/components/ui/toaster.tsx";
+import {ToasterError, ToasterSuccess} from "@/lib/toaster.ts";
 
 export const Route = createFileRoute('/auth/login')({
   component: RouteComponent,
   beforeLoad: ({context}: { context: MyRooterContext }) => {
-    console.log(context.auth.isAuthenticated);
     if (context.auth.isAuthenticated) {
       throw redirect({
         to: '/app/home',
@@ -35,29 +35,26 @@ async function TryLogin(data: LoginFormValues) {
     return response.json();
   } catch (e) {
     console.error(e);
+    ToasterError('Erreur', 'Une erreur est survenue');
   }
 }
 
 function RouteComponent() {
   const auth = useAuth();
   const form = useForm<LoginFormValues>();
-  const [isPending, setIsPending] = useState(false);
 
   const onSubmit = form.handleSubmit(async (data) => {
-    setIsPending(true);
+    const t = toaster.loading({title: 'Connexion en cours...'});
     const result = await TryLogin(data);
-    const isLogged = await auth.login(result.token);
-    if (!isLogged)
-      console.error('Login failed');
-    setIsPending(false);
+    if (result.error) {
+      ToasterError('Erreur', result.message);
+    }
+    if (result.token) {
+      await auth.login(result.token);
+      ToasterSuccess('Vous êtes connecté !');
+    }
+    toaster.remove(t);
   });
-
-  useEffect(() => {
-  }, [isPending]);
-
-  if (isPending) {
-    return <Text>Logging in...</Text>
-  }
 
   return (
     <VStack gap={6} align={'center'}>

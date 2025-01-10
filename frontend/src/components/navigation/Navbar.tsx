@@ -7,13 +7,14 @@ import {
   MenuRoot,
   MenuTrigger,
   MenuContent,
+  Image
 } from '@chakra-ui/react';
 import {
   useColorMode,
   useColorModeValue,
 } from '@/components/ui/color-mode.tsx';
-import {MoonIcon, SunIcon} from '@/components/Icons.tsx';
-import {Link, Navigate, redirect, useNavigate} from "@tanstack/react-router";
+import {MoonIcon, SunIcon, UserIcon} from '@/components/Icons.tsx';
+import {Link, Navigate} from "@tanstack/react-router";
 import {MdAccountCircle} from "react-icons/md";
 import {useAuth} from "@/auth.tsx";
 
@@ -21,16 +22,18 @@ export function NavbarAuth() {
   const {colorMode, toggleColorMode} = useColorMode();
   return (
     <>
-      <Box bg={useColorModeValue('gray.100', 'gray.900')} pr={2} pl={20} py={2}>
+      <Box bg={useColorModeValue('gray.100', 'gray.900')} pr={5} pl={20} py={2}>
         <Flex justifyContent={'end'} alignItems="center" alignContent="end">
           <Box w="100%" display="flex" justifyContent={'center'} ml={10}><Link to={"/"}>MATCHA</Link></Box>
           <Stack direction={'row'}>
-            <Button onClick={toggleColorMode}>
+            <Button onClick={toggleColorMode} variant='ghost'>
               {colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}
             </Button>
-            <Button variant="ghost" p='0' width={50}>
+            <Button variant="ghost" p='0' mr='2' w={'40px'} h={'40px'}>
               <Link to={'/auth/login'} className={'w-full h-full'}>
-                <MdAccountCircle className={'w-full h-full'}/>
+                <UserIcon>
+                  <MdAccountCircle className={'user-icon'}/>
+                </UserIcon>
               </Link>
             </Button>
           </Stack>
@@ -51,7 +54,7 @@ export default function Navbar() {
           <Box></Box>
           <Box w="100%" display="flex" justifyContent={'center'}><Link to={"/"}>MATCHA</Link></Box>
           <Stack direction={'row'}>
-            <Button onClick={toggleColorMode}>
+            <Button onClick={toggleColorMode} variant='ghost'>
               {colorMode === 'light' ? <MoonIcon/> : <SunIcon/>}
             </Button>
             <NavbarMenu/>
@@ -67,13 +70,22 @@ export const NavbarMenu = () => {
   const auth = useAuth();
 
   return (
-    <MenuRoot>
-      <MenuTrigger asChild pos="relative">
-        <Button variant="outline" size="md">
-          Open
+    <MenuRoot pos='relative'>
+      <MenuTrigger asChild>
+        <Button variant="ghost" p='0' mr='2' w={'40px'} h={'40px'}>
+          <UserIcon>
+            <Image
+              src="https://bit.ly/naruto-sage"
+              borderRadius="full"
+              boxSize="cover"
+              w='100%'
+              h='100%'
+              alt="navigation menu"
+            />
+          </UserIcon>
         </Button>
       </MenuTrigger>
-      <MenuContent pos="absolute">
+      <MenuContent pos="absolute" top={"56px"}>
         <MenuItem value="Profile">Profile</MenuItem>
         <MenuItem value="settings">Settings</MenuItem>
         <MenuItem value="logout" onClick={async () => {

@@ -45,35 +45,63 @@ export function RegisterForm(props: {
           >
             <PasswordInput
               variant="subtle"
-              {...form.register('password', {required: 'Password is required'})}
-            />
+              {...form.register("password", {
+                minLength: {
+                  value: 8,
+                  message: "Password must have at least 8 characters"
+                },
+                required: 'Password is required',
+              })}/>
           </Field>
           <Field
-            label="Password"
-            invalid={!!errors.password}
-            errorText={errors.password?.message}
+            label="Confirm password"
+            invalid={!!errors.confirm_password}
+            errorText={errors.confirm_password?.message}
           >
             <PasswordInput
-              {...form.register('password', {required: 'Password is required'})}
+              {...form.register("confirm_password", {
+                minLength: {
+                  value: 8,
+                  message: "Password must have at least 8 characters"
+                },
+                required: 'Password is required',
+                validate: (val: string) => {
+                  if (form.watch('password') != val) {
+                    return 'Passwords do not match';
+                  }
+                },
+              })}
             />
           </Field>
         </Stack>
         <Field
           label="Email"
           invalid={!!errors.email}
-          errorText={errors.email?.message} required
-        >
-          <Input placeholder="me@example.com" variant="subtle"/>
-        </Field>
-        <Field
-          label="Email"
-          invalid={!!errors.email}
           errorText={errors.email?.message}
-          required
         >
           <Input
+            type='email'
+            placeholder="me@example.com" variant="subtle"
+            {...form.register('email', {
+              required: 'Email is required',
+            })}/>
+        </Field>
+        <Field
+          label="Confirm email"
+          invalid={!!errors.confirm_email}
+          errorText={errors.confirm_email?.message}
+        >
+          <Input
+            type='email'
             placeholder="me@example.com" variant="outline"
-            {...form.register('email', {required: 'Email is required'})}
+            {...form.register('confirm_email', {
+              required: 'Email is required',
+              validate: (val: string) => {
+                if (form.watch('email') != val) {
+                  return 'Email do not match';
+                }
+              },
+            })}
           />
         </Field>
         <Button type="submit" size="md" cursor="pointer">

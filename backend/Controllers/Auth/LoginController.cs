@@ -48,11 +48,20 @@ public class LoginController : ControllerBase
             Console.WriteLine(hashedPassword);
             string salt = reader.GetString("salt");
             int userId = reader.GetInt32("id");
+            bool isVerified = reader.GetBoolean("is_verified");
             // Vérification du mot de passe
             bool isPasswordValid = Crypt.VerifyPassword(newLogin.Password, salt, hashedPassword);
             if (isPasswordValid)
             {
                 Console.WriteLine("Password Valid.");
+                
+                if (!isVerified) {
+                    return Unauthorized(new {
+                        Error = "AccountNotVerified",
+                        Message = "Votre compte n'est pas encore vérifié. Veuillez vérifier votre boîte mail."
+                    });
+                }
+                
                 string token = GenerateJwtToken(userId, newLogin.UserName);
                 return Ok(new
                 {

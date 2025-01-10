@@ -66,7 +66,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
         }
     }
     
-        /// <summary>
+    /// <summary>
     /// Get user profile
     /// </summary>
     /// <response code="200">Success</response>
@@ -85,7 +85,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             using MySqlConnection conn = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", 2);
+            cmd.Parameters.AddWithValue("@userID", 1);
             
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (reader.Read())
