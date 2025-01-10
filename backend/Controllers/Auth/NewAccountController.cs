@@ -64,13 +64,13 @@ public class NewAccountController : ControllerBase
 
             using MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("userName", newAccount.UserName);
-            cmd.Parameters.AddWithValue("userPassword", hashedPassword);
-            cmd.Parameters.AddWithValue("userMail", newAccount.Email);
-            cmd.Parameters.AddWithValue("userBirthDate", newAccount.BirthDate);
-            cmd.Parameters.AddWithValue("verificationLink", verificationLink);
-            cmd.Parameters.AddWithValue("verificationLinkExpiration", DateTime.UtcNow.AddHours(1));
-            cmd.Parameters.AddWithValue("inputSalt", salt);
+            cmd.Parameters.AddWithValue("@userName", newAccount.UserName);
+            cmd.Parameters.AddWithValue("@userPassword", hashedPassword);
+            cmd.Parameters.AddWithValue("@userMail", newAccount.Email);
+            cmd.Parameters.AddWithValue("@userBirthDate", newAccount.BirthDate);
+            cmd.Parameters.AddWithValue("@verificationLink", verificationLink);
+            cmd.Parameters.AddWithValue("@verificationLinkExpiration", DateTime.UtcNow.AddHours(1));
+            cmd.Parameters.AddWithValue("@inputSalt", salt);
             cmd.ExecuteNonQuery();
 
             if (newAccount.Email != null) 
