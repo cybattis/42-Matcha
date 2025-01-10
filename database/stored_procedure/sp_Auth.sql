@@ -47,7 +47,10 @@ BEGIN
         SET is_verified = TRUE WHERE user_id = @userId;
 END //
 
-CREATE PROCEDURE forgotenPasswordLink(IN inputForgottenPasswordLink VARCHAR(250), IN inputUsername VARCHAR(50))
+CREATE PROCEDURE forgottenPasswordLink(
+    IN inputForgottenPasswordLink VARCHAR(250), 
+    IN inputUsername VARCHAR(100)
+)
 BEGIN
     UPDATE users
         SET forgotten_password_link = inputForgottenPasswordLink,

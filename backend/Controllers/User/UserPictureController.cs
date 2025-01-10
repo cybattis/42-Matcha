@@ -147,10 +147,6 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             Console.WriteLine("ID " + id + " Position " + position);
             
-            Console.WriteLine("ID " + id + " Position " + position);
-            
-            Console.WriteLine("ID " + id + " Position " + position);
-            
             using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
             getImageCmd.CommandType = CommandType.StoredProcedure;
             getImageCmd.Parameters.AddWithValue("@userID", id);
