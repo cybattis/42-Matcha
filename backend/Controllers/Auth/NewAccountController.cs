@@ -53,7 +53,6 @@ public class NewAccountController : ControllerBase
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
             if (!CheckUserInfo(newAccount)) {
                 return new ObjectResult(new {
-                    Error = "User input",
                     Message = _responseMessage,
                 }) {
                     StatusCode = 400
@@ -84,7 +83,6 @@ public class NewAccountController : ControllerBase
         catch (Exception e) {
             Console.WriteLine(e.Message);
             return BadRequest(new {
-                Error = "An error occured",
                 Message = $"{e.Message}"
             });
         }

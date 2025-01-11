@@ -40,7 +40,11 @@ public class LoginController : ControllerBase
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (!reader.Read())
             {
-                return Unauthorized(new { Error = "UserNotFound", Message = "Utilisateur introuvable." });
+                return Unauthorized(new
+                {
+                    Error = "UserNotFound", 
+                    Message = "Utilisateur introuvable."
+                });
             }
 
             byte[] hashedPassword = new byte[32];

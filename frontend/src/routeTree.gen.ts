@@ -11,28 +11,14 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth/route'
-import { Route as AppRouteImport } from './routes/app/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthVerifyImport } from './routes/auth/verify'
 import { Route as AuthRegisterImport } from './routes/auth/register'
 import { Route as AuthLoginImport } from './routes/auth/login'
+import { Route as AppProfileCreationImport } from './routes/app/profile-creation'
 import { Route as AppProfileImport } from './routes/app/profile'
-import { Route as AppHomeImport } from './routes/app/home'
 
 // Create/Update Routes
-
-const AuthRouteRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AppRouteRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -41,33 +27,33 @@ const IndexRoute = IndexImport.update({
 } as any)
 
 const AuthVerifyRoute = AuthVerifyImport.update({
-  id: '/verify',
-  path: '/verify',
-  getParentRoute: () => AuthRouteRoute,
+  id: '/auth/verify',
+  path: '/auth/verify',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const AuthRegisterRoute = AuthRegisterImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => AuthRouteRoute,
+  id: '/auth/register',
+  path: '/auth/register',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const AuthLoginRoute = AuthLoginImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AuthRouteRoute,
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AppProfileCreationRoute = AppProfileCreationImport.update({
+  id: '/app/profile-creation',
+  path: '/app/profile-creation',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const AppProfileRoute = AppProfileImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-
-const AppHomeRoute = AppHomeImport.update({
-  id: '/home',
-  path: '/home',
-  getParentRoute: () => AppRouteRoute,
+  id: '/app/profile',
+  path: '/app/profile',
+  getParentRoute: () => rootRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -81,96 +67,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/app/home': {
-      id: '/app/home'
-      path: '/home'
-      fullPath: '/app/home'
-      preLoaderRoute: typeof AppHomeImport
-      parentRoute: typeof AppRouteImport
-    }
     '/app/profile': {
       id: '/app/profile'
-      path: '/profile'
+      path: '/app/profile'
       fullPath: '/app/profile'
       preLoaderRoute: typeof AppProfileImport
-      parentRoute: typeof AppRouteImport
+      parentRoute: typeof rootRoute
+    }
+    '/app/profile-creation': {
+      id: '/app/profile-creation'
+      path: '/app/profile-creation'
+      fullPath: '/app/profile-creation'
+      preLoaderRoute: typeof AppProfileCreationImport
+      parentRoute: typeof rootRoute
     }
     '/auth/login': {
       id: '/auth/login'
-      path: '/login'
+      path: '/auth/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginImport
-      parentRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRoute
     }
     '/auth/register': {
       id: '/auth/register'
-      path: '/register'
+      path: '/auth/register'
       fullPath: '/auth/register'
       preLoaderRoute: typeof AuthRegisterImport
-      parentRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRoute
     }
     '/auth/verify': {
       id: '/auth/verify'
-      path: '/verify'
+      path: '/auth/verify'
       fullPath: '/auth/verify'
       preLoaderRoute: typeof AuthVerifyImport
-      parentRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRoute
     }
   }
 }
 
 // Create and export the route tree
 
-interface AppRouteRouteChildren {
-  AppHomeRoute: typeof AppHomeRoute
-  AppProfileRoute: typeof AppProfileRoute
-}
-
-const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppHomeRoute: AppHomeRoute,
-  AppProfileRoute: AppProfileRoute,
-}
-
-const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
-  AppRouteRouteChildren,
-)
-
-interface AuthRouteRouteChildren {
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthRegisterRoute: typeof AuthRegisterRoute
-  AuthVerifyRoute: typeof AuthVerifyRoute
-}
-
-const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-  AuthLoginRoute: AuthLoginRoute,
-  AuthRegisterRoute: AuthRegisterRoute,
-  AuthVerifyRoute: AuthVerifyRoute,
-}
-
-const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
-  AuthRouteRouteChildren,
-)
-
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
-  '/auth': typeof AuthRouteRouteWithChildren
-  '/app/home': typeof AppHomeRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/profile-creation': typeof AppProfileCreationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/verify': typeof AuthVerifyRoute
@@ -178,10 +118,8 @@ export interface FileRoutesByFullPath {
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
-  '/auth': typeof AuthRouteRouteWithChildren
-  '/app/home': typeof AppHomeRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/profile-creation': typeof AppProfileCreationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/verify': typeof AuthVerifyRoute
@@ -190,10 +128,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
-  '/auth': typeof AuthRouteRouteWithChildren
-  '/app/home': typeof AppHomeRoute
   '/app/profile': typeof AppProfileRoute
+  '/app/profile-creation': typeof AppProfileCreationRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/auth/verify': typeof AuthVerifyRoute
@@ -203,30 +139,24 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/app'
-    | '/auth'
-    | '/app/home'
     | '/app/profile'
+    | '/app/profile-creation'
     | '/auth/login'
     | '/auth/register'
     | '/auth/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/app'
-    | '/auth'
-    | '/app/home'
     | '/app/profile'
+    | '/app/profile-creation'
     | '/auth/login'
     | '/auth/register'
     | '/auth/verify'
   id:
     | '__root__'
     | '/'
-    | '/app'
-    | '/auth'
-    | '/app/home'
     | '/app/profile'
+    | '/app/profile-creation'
     | '/auth/login'
     | '/auth/register'
     | '/auth/verify'
@@ -235,14 +165,20 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRouteRoute: typeof AppRouteRouteWithChildren
-  AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  AppProfileRoute: typeof AppProfileRoute
+  AppProfileCreationRoute: typeof AppProfileCreationRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthVerifyRoute: typeof AuthVerifyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRouteRoute: AppRouteRouteWithChildren,
-  AuthRouteRoute: AuthRouteRouteWithChildren,
+  AppProfileRoute: AppProfileRoute,
+  AppProfileCreationRoute: AppProfileCreationRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+  AuthVerifyRoute: AuthVerifyRoute,
 }
 
 export const routeTree = rootRoute
@@ -256,47 +192,30 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/app",
-        "/auth"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/app": {
-      "filePath": "app/route.tsx",
-      "children": [
-        "/app/home",
-        "/app/profile"
-      ]
-    },
-    "/auth": {
-      "filePath": "auth/route.tsx",
-      "children": [
+        "/app/profile",
+        "/app/profile-creation",
         "/auth/login",
         "/auth/register",
         "/auth/verify"
       ]
     },
-    "/app/home": {
-      "filePath": "app/home.tsx",
-      "parent": "/app"
+    "/": {
+      "filePath": "index.tsx"
     },
     "/app/profile": {
-      "filePath": "app/profile.tsx",
-      "parent": "/app"
+      "filePath": "app/profile.tsx"
+    },
+    "/app/profile-creation": {
+      "filePath": "app/profile-creation.tsx"
     },
     "/auth/login": {
-      "filePath": "auth/login.tsx",
-      "parent": "/auth"
+      "filePath": "auth/login.tsx"
     },
     "/auth/register": {
-      "filePath": "auth/register.tsx",
-      "parent": "/auth"
+      "filePath": "auth/register.tsx"
     },
     "/auth/verify": {
-      "filePath": "auth/verify.tsx",
-      "parent": "/auth"
+      "filePath": "auth/verify.tsx"
     }
   }
 }

@@ -1,21 +1,23 @@
-import {ReactNode} from "react";
-import {Button} from "@chakra-ui/react";
+import { ReactNode } from "react";
+import { Button } from "@chakra-ui/react";
+import { Link } from "@tanstack/react-router";
 
-export function LinkButton({children, href}: {
+export function LinkButton({
+  children,
+  href,
+}: {
   children: ReactNode;
   href: string;
 }) {
   return (
     <Button
-      size='xs'
+      size="xs"
       variant="subtle"
-      cursor={'pointer'}
-      as={'a'}
-      href={href}
-      alignItems={'center'}
-      justifyContent={'center'}
+      cursor={"pointer"}
+      alignItems={"center"}
+      justifyContent={"center"}
     >
-      {children}
+      <Link to={href}>{children}</Link>
     </Button>
   );
 }

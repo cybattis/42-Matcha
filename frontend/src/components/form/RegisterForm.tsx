@@ -1,16 +1,17 @@
-import {Button, Input, Stack, Text, VStack} from '@chakra-ui/react';
-import {Field} from '@/components/ui/field';
-import {PasswordInput} from '@/components/ui/password-input';
-import {FormSubmitHandler, UseFormReturn} from 'react-hook-form';
-import {RegisterFormValues} from "@/routes/auth/register.tsx";
-import {Link} from "@tanstack/react-router";
-import {RiArrowRightLine} from "react-icons/ri";
+import { Button, Input, Stack, Text, VStack } from "@chakra-ui/react";
+import { Field } from "@/components/ui/field";
+import { PasswordInput } from "@/components/ui/password-input";
+import { UseFormReturn } from "react-hook-form";
+import { RegisterFormValues } from "@/routes/auth/register.tsx";
+import { Link } from "@tanstack/react-router";
+import { RiArrowRightLine } from "react-icons/ri";
+import { FormEventHandler } from "react";
 
 export function RegisterForm(props: {
-  form: UseFormReturn<RegisterFormValues>,
-  onSubmit: FormSubmitHandler<RegisterFormValues>
+  form: UseFormReturn<RegisterFormValues>;
+  onSubmit: FormEventHandler<HTMLFormElement>;
 }) {
-  const {form} = props;
+  const { form } = props;
   const errors = form.formState.errors;
 
   return (
@@ -23,7 +24,9 @@ export function RegisterForm(props: {
             errorText={errors.username?.message}
           >
             <Input
-              {...form.register('username', {required: 'Username is required'})}
+              {...form.register("username", {
+                required: "Username is required",
+              })}
             />
           </Field>
           <Field
@@ -32,8 +35,11 @@ export function RegisterForm(props: {
             errorText={errors.birthdate?.message}
           >
             <Input
-              type="date" placeholder="YYYY-MM-DD"
-              {...form.register('birthdate', {required: 'Birthdate is required'})}
+              type="date"
+              placeholder="YYYY-MM-DD"
+              {...form.register("birthdate", {
+                required: "Birthdate is required",
+              })}
             />
           </Field>
         </Stack>
@@ -48,10 +54,11 @@ export function RegisterForm(props: {
               {...form.register("password", {
                 minLength: {
                   value: 8,
-                  message: "Password must have at least 8 characters"
+                  message: "Password must have at least 8 characters",
                 },
-                required: 'Password is required',
-              })}/>
+                required: "Password is required",
+              })}
+            />
           </Field>
           <Field
             label="Confirm password"
@@ -62,12 +69,12 @@ export function RegisterForm(props: {
               {...form.register("confirm_password", {
                 minLength: {
                   value: 8,
-                  message: "Password must have at least 8 characters"
+                  message: "Password must have at least 8 characters",
                 },
-                required: 'Password is required',
+                required: "Password is required",
                 validate: (val: string) => {
-                  if (form.watch('password') != val) {
-                    return 'Passwords do not match';
+                  if (form.watch("password") != val) {
+                    return "Passwords do not match";
                   }
                 },
               })}
@@ -80,11 +87,13 @@ export function RegisterForm(props: {
           errorText={errors.email?.message}
         >
           <Input
-            type='email'
-            placeholder="me@example.com" variant="subtle"
-            {...form.register('email', {
-              required: 'Email is required',
-            })}/>
+            type="email"
+            placeholder="me@example.com"
+            variant="subtle"
+            {...form.register("email", {
+              required: "Email is required",
+            })}
+          />
         </Field>
         <Field
           label="Confirm email"
@@ -92,13 +101,14 @@ export function RegisterForm(props: {
           errorText={errors.confirm_email?.message}
         >
           <Input
-            type='email'
-            placeholder="me@example.com" variant="outline"
-            {...form.register('confirm_email', {
-              required: 'Email is required',
+            type="email"
+            placeholder="me@example.com"
+            variant="outline"
+            {...form.register("confirm_email", {
+              required: "Email is required",
               validate: (val: string) => {
-                if (form.watch('email') != val) {
-                  return 'Email do not match';
+                if (form.watch("email") != val) {
+                  return "Email do not match";
                 }
               },
             })}
@@ -107,11 +117,11 @@ export function RegisterForm(props: {
         <Button type="submit" size="md" cursor="pointer">
           Submit
         </Button>
-        <Stack direction="row" spacing={4} align="center">
-          <Text justify={'center'}>Already have an account ? </Text>
-          <Link to={'/auth/login'} className={'chakra-button'}>
-            <Button size='xs' variant="subtle">
-              Login <RiArrowRightLine/>
+        <Stack direction="row" align="center">
+          <Text justifyContent={"center"}>Already have an account ? </Text>
+          <Link to={"/auth/login"} className={"chakra-button"}>
+            <Button size="xs" variant="subtle">
+              Login <RiArrowRightLine />
             </Button>
           </Link>
         </Stack>

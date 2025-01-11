@@ -1,29 +1,27 @@
-import {Button, Input, Stack, VStack} from '@chakra-ui/react';
-import {Field} from '@/components/ui/field';
-import {PasswordInput} from '@/components/ui/password-input';
-import {FormSubmitHandler, useForm, UseFormReturn} from 'react-hook-form';
-import {Link, useNavigate} from '@tanstack/react-router';
-import {Text} from '@chakra-ui/react';
-import {LoginFormValues} from "@/routes/auth/login.tsx";
-import {RiArrowRightLine} from "react-icons/ri";
+import { Button, Input, VStack } from "@chakra-ui/react";
+import { Field } from "@/components/ui/field";
+import { PasswordInput } from "@/components/ui/password-input";
+import { UseFormReturn } from "react-hook-form";
+import { LoginFormValues } from "@/routes/auth/login.tsx";
+import { FormEventHandler } from "react";
 
 export function LoginForm(props: {
-  form: UseFormReturn<LoginFormValues>,
-  onSubmit: FormSubmitHandler<LoginFormValues>
+  form: UseFormReturn<LoginFormValues>;
+  onSubmit: FormEventHandler<HTMLFormElement>;
 }) {
-  const {form} = props;
+  const { form } = props;
   const errors = form.formState.errors;
 
   return (
     <form onSubmit={props.onSubmit}>
-      <VStack gap="4" align="center" maxW="sm">
+      <VStack gap="4" align="center" maxW="lg">
         <Field
           label="Username"
           invalid={!!errors.username}
           errorText={errors.username?.message}
         >
           <Input
-            {...form.register('username', {required: 'Username is required'})}
+            {...form.register("username", { required: "Username is required" })}
           />
         </Field>
         <Field
@@ -32,20 +30,12 @@ export function LoginForm(props: {
           errorText={errors.password?.message}
         >
           <PasswordInput
-            {...form.register('password', {required: 'Password is required'})}
+            {...form.register("password", { required: "Password is required" })}
           />
         </Field>
         <Button type="submit" size="md" cursor="pointer">
           Submit
         </Button>
-        <Stack direction="row" spacing={4} align="center">
-          <Text>Does not have account ? </Text>
-          <Link to={'/auth/register'} className={'chakra-button'}>
-            <Button size='xs' variant="subtle">
-              Register <RiArrowRightLine/>
-            </Button>
-          </Link>
-        </Stack>
       </VStack>
     </form>
   );
