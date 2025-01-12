@@ -23,7 +23,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult Upload(int id, [FromForm] UserPictureModel image)
+    public async Task<ActionResult> Upload(int id, [FromForm] UserPictureModel image)
     {
         try {
             if (image.Position is < 1 or > 5)
@@ -39,23 +39,22 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             if (image.Data.Length < 1 * 1024) // 1KB
                 return ValidationProblem("Image is too small");
             
-            using MySqlConnection conn = DbHelper.GetOpenConnection();
-            
-            using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
             getImageCmd.CommandType = CommandType.StoredProcedure;
             getImageCmd.Parameters.AddWithValue("@userID", id);
             getImageCmd.Parameters.AddWithValue("@position", image.Position);
-            using MySqlDataReader reader = getImageCmd.ExecuteReader();
+            await using MySqlDataReader reader = getImageCmd.ExecuteReader();
             
             // Check if an image already exist at that position
             if (reader.Read() && reader.HasRows) {
                 logger.LogError("Image already present at that position delete it first");
                 return ValidationProblem("Image already present at that position");
             }
-            reader.Close();
+            await reader.CloseAsync();
             
             using var memoryStream = new MemoryStream();
-            image.Data.CopyTo(memoryStream);
+            await image.Data.CopyToAsync(memoryStream);
             var bytes = memoryStream.ToArray();
             
             var isValid = Files.IsImageFileValid(bytes);
@@ -69,10 +68,10 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             // Save image to disk
             var url = userFolder + Guid.NewGuid() + ".png";
-            System.IO.File.WriteAllBytes(url, bytes);
+            await System.IO.File.WriteAllBytesAsync(url, bytes);
             
             // Save image url to database
-            using MySqlCommand cmd = new MySqlCommand("UploadImage", conn);
+            await using MySqlCommand cmd = new MySqlCommand("UploadImage", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
             cmd.Parameters.AddWithValue("@position", image.Position);
@@ -144,10 +143,6 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             }
             
             using MySqlConnection conn = DbHelper.GetOpenConnection();
-            
-            Console.WriteLine("ID " + id + " Position " + position);
-            
-            Console.WriteLine("ID " + id + " Position " + position);
             
             Console.WriteLine("ID " + id + " Position " + position);
             

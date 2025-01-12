@@ -9,21 +9,17 @@ public static class Crypt
     {
         // Génère un sel aléatoire
         var saltBytes = new byte[16];
-        using (var rng = RandomNumberGenerator.Create())
-        {
+        using (var rng = RandomNumberGenerator.Create()) {
             rng.GetBytes(saltBytes);
         }
-        string salt = Convert.ToBase64String(saltBytes).Substring(0, 16);
+        string salt = Convert.ToBase64String(saltBytes);
 
         // Concatène le sel au mot de passe
         string saltedPassword = salt + password;
 
         // Hache le mot de passe avec le sel
-        using (var sha256 = SHA256.Create())
-        {
+        using (var sha256 = SHA256.Create()) {
             byte[] hashedPassword = sha256.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
-            // string hashedPassword = Convert.ToBase64String(hashBytes);
-
             return (salt, hashedPassword);
         }
     }
@@ -46,10 +42,8 @@ public static class Crypt
         
         string inputPassword = Convert.ToBase64String(hashBytes);
         string storedPassword = Convert.ToBase64String(hashedPassword);
-        Console.WriteLine(inputPassword, storedPassword);
 
         // Compare les hachages
         return inputPassword == storedPassword;
-        
     }
 }

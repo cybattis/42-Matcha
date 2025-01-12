@@ -65,6 +65,69 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             return Problem(detail: e.Message);
         }
     }
+    
+    /// <summary>
+    /// Get user profile
+    /// </summary>
+    /// <response code="200">Success</response>
+    /// <response code="400">Bad request</response>
+    [HttpGet]
+    [Route("[action]")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Me()
+    {
+        //Decode token
+        //Get user id from token
+        Request.Headers.TryGetValue("Authorization", out var token);
+        Console.WriteLine(token.ToString());
+        
+        try {
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userID", 1);
+
+            await using MySqlDataReader reader = cmd.ExecuteReader();
+            if (!reader.Read()) return ValidationProblem();
+            
+            var profile = new UserProfileModel
+            {
+                FirstName = reader["first_name"].ToString() ?? "",
+                LastName = reader["last_name"].ToString() ?? "",
+                GenderId = reader["gender_id"] as int?,
+                SexualOrientation = reader["sexual_orientation"] as int?,
+                Biography = reader["biography"].ToString() ?? "",
+                Coordinates = reader["coordinates"].ToString() ?? "",
+                IsVerified = reader["is_verified"] as bool? ?? false,
+                ProfileCompletionPercentage = reader["profile_completion_percentage"] as int? ?? 0,
+                FameRating = reader["fame"] as int? ?? 0
+            };
+
+            // Tags
+            if (reader.NextResult()) {
+                while (reader.Read())
+                    profile.Tags.Add(reader["tag_id"] as int? ?? 0);
+            } 
+                
+            // Pictures
+            if (reader.NextResult()) {
+                while (reader.Read())
+                    profile.Images.Add(reader["image_url"] as string ?? "");
+            }
+            await reader.CloseAsync();
+            
+            // logger.LogInformation("{profile}", profile.ToString());
+                
+            return Ok(profile);
+        }
+        catch (MySqlException e)
+        {
+            // logger.LogError("{e}", e.Message);
+            return Problem(detail: e.Message);
+        }
+    }
 
     /// <summary>
     /// Update user profile

@@ -30,7 +30,7 @@
     networks:
       - back-net
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - db:/var/lib/mysql
       - "./database/init/init.sql:/docker-entrypoint-initdb.d/init.sql"
