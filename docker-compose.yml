@@ -30,7 +30,7 @@
     networks:
       - back-net
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db:/var/lib/mysql
       - "./database/init/init.sql:/docker-entrypoint-initdb.d/init.sql"
@@ -56,6 +56,8 @@
       - /app/node_modules
     depends_on:
       - db
+    environment:
+      - API_URL={API_URL}
 
 volumes:
   db:

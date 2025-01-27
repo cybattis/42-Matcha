@@ -1,13 +1,13 @@
-import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
-import { ThemeProvider } from "next-themes";
-import { StrictMode } from "react";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {ChakraProvider, defaultSystem} from "@chakra-ui/react";
+import {ThemeProvider} from "next-themes";
+import {StrictMode} from "react";
+import {RouterProvider, createRouter} from "@tanstack/react-router";
+import {createRoot} from "react-dom/client";
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 
-import { routeTree } from "./routeTree.gen";
-import { AuthProvider, useAuth } from "@/auth.tsx";
-import { Toaster } from "@/components/ui/toaster.tsx";
+import {routeTree} from "./routeTree.gen";
+import {AuthProvider, useAuth} from "@/auth.tsx";
+import {Toaster} from "@/components/ui/toaster.tsx";
 import axios from "axios";
 
 const queryClient = new QueryClient();
@@ -36,7 +36,7 @@ declare module "@tanstack/react-router" {
 
 function InnerApp() {
   const auth = useAuth();
-  return <RouterProvider router={router} context={{ auth }} />;
+  return <RouterProvider router={router} context={{auth}}/>;
 }
 
 function App() {
@@ -45,8 +45,8 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ChakraProvider value={defaultSystem}>
           <ThemeProvider attribute="class" disableTransitionOnChange>
-            <InnerApp />
-            <Toaster />
+            <InnerApp/>
+            <Toaster/>
           </ThemeProvider>
         </ChakraProvider>
       </QueryClientProvider>
@@ -60,7 +60,7 @@ if (!rootElement.innerHTML) {
   const root = createRoot(rootElement);
   root.render(
     <StrictMode>
-      <App />
+      <App/>
     </StrictMode>
   );
 }

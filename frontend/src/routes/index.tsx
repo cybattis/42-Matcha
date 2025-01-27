@@ -3,19 +3,19 @@ import {
   ParsedLocation,
   redirect,
 } from "@tanstack/react-router";
-import { MyRooterContext } from "./__root";
+import {MyRooterContext} from "./__root";
 import axios from "axios";
-import { UserProfile } from "@/lib/interface.ts";
-import { VStack, Image, Flex, HStack, Button } from "@chakra-ui/react";
-import { getUserToken } from "@/auth.tsx";
-import { LikeIcon, SkipIcon } from "@/components/Icons.tsx";
+import {UserProfile} from "@/lib/interface.ts";
+import {VStack, Image, Flex, HStack, Button, IconButton} from "@chakra-ui/react";
+import {getUserToken} from "@/auth.tsx";
+import {LikeIcon, ProfileIcon, SkipIcon} from "@/components/Icons.tsx";
 
 export const Route = createFileRoute("/")({
   component: Index,
   beforeLoad: ({
-    context,
-    location,
-  }: {
+                 context,
+                 location,
+               }: {
     context: MyRooterContext;
     location: ParsedLocation;
   }) => {
@@ -51,13 +51,16 @@ function Index() {
           aspectRatio={4 / 5}
           width="md"
         />
-        <HStack gap={20} justifyContent={"center"}>
-          <Button variant={"ghost"}>
-            <SkipIcon />
-          </Button>
-          <Button variant={"ghost"}>
-            <LikeIcon />
-          </Button>
+        <HStack gap={20} justifyContent={"center"} p={2}>
+          <IconButton variant={"ghost"}>
+            <SkipIcon/>
+          </IconButton>
+          <IconButton variant={'ghost'} size={{sm: 'sm'}}>
+            <ProfileIcon/>
+          </IconButton>
+          <IconButton variant={"ghost"}>
+            <LikeIcon/>
+          </IconButton>
         </HStack>
       </Flex>
     </VStack>
