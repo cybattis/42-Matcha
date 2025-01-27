@@ -83,7 +83,14 @@ BEGIN
     UPDATE users SET profile_completion_percentage = @percentage WHERE id = userID;
 END //
 
-#  InsertTags
+# TAGS PROCEDURES
+# =================================================================================================
+
+CREATE PROCEDURE GetAllTags()
+BEGIN
+    SELECT *  FROM tags;
+END //
+
 CREATE PROCEDURE UpdateTag(
     IN userID INT,
     IN tagID INT

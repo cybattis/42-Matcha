@@ -6,10 +6,6 @@ import { useState } from "react";
 import { toaster } from "@/components/ui/toaster.tsx";
 import { ToasterSuccess } from "@/lib/toaster.ts";
 
-export const Route = createFileRoute("/auth/register")({
-  component: RouteComponent,
-});
-
 export interface RegisterFormValues {
   username: string;
   password: string;
@@ -28,6 +24,10 @@ interface RegisterResponse {
     server?: string;
   };
 }
+
+export const Route = createFileRoute("/auth/register")({
+  component: RouteComponent,
+});
 
 async function TryRegister(
   data: RegisterFormValues
@@ -49,26 +49,6 @@ async function TryRegister(
     return { error: { server: "Erreur serveur" } };
   }
 }
-//
-// async function TryRegisterAxios(
-//   data: RegisterFormValues
-// ): Promise<RegisterResponse> {
-//   try {
-//     const response = await axios.post(
-//       "http://localhost:5163/auth/CreateNewAccount",
-//       {
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(data),
-//       }
-//     );
-//     return response.json();
-//   } catch (e) {
-//     console.error(e);
-//     return { error: { server: "Erreur serveur" } };
-//   }
-// }
 
 function RouteComponent() {
   const form = useForm<RegisterFormValues>();
