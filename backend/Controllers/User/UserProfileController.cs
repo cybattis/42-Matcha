@@ -22,15 +22,15 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult Get(int id)
+    public async Task<ActionResult> Get(int id)
     {
         try {
-            using MySqlConnection conn = DbHelper.GetOpenConnection();
-            using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
             
-            using MySqlDataReader reader = cmd.ExecuteReader();
+            await using MySqlDataReader reader = cmd.ExecuteReader();
             if (reader.Read())
             {
                 var profile = new UserProfileModel
@@ -54,7 +54,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                     while (reader.Read())
                         profile.Images.Add(reader["image_url"] as string ?? "");
                 }
-                // reader.Close();
+                await reader.CloseAsync();
                 return Ok(profile);
             }
             return ValidationProblem();
@@ -159,38 +159,6 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             cmd.Parameters.AddWithValue("@coordinates", data.Coordinates);
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully updated");
-        }
-        catch (MySqlException e) {
-            logger.LogError(e.Message);
-            return Problem(detail: e.Message);
-        }
-    }
-    
-    /// <summary>
-    /// Update user tag
-    /// </summary>
-    /// <param name="id">User ID</param>
-    /// <param name="tagId">tag id</param>
-    /// <response code="200">Tag updated</response>
-    /// <response code="400">Bad request</response>
-    [HttpPost]
-    [Route("[action]/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult UpdateTag(int id, [FromForm] int tagId)
-    {
-        try {
-            if (tagId < 1)
-                return BadRequest("Invalid tag id");
-            
-            
-            using MySqlConnection conn = DbHelper.GetOpenConnection();
-            using MySqlCommand cmd = new MySqlCommand("UpdateTag", conn);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
-            cmd.Parameters.AddWithValue("@tagID", tagId);
-            cmd.ExecuteNonQuery();
-            return Ok("Tag updated");
         }
         catch (MySqlException e) {
             logger.LogError(e.Message);
