@@ -44,7 +44,8 @@ END //
 CREATE PROCEDURE assertAccountVerification (IN user_id INT)
 BEGIN
     UPDATE users
-        SET is_verified = TRUE WHERE user_id = @userId;
+        SET is_verified = TRUE
+            WHERE id = user_id;
 END //
 
 CREATE PROCEDURE forgottenPasswordLink(
