@@ -2,12 +2,14 @@ using System.Data;
 using backend.Database;
 using backend.Models.Users;
 using backend.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 
 namespace backend.Controllers.User;
 
 [ApiController]
+[Authorize]
 [Route("[controller]")]
 public class UserProfileController(ILogger<UserProfileController> logger) : ControllerBase
 {

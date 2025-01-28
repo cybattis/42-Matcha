@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Utils;
 
-public class JwtHelper(string secretKey)
+public class JwtHelper
 {
     /// <summary>
     /// Génère un JWT avec les informations de l'utilisateur.
@@ -16,25 +16,29 @@ public class JwtHelper(string secretKey)
     /// <returns>Un token JWT signé</returns>
     public string GenerateJwtToken(int userId, string username)
     {
+        string secretKey = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "";
+        var issuer = Environment.GetEnvironmentVariable("JWT_Issuer") ?? "";
+        var audience = Environment.GetEnvironmentVariable("JWT_Audience") ?? "";
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
+        
+        var tokenDescriptor = new SecurityTokenDescriptor
         {
-            new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()), // Identifiant utilisateur
-            new Claim("username", username),                          // Nom d'utilisateur
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // ID unique du JWT
-            new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64) // Date d'émission
+            Subject = new ClaimsIdentity([
+                new Claim("Id", Guid.NewGuid().ToString()),
+                new Claim("username", username),
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            ]),
+            Expires = DateTime.UtcNow.AddMinutes(5),
+            Issuer = issuer,
+            Audience = audience,
+            SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature)
         };
-
-        var token = new JwtSecurityToken(
-            issuer: "matcha",                // Issuer : Identifiant de l'application
-            audience: "matcha-users",        // Audience : Destinataires du token
-            claims: claims,
-            expires: DateTime.UtcNow.AddHours(1), // Expiration (1 heure)
-            signingCredentials: credentials    // Clé de signature
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        // var jwtToken = tokenHandler.WriteToken(token);
+        var stringToken = tokenHandler.WriteToken(token);
+        return stringToken;
     }
 }
