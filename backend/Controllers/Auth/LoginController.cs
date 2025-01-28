@@ -35,7 +35,7 @@ public class LoginController : ControllerBase
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("GetUserPasswordByUsername", dbClient);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@inputUsername", newLogin.UserName);
+            cmd.Parameters.AddWithValue("inputUsername", newLogin.UserName);
 
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (!reader.Read())
@@ -104,19 +104,15 @@ public class LoginController : ControllerBase
     {
         try 
         {
-            if (!Checks.IsValidMail(forgottenPassword.Email) && !Checks.IsValidUserName(forgottenPassword.UserName))
-            {
-                return BadRequest("Invalide username or email");
-            }
             //Environment.GetEnvironmentVariable("ROOT_URL") + "/Auth/ForgotenPassword/" +
             string forgotenPasswordLink =  Guid.NewGuid().ToString();
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("CheckUserExist", dbClient);
             cmd.CommandType = CommandType.StoredProcedure;
 
-            cmd.Parameters.AddWithValue("@inputUsername", forgottenPassword.UserName);
-            cmd.Parameters.AddWithValue("@inputMail", forgottenPassword.Email);
-            MySqlParameter existsParam = new MySqlParameter("@userExists", MySqlDbType.Int32)
+            cmd.Parameters.AddWithValue("inputUsername", forgottenPassword.UserName);
+            cmd.Parameters.AddWithValue("inputMail", forgottenPassword.Email);
+            MySqlParameter existsParam = new MySqlParameter("userExists", MySqlDbType.Int32)
             {
                 Direction = ParameterDirection.Output
             };
@@ -126,13 +122,10 @@ public class LoginController : ControllerBase
 
             // Vérifiez si l'utilisateur existe
             int userExists = Convert.ToInt32(existsParam.Value);
-            if (userExists == 0)
+            if (userExists != 0 && forgottenPassword.Email != null)
             {
-                if (forgottenPassword.Email != null)
-                    Notify.SendForgottenPasswordMail(forgottenPassword.Email, forgotenPasswordLink);
-                return Ok("If informations are valid, a mail will be sent to the adress");
+                Notify.SendForgottenPasswordMail(forgottenPassword.Email, forgotenPasswordLink);
             }
-
             return Ok("If informations are valid, a mail will be sent to the adress");
         }
         catch (Exception ex)

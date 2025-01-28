@@ -1,7 +1,9 @@
 DELIMITER //
 
+-- InsertNewAccount
 CREATE PROCEDURE InsertNewAccount(
     IN userName VARCHAR(50),
+    IN userPassword BINARY(32),
     IN userPassword BINARY(32),
     IN userMail VARCHAR(100),
     IN userBirthDate DATE,
@@ -20,6 +22,7 @@ BEGIN
                 verificationLinkExpiration);
 END //
 
+-- GetUserPasswordByUsername
 CREATE PROCEDURE GetUserPasswordByUsername(IN inputUsername VARCHAR(50))
 BEGIN
     SELECT id, password, salt, is_verified
@@ -27,6 +30,7 @@ BEGIN
     WHERE username = inputUsername;
 END //
 
+-- GetUserMailByUsername
 CREATE PROCEDURE GetUserMailByUsername(IN inputUsername VARCHAR(50))
 BEGIN
     SELECT email
@@ -34,17 +38,20 @@ BEGIN
     WHERE username = inputUsername;
 END //
 
+-- getVerificationAccountInfo
 CREATE PROCEDURE getVerificationAccountInfo(IN inputVerifyLink VARCHAR(250))
 BEGIN
     SELECT id, is_verified, email_verification_link, forgotten_password_link_expiration, email
-        FROM users
-        WHERE email_verification_link = inputVerifyLink;
+    FROM users
+    WHERE email_verification_link = inputVerifyLink;
 END //
 
+-- assertAccountVerification
 CREATE PROCEDURE assertAccountVerification (IN user_id INT)
 BEGIN
     UPDATE users
-        SET is_verified = TRUE WHERE user_id = @userId;
+    SET is_verified = TRUE
+    WHERE id = user_id;
 END //
 
 CREATE PROCEDURE forgottenPasswordLink(
@@ -53,9 +60,9 @@ CREATE PROCEDURE forgottenPasswordLink(
 )
 BEGIN
     UPDATE users
-        SET forgotten_password_link = inputForgottenPasswordLink,
-            forgotten_password_link_expiration = NOW() + INTERVAL 1 HOUR
-        WHERE email = inputUsername;
+    SET forgotten_password_link = inputForgottenPasswordLink,
+        forgotten_password_link_expiration = NOW() + INTERVAL 1 HOUR
+    WHERE email = inputUsername;
 END //
 
 CREATE PROCEDURE getuserid (IN inputUsername VARCHAR(255))

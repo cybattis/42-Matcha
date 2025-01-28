@@ -24,7 +24,7 @@ public class NewAccountController : ControllerBase
     {
         if (!Checks.IsValidUserName(newAccount.UserName))
         {
-            _responseMessage.UserName = "Nom d'utilisateur invalide:\nIl doit contenir entre 3 et 20 caractères\nIl ne doit pas contenir de caractere speciaux";
+            ResponseMessage.UserName = $"Nom d'utilisateur invalide:\nIl doit contenir entre 3 et 20 caractères\nIl ne doit pas contenir de caractere speciaux {newAccount.UserName}";
         }
         if (!Checks.IsValidPassword(newAccount.Password, newAccount.UserName))
         {
@@ -60,7 +60,7 @@ public class NewAccountController : ControllerBase
             }
 
             string verificationLink = Guid.NewGuid().ToString();
-            (string salt, byte[] hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
+            (string salt, byte [] hashedPassword) = Crypt.CryptPassWord(newAccount.Password ?? throw new InvalidOperationException());
 
             using MySqlCommand cmd = new MySqlCommand("InsertNewAccount", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -102,7 +102,7 @@ public class NewAccountController : ControllerBase
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("GetVerificationAccountInfo", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@inputVerifyLink", verificationID);
+            cmd.Parameters.AddWithValue("inputVerifyLink", verificationID);
 
             using MySqlDataReader reader = cmd.ExecuteReader();
             if (!reader.Read()) 
@@ -126,7 +126,7 @@ public class NewAccountController : ControllerBase
             }
             // Mettez à jour l'état de vérification ici si nécessaire
             using MySqlCommand updateCmd = new MySqlCommand("assertAccountVerification", dbClient);
-            updateCmd.Parameters.AddWithValue("@userId", userId);
+            updateCmd.Parameters.AddWithValue("userId", userId);
             updateCmd.ExecuteNonQuery();
 
             return Ok("Verification completed successfully.");
