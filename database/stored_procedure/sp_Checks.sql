@@ -5,8 +5,8 @@ CREATE PROCEDURE CheckUserNameTaken(
 )
 BEGIN
     SELECT COUNT(*) 
-    FROM users 
-    WHERE users.username = username;
+        FROM users 
+        WHERE users.username = username;
 END //
 
 CREATE PROCEDURE CheckMailTaken(
@@ -14,8 +14,8 @@ CREATE PROCEDURE CheckMailTaken(
 )
 BEGIN
     SELECT COUNT(*) 
-    FROM users 
-    WHERE email = userMail;
+        FROM users 
+        WHERE email = userMail;
 END //
 
 
@@ -26,9 +26,9 @@ CREATE PROCEDURE CheckUserExist(
 )
 BEGIN 
     SELECT COUNT(*) INTO userExists
-    FROM users
-    WHERE username = inputUsername
-      AND email = inputMail;
+        FROM users
+        WHERE username = inputUsername
+          AND email = inputMail;
 END //
 
 DELIMITER ;

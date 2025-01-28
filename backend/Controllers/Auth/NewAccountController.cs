@@ -18,23 +18,27 @@ public class NewAccountController : ControllerBase
         public string? BirthDate { get; set; } = "";
     }
     
-    private NewAccountResponse ResponseMessage = new NewAccountResponse();
+    private readonly NewAccountResponse _responseMessage = new();
     
     private bool CheckUserInfo(NewAccountModel newAccount)
     {
         if (!Checks.IsValidUserName(newAccount.UserName))
         {
-            ResponseMessage.UserName = $"Nom d'utilisateur invalide:\nIl doit contenir entre 3 et 20 caracteres\nIl ne doit pas contenir de caractere speciaux {newAccount.UserName}";
+            ResponseMessage.UserName = $"Nom d'utilisateur invalide:\nIl doit contenir entre 3 et 20 caractères\nIl ne doit pas contenir de caractere speciaux {newAccount.UserName}";
         }
         if (!Checks.IsValidPassword(newAccount.Password, newAccount.UserName))
         {
-            ResponseMessage.Password = "Mot de passe incorect:\nIl faut au moins 1 majuscule 1 minuscule 1 caractere special et 1 chiffre\nLe mot de passe doit faire au moins 8 caracteres";
+            _responseMessage.Password = "Mot de passe incorrect:\nIl faut au moins 1 majuscule 1 minuscule 1 caractères special et 1 chiffre\nLe mot de passe doit faire au moins 8 caracteres";
         }
         if (!Checks.IsValidMail(newAccount.Email)) {
-            ResponseMessage.Mail = "L'adresse e-mail est invalide. Veuillez fournir une adresse e-mail valide.";
+            _responseMessage.Mail = "L'adresse e-mail est invalide. Veuillez fournir une adresse e-mail valide.";
         }
         if (!Checks.IsValidBirthDate(newAccount.BirthDate)) {
-            ResponseMessage.BirthDate = "Vous devez etre majeur pour vous inscrire.";
+            _responseMessage.BirthDate = "Vous devez etre majeur pour vous inscrire.";
+        }
+        
+        if (_responseMessage.UserName != "" || _responseMessage.Password != "" || _responseMessage.Mail != "" || _responseMessage.BirthDate != "") {
+            return false;
         }
         return true;
     }
@@ -48,13 +52,9 @@ public class NewAccountController : ControllerBase
         try {
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
             if (!CheckUserInfo(newAccount)) {
-                return new ObjectResult(new
-                {
-                    Error = "InvalidEmail",
-                    Message = "L'adresse e-mail est invalide.",
-                    Details = ResponseMessage
-                })
-                {
+                return new ObjectResult(new {
+                    Message = _responseMessage,
+                }) {
                     StatusCode = 400
                 };
             }
@@ -72,6 +72,7 @@ public class NewAccountController : ControllerBase
             cmd.Parameters.AddWithValue("@verificationLinkExpiration", DateTime.UtcNow.AddHours(1));
             cmd.Parameters.AddWithValue("@inputSalt", salt);
             cmd.ExecuteNonQuery();
+            dbClient.Close();
 
             if (newAccount.Email != null) 
                 Notify.SendVerificationEmail(newAccount.Email, verificationLink);
@@ -82,7 +83,6 @@ public class NewAccountController : ControllerBase
         catch (Exception e) {
             Console.WriteLine(e.Message);
             return BadRequest(new {
-                Error = "An error occured",
                 Message = $"{e.Message}"
             });
         }

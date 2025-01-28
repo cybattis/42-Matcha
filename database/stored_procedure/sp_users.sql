@@ -16,8 +16,11 @@ END //
 CREATE PROCEDURE GetUserProfile(IN userID INT) 
 BEGIN
     SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
-           profile_completion_percentage, coordinates FROM users WHERE id = userID;
+           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage
+        FROM users WHERE id = userID;
+    
     SELECT * FROM users_tags WHERE user_id = userID;
+    
     SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
 END //
 

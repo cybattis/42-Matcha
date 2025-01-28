@@ -4,6 +4,7 @@ DELIMITER //
 CREATE PROCEDURE InsertNewAccount(
     IN userName VARCHAR(50),
     IN userPassword BINARY(32),
+    IN userPassword BINARY(32),
     IN userMail VARCHAR(100),
     IN userBirthDate DATE,
     IN verificationLink VARCHAR(255),
@@ -11,14 +12,20 @@ CREATE PROCEDURE InsertNewAccount(
     IN inputSalt VARCHAR(255)
 )
 BEGIN
-    INSERT INTO users (username, password, email, birth_date, email_verification_link, email_verification_link_expiration, salt)
-    VALUES (userName, userPassword, userMail, userBirthDate, verificationLink, verificationLinkExpiration, inputSalt);
+    INSERT INTO db.users (username, password, email, birth_date, salt, email_verification_link, email_verification_link_expiration)
+        VALUES (userName, 
+                userPassword, 
+                userMail, 
+                userBirthDate,
+                inputSalt,
+                verificationLink, 
+                verificationLinkExpiration);
 END //
 
 -- GetUserPasswordByUsername
 CREATE PROCEDURE GetUserPasswordByUsername(IN inputUsername VARCHAR(50))
 BEGIN
-    SELECT id, password, salt
+    SELECT id, password, salt, is_verified
     FROM users
     WHERE username = inputUsername;
 END //
@@ -47,8 +54,7 @@ BEGIN
     WHERE id = user_id;
 END //
 
--- forgotenPasswordLink
-CREATE PROCEDURE forgotenPasswordLink(
+CREATE PROCEDURE forgottenPasswordLink(
     IN inputForgottenPasswordLink VARCHAR(250), 
     IN inputUsername VARCHAR(100)
 )
@@ -59,12 +65,11 @@ BEGIN
     WHERE email = inputUsername;
 END //
 
--- getuserid
 CREATE PROCEDURE getuserid (IN inputUsername VARCHAR(255))
 BEGIN
     SELECT id
-    FROM users
-    WHERE username = inputUsername;
+        FROM users
+        WHERE userName = inputUsername;
 END //
 
 DELIMITER ;

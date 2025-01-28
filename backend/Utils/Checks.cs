@@ -12,9 +12,7 @@ public static class Checks {
     {
         // Vérification si l'e-mail est null
         if (string.IsNullOrEmpty(email))
-        {
             return false;
-        }
 
         // Validation du format de l'e-mail
         try
@@ -29,24 +27,21 @@ public static class Checks {
             // Vérification en base de données
         try
         {
-            DbHelper db = new();
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
-
             using MySqlCommand cmd = new MySqlCommand("CheckMailTaken", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userMail", email);
 
             // La procédure stockée renvoie un entier ou un booléen
             var result = cmd.ExecuteScalar();
+            
+            dbClient.Close();
 
             // Si la procédure renvoie 1 ou "true", l'e-mail est déjà pris
             if (result != null && Convert.ToInt32(result) > 0)
-            {
                 return false; // E-mail déjà pris
-            }
         }
-        catch (Exception ex)
-        {
+        catch (Exception ex) {
             // Log l'erreur ou gérer comme nécessaire
             Console.WriteLine($"Erreur lors de la vérification de l'e-mail : {ex.Message}");
             return false;
@@ -56,69 +51,60 @@ public static class Checks {
     }
 
 
-    public static bool IsValidPassword(string? password, string UserName)
+    public static bool IsValidPassword(string? password, string? userName)
     {
         if (password == null)
-        {
             return false;
-        }
+        if (userName != null && password.Contains(userName))
+            return false;
+        
         string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$";
         if (!Regex.IsMatch(password, pattern))
-        {
             return false;
-        }
-        if (password.Contains(UserName))
-        {
-            return false;
-        }
         return true;
     }
 
-    public static bool IsValidBirthDate(DateTime? BirthDate)
+    public static bool IsValidBirthDate(DateTime? birthDate)
     {
-        if (BirthDate == null){
+        if (birthDate == null){
             return false;
         }
         DateTime today = DateTime.Today;
-        int age = today.Year - BirthDate.Value.Year;
+        int age = today.Year - birthDate.Value.Year;
             
-        if (BirthDate.Value.Date > today.AddYears(-age))
+        if (birthDate.Value.Date > today.AddYears(-age))
         {
             age--;
         }
         return age >= 18;
     }
 
-    public static bool IsValidUserNameFormat(string UserName) {
+    public static bool IsValidUserNameFormat(string userName) {
         var regex = new Regex("^[a-zA-Z][a-zA-Z0-9_-]{5,20}$");
-        return regex.IsMatch(UserName);
+        return regex.IsMatch(userName);
     }
         
-    public static bool IsValidUserName(string? UserName) {
-        if (string.IsNullOrEmpty(UserName)){
+    public static bool IsValidUserName(string? userName) {
+        if (string.IsNullOrEmpty(userName))
             return false;
-        }
-        if (!IsValidUserNameFormat(UserName))
-        {
+        if (!IsValidUserNameFormat(userName))
             return false;
-        }
+        
         try
         {
-            DbHelper db = new();
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
-
             using MySqlCommand cmd = new MySqlCommand("CheckUserNameTaken", dbClient);
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@username", UserName);
+            cmd.Parameters.AddWithValue("@userName", userName);
 
             // La procédure stockée doit renvoyer un entier ou un booléen
             object? result = cmd.ExecuteScalar();
+            
+            dbClient.Close();
         
             // Si la procédure renvoie 1 ou "true", le nom est pris
             if (result != null && Convert.ToInt32(result) > 0)
-            {
                 return false; // Nom d'utilisateur déjà pris
-            }
         }
         catch (Exception ex)
         {
