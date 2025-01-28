@@ -24,7 +24,7 @@ public class NewAccountController : ControllerBase
     {
         if (!Checks.IsValidUserName(newAccount.UserName))
         {
-            ResponseMessage.UserName = $"Nom d'utilisateur invalide:\nIl doit contenir entre 3 et 20 caractères\nIl ne doit pas contenir de caractere speciaux {newAccount.UserName}";
+            _responseMessage.UserName = $"Nom d'utilisateur invalide:\nIl doit contenir entre 3 et 20 caractères\nIl ne doit pas contenir de caractère speciaux {newAccount.UserName}";
         }
         if (!Checks.IsValidPassword(newAccount.Password, newAccount.UserName))
         {

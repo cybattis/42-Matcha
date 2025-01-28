@@ -1,6 +1,5 @@
 import {
   Box,
-  Flex,
   Button,
   MenuItem,
   Stack,
@@ -8,6 +7,7 @@ import {
   MenuTrigger,
   MenuContent,
   Image,
+  Grid,
 } from "@chakra-ui/react";
 import {
   useColorMode,
@@ -32,7 +32,7 @@ import {
 
 function AppLogo() {
   return (
-    <Box w="100%" display="flex" justifyContent={"center"} ml={10}>
+    <Box w="100%" display="flex" justifyContent={"center"}>
       <Link to={"/"}>MATCHA</Link>
     </Box>
   );
@@ -43,7 +43,7 @@ function DarkModeButton(props: {
   colorMode: string | undefined;
 }) {
   return (
-    <Button onClick={props.onClick} variant="ghost">
+    <Button onClick={props.onClick} variant="ghost" w={"40px"} h={"40px"}>
       {props.colorMode === "light" ? <MoonIcon /> : <SunIcon />}
     </Button>
   );
@@ -53,12 +53,13 @@ export function NavbarAuth() {
   const { colorMode, toggleColorMode } = useColorMode();
   return (
     <>
-      <Box bg={useColorModeValue("gray.100", "gray.900")} pl={20} pr={5} py={2}>
-        <Flex justifyContent={"end"} alignItems="center" alignContent="end">
+      <Box bg={useColorModeValue("gray.100", "gray.900")} px={5} py={2}>
+        <Grid templateColumns="repeat(3, 1fr)" gap="6" alignItems={"center"}>
+          <Box />
           <AppLogo />
-          <Stack direction={"row"}>
+          <Stack direction={"row"} justifyContent={"end"}>
             <DarkModeButton onClick={toggleColorMode} colorMode={colorMode} />
-            <Button variant="ghost" p="0" mr="2" w={"40px"} h={"40px"}>
+            <Button variant="ghost" p="0" w={"40px"} h={"40px"}>
               <Link to={"/auth/login"} className={"w-full h-full"}>
                 <UserIcon className={"user-icon"}>
                   <svg
@@ -77,7 +78,7 @@ export function NavbarAuth() {
               </Link>
             </Button>
           </Stack>
-        </Flex>
+        </Grid>
       </Box>
     </>
   );
@@ -88,25 +89,26 @@ export default function Navbar() {
 
   return (
     <>
-      <Box bg={useColorModeValue("gray.100", "gray.900")} pl={20} pr={5} py={2}>
-        <Flex justifyContent={"end"} alignItems="center" alignContent="end">
+      <Box bg={useColorModeValue("gray.100", "gray.900")} px={5} py={2}>
+        <Grid templateColumns="repeat(3, 1fr)" gap="6" alignItems={"center"}>
+          <Box />
           <AppLogo />
-          <Stack direction={"row"} gap={4}>
+          <Stack direction={"row"} justifyContent={"end"}>
             <DarkModeButton onClick={toggleColorMode} colorMode={colorMode} />
-            <Notification />
+            <NotificationButton />
             <NavbarMenu />
           </Stack>
-        </Flex>
+        </Grid>
       </Box>
     </>
   );
 }
 
-function Notification() {
+function NotificationButton() {
   return (
     <PopoverRoot>
       <PopoverTrigger asChild>
-        <Button size="sm" variant="ghost">
+        <Button size="sm" variant="ghost" alignSelf={"center"}>
           <NotificationIcon />
         </Button>
       </PopoverTrigger>
@@ -127,7 +129,7 @@ const NavbarMenu = () => {
   return (
     <MenuRoot>
       <MenuTrigger asChild position="relative">
-        <Button variant="ghost" p="0" mr="2" w={"40px"} h={"40px"}>
+        <Button variant="ghost" p="0" w={"40px"} h={"40px"}>
           <UserIcon>
             <Image
               src="https://bit.ly/naruto-sage"
@@ -140,7 +142,7 @@ const NavbarMenu = () => {
           </UserIcon>
         </Button>
       </MenuTrigger>
-      <MenuContent pos="absolute" top={"56px"}>
+      <MenuContent pos="absolute" top={"56px"} right={"12px"}>
         <MenuItem
           value="Profile"
           onClick={async () => {

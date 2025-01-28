@@ -20,17 +20,17 @@ export const Route = createRootRouteWithContext<MyRooterContext>()({
   component: RootComponent,
   notFoundComponent: () => {
     return (
-      <Box w="100vw" h="100%">
+      <Center w="100%" h="100%">
         <VStack w="100vw">
           <p>Error 404</p>
           <Link to="/">Start Over</Link>
         </VStack>
-      </Box>
+      </Center>
     );
   },
   errorComponent: ({ error }) => {
     return (
-      <Center w="100vw" h="100%">
+      <Center w="100%" h="100%">
         <VStack>
           <p>Error: {error.message}</p>
           <Link to="/">Start Over</Link>

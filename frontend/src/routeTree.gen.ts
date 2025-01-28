@@ -12,11 +12,13 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
-import { Route as AuthVerifyImport } from './routes/auth/verify'
 import { Route as AuthRegisterImport } from './routes/auth/register'
+import { Route as AuthNotVerifyImport } from './routes/auth/not-verify'
 import { Route as AuthLoginImport } from './routes/auth/login'
+import { Route as AppSearchImport } from './routes/app/search'
 import { Route as AppProfileCreationImport } from './routes/app/profile-creation'
 import { Route as AppProfileImport } from './routes/app/profile'
+import { Route as AppMatchImport } from './routes/app/match'
 
 // Create/Update Routes
 
@@ -26,21 +28,27 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AuthVerifyRoute = AuthVerifyImport.update({
-  id: '/auth/verify',
-  path: '/auth/verify',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const AuthRegisterRoute = AuthRegisterImport.update({
   id: '/auth/register',
   path: '/auth/register',
   getParentRoute: () => rootRoute,
 } as any)
 
+const AuthNotVerifyRoute = AuthNotVerifyImport.update({
+  id: '/auth/not-verify',
+  path: '/auth/not-verify',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const AuthLoginRoute = AuthLoginImport.update({
   id: '/auth/login',
   path: '/auth/login',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AppSearchRoute = AppSearchImport.update({
+  id: '/app/search',
+  path: '/app/search',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -56,6 +64,12 @@ const AppProfileRoute = AppProfileImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AppMatchRoute = AppMatchImport.update({
+  id: '/app/match',
+  path: '/app/match',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -65,6 +79,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/app/match': {
+      id: '/app/match'
+      path: '/app/match'
+      fullPath: '/app/match'
+      preLoaderRoute: typeof AppMatchImport
       parentRoute: typeof rootRoute
     }
     '/app/profile': {
@@ -81,11 +102,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileCreationImport
       parentRoute: typeof rootRoute
     }
+    '/app/search': {
+      id: '/app/search'
+      path: '/app/search'
+      fullPath: '/app/search'
+      preLoaderRoute: typeof AppSearchImport
+      parentRoute: typeof rootRoute
+    }
     '/auth/login': {
       id: '/auth/login'
       path: '/auth/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginImport
+      parentRoute: typeof rootRoute
+    }
+    '/auth/not-verify': {
+      id: '/auth/not-verify'
+      path: '/auth/not-verify'
+      fullPath: '/auth/not-verify'
+      preLoaderRoute: typeof AuthNotVerifyImport
       parentRoute: typeof rootRoute
     }
     '/auth/register': {
@@ -95,13 +130,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterImport
       parentRoute: typeof rootRoute
     }
-    '/auth/verify': {
-      id: '/auth/verify'
-      path: '/auth/verify'
-      fullPath: '/auth/verify'
-      preLoaderRoute: typeof AuthVerifyImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -109,76 +137,92 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app/match': typeof AppMatchRoute
   '/app/profile': typeof AppProfileRoute
   '/app/profile-creation': typeof AppProfileCreationRoute
+  '/app/search': typeof AppSearchRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/auth/verify': typeof AuthVerifyRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/match': typeof AppMatchRoute
   '/app/profile': typeof AppProfileRoute
   '/app/profile-creation': typeof AppProfileCreationRoute
+  '/app/search': typeof AppSearchRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/auth/verify': typeof AuthVerifyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/app/match': typeof AppMatchRoute
   '/app/profile': typeof AppProfileRoute
   '/app/profile-creation': typeof AppProfileCreationRoute
+  '/app/search': typeof AppSearchRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/auth/verify': typeof AuthVerifyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app/match'
     | '/app/profile'
     | '/app/profile-creation'
+    | '/app/search'
     | '/auth/login'
+    | '/auth/not-verify'
     | '/auth/register'
-    | '/auth/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app/match'
     | '/app/profile'
     | '/app/profile-creation'
+    | '/app/search'
     | '/auth/login'
+    | '/auth/not-verify'
     | '/auth/register'
-    | '/auth/verify'
   id:
     | '__root__'
     | '/'
+    | '/app/match'
     | '/app/profile'
     | '/app/profile-creation'
+    | '/app/search'
     | '/auth/login'
+    | '/auth/not-verify'
     | '/auth/register'
-    | '/auth/verify'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppMatchRoute: typeof AppMatchRoute
   AppProfileRoute: typeof AppProfileRoute
   AppProfileCreationRoute: typeof AppProfileCreationRoute
+  AppSearchRoute: typeof AppSearchRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthNotVerifyRoute: typeof AuthNotVerifyRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
-  AuthVerifyRoute: typeof AuthVerifyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppMatchRoute: AppMatchRoute,
   AppProfileRoute: AppProfileRoute,
   AppProfileCreationRoute: AppProfileCreationRoute,
+  AppSearchRoute: AppSearchRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthNotVerifyRoute: AuthNotVerifyRoute,
   AuthRegisterRoute: AuthRegisterRoute,
-  AuthVerifyRoute: AuthVerifyRoute,
 }
 
 export const routeTree = rootRoute
@@ -192,15 +236,20 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/app/match",
         "/app/profile",
         "/app/profile-creation",
+        "/app/search",
         "/auth/login",
-        "/auth/register",
-        "/auth/verify"
+        "/auth/not-verify",
+        "/auth/register"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/app/match": {
+      "filePath": "app/match.tsx"
     },
     "/app/profile": {
       "filePath": "app/profile.tsx"
@@ -208,14 +257,17 @@ export const routeTree = rootRoute
     "/app/profile-creation": {
       "filePath": "app/profile-creation.tsx"
     },
+    "/app/search": {
+      "filePath": "app/search.tsx"
+    },
     "/auth/login": {
       "filePath": "auth/login.tsx"
     },
+    "/auth/not-verify": {
+      "filePath": "auth/not-verify.tsx"
+    },
     "/auth/register": {
       "filePath": "auth/register.tsx"
-    },
-    "/auth/verify": {
-      "filePath": "auth/verify.tsx"
     }
   }
 }

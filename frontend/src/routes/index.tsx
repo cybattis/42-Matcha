@@ -4,15 +4,12 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import { MyRooterContext } from "./__root";
-import axios from "axios";
-import { UserProfile } from "@/lib/interface.ts";
 import { VStack, Image, Flex, HStack, Button } from "@chakra-ui/react";
-import { getUserToken } from "@/auth.tsx";
 import { LikeIcon, SkipIcon } from "@/components/Icons.tsx";
 
 export const Route = createFileRoute("/")({
   component: Index,
-  beforeLoad: ({
+  beforeLoad: async ({
     context,
     location,
   }: {
@@ -27,19 +24,18 @@ export const Route = createFileRoute("/")({
         },
       });
     }
+    console.log("User is authenticated");
+    throw redirect({
+      to: "/app/profile-creation",
+      search: {
+        redirect: location.href,
+      },
+    });
   },
-  loader: () => loader(getUserToken()),
+  loader: () => loader(),
 });
 
-async function loader(token: string | null) {
-  const response = await axios.get("/UserProfile/Me", {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    },
-  });
-  return response.data as UserProfile;
-}
+async function loader() {}
 
 function Index() {
   return (
