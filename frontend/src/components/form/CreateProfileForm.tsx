@@ -1,28 +1,31 @@
 import {
   Button,
+  Flex,
   HStack,
   Input,
   Stack,
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import {Field} from "@/components/ui/field";
-import {UseFormReturn} from "react-hook-form";
-import {FormEventHandler} from "react";
-import {UserProfileFormValue} from "@/routes/app/creation.tsx";
-import {Radio, RadioGroup} from "@/components/ui/radio";
-import {useCoordinate} from "@/lib/useCoordinate.ts";
+import { Field } from "@/components/ui/field";
+import { UseFormReturn } from "react-hook-form";
+import { FormEventHandler } from "react";
+import { Tags, UserProfileFormValue } from "@/routes/app/profile/creation.tsx";
+import { useCoordinate } from "@/lib/useCoordinate.ts";
+import { Radio, RadioGroup } from "@/components/ui/radio.tsx";
+import { TagButton } from "@/components/TagButton.tsx";
 
 export function CreateProfileForm(props: {
   form: UseFormReturn<UserProfileFormValue>;
   onSubmit: FormEventHandler<HTMLFormElement>;
+  tags: Tags[];
 }) {
-  const {form} = props;
+  const { form, tags, onSubmit } = props;
   const errors = form.formState.errors;
   const coordinates = useCoordinate();
 
   return (
-    <form onSubmit={props.onSubmit}>
+    <form onSubmit={onSubmit}>
       <VStack gap="4" align="center">
         <Stack gap="5" direction="column" w={"full"}>
           <HStack gap="4">
@@ -89,6 +92,12 @@ export function CreateProfileForm(props: {
           >
             <Textarea placeholder="I am ..." {...form.register("biography")} />
           </Field>
+          <div>Tags</div>
+          <Flex wrap="wrap" gap={2} justifyContent="flex-start" maxW="xl">
+            {tags
+              ? tags.map((tag: Tags) => <TagButton name={tag.name} />)
+              : null}
+          </Flex>
         </Stack>
         <Button type="submit" size="md" cursor="pointer">
           Save
