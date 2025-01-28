@@ -91,10 +91,6 @@ public class LoginController : ControllerBase
     {
         try 
         {
-            if (!Checks.IsValidMail(forgottenPassword.Email) && !Checks.IsValidUserName(forgottenPassword.UserName))
-            {
-                return BadRequest("Invalide username or email");
-            }
             //Environment.GetEnvironmentVariable("ROOT_URL") + "/Auth/ForgotenPassword/" +
             string forgotenPasswordLink =  Guid.NewGuid().ToString();
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
@@ -113,13 +109,10 @@ public class LoginController : ControllerBase
 
             // Vérifiez si l'utilisateur existe
             int userExists = Convert.ToInt32(existsParam.Value);
-            if (userExists == 0)
+            if (userExists != 0 && forgottenPassword.Email != null)
             {
-                if (forgottenPassword.Email != null)
-                    Notify.SendForgottenPasswordMail(forgottenPassword.Email, forgotenPasswordLink);
-                return Ok("If informations are valid, a mail will be sent to the adress");
+                Notify.SendForgottenPasswordMail(forgottenPassword.Email, forgotenPasswordLink);
             }
-
             return Ok("If informations are valid, a mail will be sent to the adress");
         }
         catch (Exception ex)
