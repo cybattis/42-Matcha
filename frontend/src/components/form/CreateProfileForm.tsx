@@ -6,18 +6,18 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import { Field } from "@/components/ui/field";
-import { UseFormReturn } from "react-hook-form";
-import { FormEventHandler } from "react";
-import { UserProfileFormValue } from "@/routes/app/profile-creation.tsx";
-import { Radio, RadioGroup } from "@/components/ui/radio";
-import { useCoordinate } from "@/lib/useCoordinate.ts";
+import {Field} from "@/components/ui/field";
+import {UseFormReturn} from "react-hook-form";
+import {FormEventHandler} from "react";
+import {UserProfileFormValue} from "@/routes/app/creation.tsx";
+import {Radio, RadioGroup} from "@/components/ui/radio";
+import {useCoordinate} from "@/lib/useCoordinate.ts";
 
 export function CreateProfileForm(props: {
   form: UseFormReturn<UserProfileFormValue>;
   onSubmit: FormEventHandler<HTMLFormElement>;
 }) {
-  const { form } = props;
+  const {form} = props;
   const errors = form.formState.errors;
   const coordinates = useCoordinate();
 

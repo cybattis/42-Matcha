@@ -3,16 +3,16 @@ import {
   ParsedLocation,
   redirect,
 } from "@tanstack/react-router";
-import { MyRooterContext } from "./__root";
-import { VStack, Image, Flex, HStack, Button } from "@chakra-ui/react";
-import { LikeIcon, SkipIcon } from "@/components/Icons.tsx";
+import {MyRooterContext} from "./__root";
+import {VStack, Image, Flex, HStack, Button} from "@chakra-ui/react";
+import {LikeIcon, SkipIcon} from "@/components/Icons.tsx";
 
 export const Route = createFileRoute("/")({
   component: Index,
   beforeLoad: async ({
-    context,
-    location,
-  }: {
+                       context,
+                       location,
+                     }: {
     context: MyRooterContext;
     location: ParsedLocation;
   }) => {
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/")({
     }
     console.log("User is authenticated");
     throw redirect({
-      to: "/app/profile-creation",
+      to: "/app/profile/creation",
       search: {
         redirect: location.href,
       },
@@ -35,7 +35,8 @@ export const Route = createFileRoute("/")({
   loader: () => loader(),
 });
 
-async function loader() {}
+async function loader() {
+}
 
 function Index() {
   return (
@@ -49,10 +50,10 @@ function Index() {
         />
         <HStack gap={20} justifyContent={"center"}>
           <Button variant={"ghost"}>
-            <SkipIcon />
+            <SkipIcon/>
           </Button>
           <Button variant={"ghost"}>
-            <LikeIcon />
+            <LikeIcon/>
           </Button>
         </HStack>
       </Flex>

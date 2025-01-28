@@ -12,19 +12,27 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as AuthVerifyImport } from './routes/auth/verify'
 import { Route as AuthRegisterImport } from './routes/auth/register'
 import { Route as AuthNotVerifyImport } from './routes/auth/not-verify'
 import { Route as AuthLoginImport } from './routes/auth/login'
 import { Route as AppSearchImport } from './routes/app/search'
-import { Route as AppProfileCreationImport } from './routes/app/profile-creation'
-import { Route as AppProfileImport } from './routes/app/profile'
 import { Route as AppMatchImport } from './routes/app/match'
+import { Route as AppProfileIndexImport } from './routes/app/profile/index'
+import { Route as AppProfileCreationImport } from './routes/app/profile/creation'
+import { Route as AppProfileUsernameImport } from './routes/app/profile/$username'
 
 // Create/Update Routes
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuthVerifyRoute = AuthVerifyImport.update({
+  id: '/auth/verify',
+  path: '/auth/verify',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -52,21 +60,27 @@ const AppSearchRoute = AppSearchImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AppProfileCreationRoute = AppProfileCreationImport.update({
-  id: '/app/profile-creation',
-  path: '/app/profile-creation',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AppProfileRoute = AppProfileImport.update({
-  id: '/app/profile',
-  path: '/app/profile',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const AppMatchRoute = AppMatchImport.update({
   id: '/app/match',
   path: '/app/match',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AppProfileIndexRoute = AppProfileIndexImport.update({
+  id: '/app/profile/',
+  path: '/app/profile/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AppProfileCreationRoute = AppProfileCreationImport.update({
+  id: '/app/profile/creation',
+  path: '/app/profile/creation',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AppProfileUsernameRoute = AppProfileUsernameImport.update({
+  id: '/app/profile/$username',
+  path: '/app/profile/$username',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -86,20 +100,6 @@ declare module '@tanstack/react-router' {
       path: '/app/match'
       fullPath: '/app/match'
       preLoaderRoute: typeof AppMatchImport
-      parentRoute: typeof rootRoute
-    }
-    '/app/profile': {
-      id: '/app/profile'
-      path: '/app/profile'
-      fullPath: '/app/profile'
-      preLoaderRoute: typeof AppProfileImport
-      parentRoute: typeof rootRoute
-    }
-    '/app/profile-creation': {
-      id: '/app/profile-creation'
-      path: '/app/profile-creation'
-      fullPath: '/app/profile-creation'
-      preLoaderRoute: typeof AppProfileCreationImport
       parentRoute: typeof rootRoute
     }
     '/app/search': {
@@ -130,6 +130,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterImport
       parentRoute: typeof rootRoute
     }
+    '/auth/verify': {
+      id: '/auth/verify'
+      path: '/auth/verify'
+      fullPath: '/auth/verify'
+      preLoaderRoute: typeof AuthVerifyImport
+      parentRoute: typeof rootRoute
+    }
+    '/app/profile/$username': {
+      id: '/app/profile/$username'
+      path: '/app/profile/$username'
+      fullPath: '/app/profile/$username'
+      preLoaderRoute: typeof AppProfileUsernameImport
+      parentRoute: typeof rootRoute
+    }
+    '/app/profile/creation': {
+      id: '/app/profile/creation'
+      path: '/app/profile/creation'
+      fullPath: '/app/profile/creation'
+      preLoaderRoute: typeof AppProfileCreationImport
+      parentRoute: typeof rootRoute
+    }
+    '/app/profile/': {
+      id: '/app/profile/'
+      path: '/app/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileIndexImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -138,35 +166,41 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app/match': typeof AppMatchRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/profile-creation': typeof AppProfileCreationRoute
   '/app/search': typeof AppSearchRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify': typeof AuthVerifyRoute
+  '/app/profile/$username': typeof AppProfileUsernameRoute
+  '/app/profile/creation': typeof AppProfileCreationRoute
+  '/app/profile': typeof AppProfileIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app/match': typeof AppMatchRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/profile-creation': typeof AppProfileCreationRoute
   '/app/search': typeof AppSearchRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify': typeof AuthVerifyRoute
+  '/app/profile/$username': typeof AppProfileUsernameRoute
+  '/app/profile/creation': typeof AppProfileCreationRoute
+  '/app/profile': typeof AppProfileIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/app/match': typeof AppMatchRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/profile-creation': typeof AppProfileCreationRoute
   '/app/search': typeof AppSearchRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify': typeof AuthVerifyRoute
+  '/app/profile/$username': typeof AppProfileUsernameRoute
+  '/app/profile/creation': typeof AppProfileCreationRoute
+  '/app/profile/': typeof AppProfileIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -174,55 +208,65 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app/match'
-    | '/app/profile'
-    | '/app/profile-creation'
     | '/app/search'
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+    | '/auth/verify'
+    | '/app/profile/$username'
+    | '/app/profile/creation'
+    | '/app/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app/match'
-    | '/app/profile'
-    | '/app/profile-creation'
     | '/app/search'
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+    | '/auth/verify'
+    | '/app/profile/$username'
+    | '/app/profile/creation'
+    | '/app/profile'
   id:
     | '__root__'
     | '/'
     | '/app/match'
-    | '/app/profile'
-    | '/app/profile-creation'
     | '/app/search'
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+    | '/auth/verify'
+    | '/app/profile/$username'
+    | '/app/profile/creation'
+    | '/app/profile/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppMatchRoute: typeof AppMatchRoute
-  AppProfileRoute: typeof AppProfileRoute
-  AppProfileCreationRoute: typeof AppProfileCreationRoute
   AppSearchRoute: typeof AppSearchRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthNotVerifyRoute: typeof AuthNotVerifyRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthVerifyRoute: typeof AuthVerifyRoute
+  AppProfileUsernameRoute: typeof AppProfileUsernameRoute
+  AppProfileCreationRoute: typeof AppProfileCreationRoute
+  AppProfileIndexRoute: typeof AppProfileIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppMatchRoute: AppMatchRoute,
-  AppProfileRoute: AppProfileRoute,
-  AppProfileCreationRoute: AppProfileCreationRoute,
   AppSearchRoute: AppSearchRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthNotVerifyRoute: AuthNotVerifyRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthVerifyRoute: AuthVerifyRoute,
+  AppProfileUsernameRoute: AppProfileUsernameRoute,
+  AppProfileCreationRoute: AppProfileCreationRoute,
+  AppProfileIndexRoute: AppProfileIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -237,12 +281,14 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/app/match",
-        "/app/profile",
-        "/app/profile-creation",
         "/app/search",
         "/auth/login",
         "/auth/not-verify",
-        "/auth/register"
+        "/auth/register",
+        "/auth/verify",
+        "/app/profile/$username",
+        "/app/profile/creation",
+        "/app/profile/"
       ]
     },
     "/": {
@@ -250,12 +296,6 @@ export const routeTree = rootRoute
     },
     "/app/match": {
       "filePath": "app/match.tsx"
-    },
-    "/app/profile": {
-      "filePath": "app/profile.tsx"
-    },
-    "/app/profile-creation": {
-      "filePath": "app/profile-creation.tsx"
     },
     "/app/search": {
       "filePath": "app/search.tsx"
@@ -268,6 +308,18 @@ export const routeTree = rootRoute
     },
     "/auth/register": {
       "filePath": "auth/register.tsx"
+    },
+    "/auth/verify": {
+      "filePath": "auth/verify.tsx"
+    },
+    "/app/profile/$username": {
+      "filePath": "app/profile/$username.tsx"
+    },
+    "/app/profile/creation": {
+      "filePath": "app/profile/creation.tsx"
+    },
+    "/app/profile/": {
+      "filePath": "app/profile/index.tsx"
     }
   }
 }
