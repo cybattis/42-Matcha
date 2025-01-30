@@ -53,8 +53,8 @@ builder.Services.AddAuthentication(options =>
 {
     o.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidIssuer = Environment.GetEnvironmentVariable("JWT_Issuer") ?? "",
-        ValidAudience = Environment.GetEnvironmentVariable("JWT_Audience") ?? "",
+        ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "",
+        ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
         ValidateIssuer = true,
         ValidateAudience = true,

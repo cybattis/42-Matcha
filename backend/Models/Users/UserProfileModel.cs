@@ -37,4 +37,6 @@ public class UserProfileModel
     public List<int> Tags {get;set;} = new();
     [SwaggerIgnore]
     public List<string> Images {get;set;} = new();
+    [SwaggerIgnore]
+    public int ProfileStatus {get;set;}
 }

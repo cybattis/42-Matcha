@@ -1,17 +1,5 @@
 DELIMITER //
 
-# GetUser
-CREATE PROCEDURE GetUserByID(IN userID INT)
-BEGIN
-    SELECT *  FROM users WHERE id = userID;
-END //
-
-# GetUserAuthData
-CREATE PROCEDURE GetUserAuthData(IN userID INT)
-BEGIN
-    SELECT username, password, email, birth_date FROM users WHERE id = userID;
-END //
-
 # GetUserProfile
 CREATE PROCEDURE GetUserProfile(IN userID INT) 
 BEGIN
@@ -22,6 +10,12 @@ BEGIN
     SELECT * FROM users_tags WHERE user_id = userID;
     
     SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
+END //
+
+CREATE PROCEDURE GetUserProfileStatus(IN userID INT)
+BEGIN
+    SELECT profile_status
+        FROM users WHERE id = userID;
 END //
 
 # UpdateUserProfile

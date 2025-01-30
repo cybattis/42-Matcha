@@ -14,11 +14,11 @@ public class JwtHelper
     /// <param name="userId">L'identifiant unique de l'utilisateur</param>
     /// <param name="username">Le nom d'utilisateur</param>
     /// <returns>Un token JWT signé</returns>
-    public string GenerateJwtToken(int userId, string username)
+    public static string GenerateJwtToken(int userId, string username)
     {
-        string secretKey = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "";
-        var issuer = Environment.GetEnvironmentVariable("JWT_Issuer") ?? "";
-        var audience = Environment.GetEnvironmentVariable("JWT_Audience") ?? "";
+        var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "";
+        var issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "";
+        var audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "";
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -30,7 +30,7 @@ public class JwtHelper
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             ]),
-            Expires = DateTime.UtcNow.AddMinutes(5),
+            Expires = DateTime.UtcNow.AddHours(1),
             Issuer = issuer,
             Audience = audience,
             SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature)
@@ -40,5 +40,15 @@ public class JwtHelper
         // var jwtToken = tokenHandler.WriteToken(token);
         var stringToken = tokenHandler.WriteToken(token);
         return stringToken;
+    }
+    
+    public static int DecodeJwtToken(string authorization)
+    {
+        var token = authorization.Replace("Bearer ", "");
+        var handler = new JwtSecurityTokenHandler();
+        var tokenS = handler.ReadToken(token) as JwtSecurityToken;
+        var id = int.Parse(tokenS?.Claims.First(claim => claim.Type == "sub").Value ?? "0");
+        
+        return id;
     }
 }

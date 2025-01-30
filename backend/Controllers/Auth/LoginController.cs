@@ -49,7 +49,6 @@ public class LoginController : ControllerBase
 
             byte[] hashedPassword = new byte[32];
             reader.GetBytes("password", 0, hashedPassword, 0, 32);
-            Console.WriteLine(hashedPassword);
             string salt = reader.GetString("salt");
             int userId = reader.GetInt32("id");
             bool isVerified = reader.GetBoolean("is_verified");
@@ -57,8 +56,6 @@ public class LoginController : ControllerBase
             bool isPasswordValid = Crypt.VerifyPassword(newLogin.Password, salt, hashedPassword);
             if (isPasswordValid)
             {
-                Console.WriteLine("Password Valid.");
-                
                 if (!isVerified) {
                     return Unauthorized(new {
                         Error = "AccountNotVerified",
@@ -66,7 +63,7 @@ public class LoginController : ControllerBase
                     });
                 }
                 
-                string token = GenerateJwtToken(userId, newLogin.UserName);
+                string token = JwtHelper.GenerateJwtToken(userId, newLogin.UserName);
                 return Ok(new
                 {
                     Message = "Connexion réussie.",
@@ -89,14 +86,7 @@ public class LoginController : ControllerBase
             });
         }
     }
-    private string GenerateJwtToken(int userId, string username)
-    {
-
-        JwtHelper jwtHelper = new JwtHelper();
-        return jwtHelper.GenerateJwtToken(userId, username);
-    }
-
-        
+    
     [HttpPost]
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]

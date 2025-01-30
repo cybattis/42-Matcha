@@ -1,6 +1,7 @@
 using System.Data;
 using backend.Database;
 using backend.Models.Users;
+using backend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
@@ -42,20 +43,21 @@ public class TagsController(ILogger<TagsController> logger): ControllerBase
             return Problem(title: "Server error", detail: "");
         }
     }
-    
+
     /// <summary>
     /// Update user tag
     /// </summary>
-    /// <param name="id">User ID</param>
     /// <param name="tagId">tag id</param>
+    /// <param name="authorization"></param>
     /// <response code="200">Tag updated</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [Route("[action]/{id:int}")]
+    [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult UpdateTag(int id, [FromForm] int tagId)
+    public ActionResult UpdateTag([FromForm] int tagId, [FromHeader] string authorization)
     {
+        var id = JwtHelper.DecodeJwtToken(authorization);
         try {
             if (tagId < 1)
                 return BadRequest("Invalid tag id");

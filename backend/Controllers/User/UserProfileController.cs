@@ -1,4 +1,6 @@
 using System.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using backend.Database;
 using backend.Models.Users;
 using backend.Utils;
@@ -78,18 +80,15 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Me()
+    public async Task<ActionResult> Me([FromHeader] string authorization)
     {
-        //Decode token
-        //Get user id from token
-        Request.Headers.TryGetValue("Authorization", out var token);
-        Console.WriteLine(token.ToString());
+        var id = JwtHelper.DecodeJwtToken(authorization);
         
         try {
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", 1);
+            cmd.Parameters.AddWithValue("@userID", id);
 
             await using MySqlDataReader reader = cmd.ExecuteReader();
             if (!reader.Read()) return ValidationProblem();
@@ -134,17 +133,19 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <summary>
     /// Update user profile
     /// </summary>
-    /// <param name="id">User ID</param>
+    /// <param name="authorization">User input data</param>
     /// <param name="data">User input data</param>
     /// <response code="200">profile updated</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [Route("[action]/{id:int}")]
+    [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult Update(int id, [FromForm] UserProfileModel data)
+    public ActionResult Update([FromHeader] string authorization, [FromForm] UserProfileModel data)
     {
+        var id = JwtHelper.DecodeJwtToken(authorization);
         var result = Checks.ValidateProfileData(data);
+        
         if (!result.IsValid)
             return BadRequest(result.Message);
         
@@ -161,6 +162,49 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             cmd.Parameters.AddWithValue("@coordinates", data.Coordinates);
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully updated");
+        }
+        catch (MySqlException e) {
+            logger.LogError(e.Message);
+            return Problem(detail: e.Message);
+        }
+    }
+
+    /// <summary>
+    /// Get user profile status
+    /// </summary>
+    /// <response code="200">Success</response>
+    /// <response code="400">Bad request</response>
+    [HttpGet]
+    [Route("[action]")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Status([FromHeader] string authorization)
+    {
+        var id = JwtHelper.DecodeJwtToken(authorization);
+        
+        try {
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlCommand cmd = new MySqlCommand("GetUserProfileStatus", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.ExecuteNonQuery();
+            
+            await using MySqlDataReader reader = cmd.ExecuteReader();
+            if (!reader.Read()) return ValidationProblem();
+            
+            var profileStatus = reader["profile_status"] as int? ?? 0;
+            await reader.CloseAsync();
+            
+            var status = profileStatus switch
+            {
+                0 => "Info",
+                1 => "Images",
+                3 => "Complete",
+                _ => "Unknown"
+            };
+            
+            return Ok(status);
         }
         catch (MySqlException e) {
             logger.LogError(e.Message);
