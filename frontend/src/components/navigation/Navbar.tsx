@@ -33,7 +33,7 @@ import {
 function AppLogo() {
   return (
     <Box w="100%" display="flex" justifyContent={"center"}>
-      <Link to={"/"}>MATCHA</Link>
+      <Link to={"/home"}>MATCHA</Link>
     </Box>
   );
 }
@@ -146,7 +146,7 @@ const NavbarMenu = () => {
         <MenuItem
           value="Profile"
           onClick={async () => {
-            await navigate({ to: "/app/profile" });
+            await navigate({ to: "/profile/me" });
           }}
         >
           Profile

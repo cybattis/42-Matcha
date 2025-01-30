@@ -7,7 +7,7 @@ import { toaster } from "@/components/ui/toaster.tsx";
 import { ToasterError, ToasterSuccess } from "@/lib/toaster.ts";
 import { RiArrowRightLine } from "react-icons/ri";
 
-export const Route = createFileRoute("/auth/login")({
+export const Route = createFileRoute("/_auth/auth/login")({
   component: RouteComponent,
 });
 
@@ -80,7 +80,7 @@ function RouteComponent() {
           </Stack>
         </Card.Footer>
       </Card.Root>
-      {auth.isAuthenticated && <Navigate to={"/"} />}
+      {auth.isAuthenticated && <Navigate to={"/home"} />}
     </Flex>
   );
 }

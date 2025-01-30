@@ -17,7 +17,7 @@ export function MatchList({props, setId}: { props: MatchListType; setId: (value:
             borderColor="gray.200">
       <Button variant={'ghost'}
               onClick={async () => {
-                await navigate({to: '/app/profile/' + props.id});
+                await navigate({to: '/profile/' + props.id});
               }}>
         <Avatar name={props.name} size="lg" src={props.avatar}>
           <Float placement="bottom-end" offsetX="1" offsetY="1">

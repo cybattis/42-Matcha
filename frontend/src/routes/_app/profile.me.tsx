@@ -3,7 +3,7 @@ import axios from 'axios'
 import { UserProfile } from '@/lib/interface.ts'
 import { MyRooterContext } from '@/routes/__root.tsx'
 
-export const Route = createFileRoute('/app/profile/')({
+export const Route = createFileRoute('/_app/profile/me')({
   component: RouteComponent,
   loader: ({ context }: { context: MyRooterContext }) =>
     loader(context.auth.token),
@@ -20,5 +20,5 @@ async function loader(token: string | null) {
 }
 
 function RouteComponent() {
-  return <div>Hello "/profile"!</div>
+  return <div>Hello Me!</div>
 }

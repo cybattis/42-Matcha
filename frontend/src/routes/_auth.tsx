@@ -1,12 +1,13 @@
 import {
   createFileRoute,
+  Outlet,
   ParsedLocation,
   redirect,
 } from "@tanstack/react-router";
-import { MyRooterContext } from "./__root";
+import { MyRooterContext } from "@/routes/__root.tsx";
 
-export const Route = createFileRoute("/")({
-  component: Index,
+export const Route = createFileRoute("/_auth")({
+  component: RouteComponent,
   beforeLoad: async ({
     context,
     location,
@@ -14,14 +15,9 @@ export const Route = createFileRoute("/")({
     context: MyRooterContext;
     location: ParsedLocation;
   }) => {
-    console.log("Index layout");
+    console.log("Auth layout");
     console.log("Location: ", location);
-    if (!context.auth.isAuthenticated) {
-      console.log("User is not authenticated");
-      throw redirect({
-        to: "/auth/login",
-      });
-    } else if (location.pathname !== "/home") {
+    if (context.auth.isAuthenticated) {
       console.log("User is authenticated");
       throw redirect({
         to: "/home",
@@ -30,6 +26,6 @@ export const Route = createFileRoute("/")({
   },
 });
 
-function Index() {
-  return <></>;
+function RouteComponent() {
+  return <Outlet />;
 }

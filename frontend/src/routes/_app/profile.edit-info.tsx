@@ -6,37 +6,45 @@ import {
 } from "@tanstack/react-router";
 import { MyRooterContext } from "@/routes/__root.tsx";
 import axios from "axios";
-import { ToasterError, ToasterSuccess } from "@/lib/toaster.ts";
-import { useEffect, useState } from "react";
+import { ToasterError } from "@/lib/toaster.ts";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { IAuthContext, useAuth } from "@/auth.tsx";
+import { IAuthContext } from "@/auth.tsx";
 import { toaster } from "@/components/ui/toaster.tsx";
 import { VStack } from "@chakra-ui/react";
-import { CreateProfileForm } from "@/components/form/CreateProfileForm.tsx";
+import { EditProfileForm } from "@/components/form/EditProfileForm.tsx";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-export const Route = createFileRoute("/app/profile/creation")({
+export const Route = createFileRoute("/_app/profile/edit-info")({
   component: RouteComponent,
   loader: async ({ context }: { context: MyRooterContext }) => {
-    return fetchTags(context.auth);
+    return await fetchTags(context.auth);
   },
 });
-
-export interface UserProfileFormValue {
-  firstName: string;
-  lastName: string;
-  gender: number;
-  sexualOrientation: number;
-  biography: string;
-  coordinates: string;
-  tags: number[];
-}
 
 export interface Tags {
   id: number;
   name: string;
 }
 
-async function createProfile(token: string | null, data: UserProfileFormValue) {
+const formSchema = z.object({
+  firstName: z.string().nonempty({
+    message: "First name is required",
+  }),
+  lastName: z.string().nonempty({
+    message: "Last name is required",
+  }),
+  gender: z.number(),
+  sexualOrientation: z.number(),
+  biography: z.string(),
+  coordinates: z.string(),
+  tags: z.array(z.string()),
+});
+
+export type UserProfileFormValue = z.infer<typeof formSchema>;
+
+async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
   const response = await axios
     .post("/UserProfile/Update", data, {
       headers: {
@@ -53,11 +61,13 @@ async function createProfile(token: string | null, data: UserProfileFormValue) {
 }
 
 async function fetchTags(auth: IAuthContext): Promise<Tags[]> {
+  const token = "Bearer " + localStorage.getItem("token");
+  console.log(token);
   try {
     const res = await axios.get("/Tags/GetList", {
       headers: {
         "Content-Type": "text/plain;charset=utf-8",
-        Authorization: "Bearer " + auth.token,
+        Authorization: token,
       },
     });
     return res.data;
@@ -75,16 +85,20 @@ async function fetchTags(auth: IAuthContext): Promise<Tags[]> {
 }
 
 function RouteComponent() {
-  const routeApi = getRouteApi("/app/profile/creation");
+  const routeApi = getRouteApi("/_app/profile/edit-info");
   const tags = routeApi.useLoaderData() as Tags[];
   const [isProfileCreated, setIsProfileCreated] = useState(false);
-  const form = useForm<UserProfileFormValue>();
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const { handleSubmit, register, formState, control } =
+    useForm<UserProfileFormValue>({
+      resolver: zodResolver(formSchema),
+    });
+
+  const onSubmit = handleSubmit(async (data: UserProfileFormValue) => {
     console.log(data);
-    const token = useAuth().token;
     const t = toaster.loading({ title: "Création de compte en cours..." });
-    const result = await createProfile(token, data);
+    const token = localStorage.getItem("token");
+    const result = await UpdateProfile(token, data);
 
     console.log(result);
 
@@ -118,12 +132,16 @@ function RouteComponent() {
     toaster.remove(t);
   });
 
-  useEffect(() => {}, []);
-
   return (
     <VStack gap={6} align={"center"}>
-      <CreateProfileForm onSubmit={onSubmit} form={form} tags={tags} />
-      {isProfileCreated ? <Navigate to={"/"} /> : null}
+      <EditProfileForm
+        onSubmit={onSubmit}
+        register={register}
+        control={control}
+        formState={formState}
+        tagsData={tags}
+      />
+      {isProfileCreated ? <Navigate to={"/profile/edit-images"} /> : null}
     </VStack>
   );
 }
