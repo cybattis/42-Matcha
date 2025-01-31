@@ -36,7 +36,7 @@ END //
 
 CREATE PROCEDURE getVerificationAccountInfo(IN inputVerifyLink VARCHAR(250))
 BEGIN
-    SELECT id, is_verified, email_verification_link, forgotten_password_link_expiration, email
+    SELECT id, is_verified, email_verification_link, email_verification_link_expiration, email
         FROM users
         WHERE email_verification_link = inputVerifyLink;
 END //

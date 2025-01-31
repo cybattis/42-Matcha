@@ -19,6 +19,7 @@ import { Route as AppSearchImport } from './routes/app/search'
 import { Route as AppProfileCreationImport } from './routes/app/profile-creation'
 import { Route as AppProfileImport } from './routes/app/profile'
 import { Route as AppMatchImport } from './routes/app/match'
+import { Route as AuthVerifyIdImport } from './routes/auth/verify.$id'
 
 // Create/Update Routes
 
@@ -67,6 +68,12 @@ const AppProfileRoute = AppProfileImport.update({
 const AppMatchRoute = AppMatchImport.update({
   id: '/app/match',
   path: '/app/match',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuthVerifyIdRoute = AuthVerifyIdImport.update({
+  id: '/auth/verify/$id',
+  path: '/auth/verify/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -130,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterImport
       parentRoute: typeof rootRoute
     }
+    '/auth/verify/$id': {
+      id: '/auth/verify/$id'
+      path: '/auth/verify/$id'
+      fullPath: '/auth/verify/$id'
+      preLoaderRoute: typeof AuthVerifyIdImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
@@ -144,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify/$id': typeof AuthVerifyIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -155,6 +170,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify/$id': typeof AuthVerifyIdRoute
 }
 
 export interface FileRoutesById {
@@ -167,6 +183,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/auth/verify/$id': typeof AuthVerifyIdRoute
 }
 
 export interface FileRouteTypes {
@@ -180,6 +197,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+    | '/auth/verify/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -190,6 +208,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+    | '/auth/verify/$id'
   id:
     | '__root__'
     | '/'
@@ -200,6 +219,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+    | '/auth/verify/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -212,6 +232,7 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthNotVerifyRoute: typeof AuthNotVerifyRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthVerifyIdRoute: typeof AuthVerifyIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -223,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthNotVerifyRoute: AuthNotVerifyRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AuthVerifyIdRoute: AuthVerifyIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -242,7 +264,8 @@ export const routeTree = rootRoute
         "/app/search",
         "/auth/login",
         "/auth/not-verify",
-        "/auth/register"
+        "/auth/register",
+        "/auth/verify/$id"
       ]
     },
     "/": {
@@ -268,6 +291,9 @@ export const routeTree = rootRoute
     },
     "/auth/register": {
       "filePath": "auth/register.tsx"
+    },
+    "/auth/verify/$id": {
+      "filePath": "auth/verify.$id.tsx"
     }
   }
 }

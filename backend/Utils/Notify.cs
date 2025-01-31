@@ -28,7 +28,7 @@ public static class Notify {
                     <body>
                         <h1>Welcome to Matcha!</h1>
                         <p>Click the link below to verify your email address:</p>
-                        <a href='http://localhost:3000/Auth/VerifyAccount/{verificationLink}'>Verify Email</a>
+                        <a href='http://localhost:3000/auth/verify/{verificationLink}'>Verify Email</a>
                         <p>If you didn't request this, you can ignore this email.</p>
                     </body>
                     </html>";
