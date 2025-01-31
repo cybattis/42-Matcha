@@ -11,10 +11,10 @@ public class UserProfileModel
     [DefaultValue("Bono")]
     public string? LastName {get;set;}
 
-    [DefaultValue("1")]
-    public int? GenderId {get;set;} // 1: Men 2: Women
+    [DefaultValue(1)]
+    public int? Gender {get;set;} // 1: Men 2: Women
 
-    [DefaultValue("1")]
+    [DefaultValue(1)]
     public int? SexualOrientation {get;set;}
 
     [DefaultValue("This is a bio.")]
@@ -23,8 +23,6 @@ public class UserProfileModel
     [DefaultValue("45.7736192,4.7579136")] // 45.7736192 4.7579136 → École 42 position
     public string? Coordinates {get;set;}
     
-    [DefaultValue(false)]
-    public bool? IsVerified {get;set;}
     
     [DefaultValue(0)]
     public int? ProfileCompletionPercentage {get;set;}
@@ -33,6 +31,9 @@ public class UserProfileModel
     public int? FameRating {get;set;}
 
     // For GET request
+    [SwaggerIgnore]
+    [DefaultValue(false)]
+    public bool? IsVerified {get;set;}
     [SwaggerIgnore]
     public List<int> Tags {get;set;} = new();
     [SwaggerIgnore]

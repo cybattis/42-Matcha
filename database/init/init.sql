@@ -48,6 +48,7 @@ CREATE TABLE users (
 CREATE TABLE users_tags (
     user_id INT NOT NULL,
     tag_id INT NOT NULL,
+    id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
 );

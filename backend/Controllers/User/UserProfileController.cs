@@ -41,7 +41,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 {
                     FirstName = reader["first_name"].ToString() ?? "",
                     LastName = reader["last_name"].ToString() ?? "",
-                    GenderId = reader["gender_id"] as int?,
+                    Gender = reader["gender_id"] as int?,
                     SexualOrientation = reader["sexual_orientation"] as int?,
                     Biography = reader["biography"].ToString() ?? "",
                     Coordinates = reader["coordinates"].ToString() ?? "",
@@ -97,7 +97,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             {
                 FirstName = reader["first_name"].ToString() ?? "",
                 LastName = reader["last_name"].ToString() ?? "",
-                GenderId = reader["gender_id"] as int?,
+                Gender = reader["gender_id"] as int?,
                 SexualOrientation = reader["sexual_orientation"] as int?,
                 Biography = reader["biography"].ToString() ?? "",
                 Coordinates = reader["coordinates"].ToString() ?? "",
@@ -143,8 +143,8 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult Update([FromHeader] string authorization, [FromForm] UserProfileModel data)
     {
-        var id = JwtHelper.DecodeJwtToken(authorization);
         var result = Checks.ValidateProfileData(data);
+        var id = JwtHelper.DecodeJwtToken(authorization);
         
         if (!result.IsValid)
             return BadRequest(result.Message);
@@ -156,7 +156,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             cmd.Parameters.AddWithValue("@userID", id);
             cmd.Parameters.AddWithValue("@firstName", data.FirstName);
             cmd.Parameters.AddWithValue("@lastName", data.LastName);
-            cmd.Parameters.AddWithValue("@genderID", data.GenderId);
+            cmd.Parameters.AddWithValue("@genderID", data.Gender);
             cmd.Parameters.AddWithValue("@sexualOrientation", data.SexualOrientation);
             cmd.Parameters.AddWithValue("@biography", data.Biography);
             cmd.Parameters.AddWithValue("@coordinates", data.Coordinates);

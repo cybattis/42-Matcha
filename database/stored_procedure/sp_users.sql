@@ -82,27 +82,77 @@ END //
 
 CREATE PROCEDURE GetAllTags()
 BEGIN
-    SELECT *  FROM tags;
+    SELECT * FROM tags;
 END //
 
-CREATE PROCEDURE UpdateTag(
+CREATE PROCEDURE UpdateTags(
     IN userID INT,
-    IN tagID INT
+    IN tag1 INT,
+    IN tag2 INT,
+    IN tag3 INT,
+    IN tag4 INT,
+    IN tag5 INT
 )
 BEGIN
-    SELECT COUNT(*) INTO @count
-    FROM users_tags
-    WHERE user_id = userID AND tag_id = tagID;
     
-    IF @count = 0 THEN
-        INSERT INTO users_tags (user_id, tag_id)
-            VALUES (userID, tagID);
-    ELSE
-        DELETE FROM users_tags
-        WHERE user_id = userID AND tag_id = tagID;
+    IF tag1 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 1) THEN
+            UPDATE users_tags
+                SET tag_id = tag1
+                WHERE user_id = userID AND id = 1;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag1, 1);
+        END IF;
     END IF;
+
+    IF tag2 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 2) THEN
+            UPDATE users_tags
+                SET tag_id = tag2
+                WHERE user_id = userID AND id = 2;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag2, 2);
+        END IF;
+    END IF;
+    
+    IF tag3 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 3) THEN
+            UPDATE users_tags
+                SET tag_id = tag3
+                WHERE user_id = userID AND id = 3;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag3, 3);
+        END IF;
+    END IF;
+    
+    IF tag4 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 4) THEN
+            UPDATE users_tags
+                SET tag_id = tag4
+                WHERE user_id = userID AND id = 4;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag4, 4);
+        END IF;
+    END IF;
+    
+    IF tag5 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 5) THEN
+            UPDATE users_tags
+                SET tag_id = tag5
+                WHERE user_id = userID AND id = 5;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag5, 5);
+        END IF;
+    END IF;
+
     CALL UpdateProfileCompletionPercentage(userID);
 END //
+    
     
 # IMAGE PROCEDURES
 # =================================================================================================

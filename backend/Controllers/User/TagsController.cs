@@ -3,6 +3,7 @@ using backend.Database;
 using backend.Models.Users;
 using backend.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 
@@ -47,7 +48,7 @@ public class TagsController(ILogger<TagsController> logger): ControllerBase
     /// <summary>
     /// Update user tag
     /// </summary>
-    /// <param name="tagId">tag id</param>
+    /// <param name="tags">tag id</param>
     /// <param name="authorization"></param>
     /// <response code="200">Tag updated</response>
     /// <response code="400">Bad request</response>
@@ -55,20 +56,43 @@ public class TagsController(ILogger<TagsController> logger): ControllerBase
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult UpdateTag([FromForm] int tagId, [FromHeader] string authorization)
+    public async Task<ActionResult> Update([FromForm] List<string> tags, [FromHeader] string authorization)
     {
-        var id = JwtHelper.DecodeJwtToken(authorization);
         try {
-            if (tagId < 1)
-                return BadRequest("Invalid tag id");
+            var id = JwtHelper.DecodeJwtToken(authorization);
+            if (tags.Count < 1)
+                return Ok("No changes");
             
-            using MySqlConnection conn = DbHelper.GetOpenConnection();
-            using MySqlCommand cmd = new MySqlCommand("UpdateTag", conn);
+            if (tags.Count > 5)
+                return BadRequest("Too many tags");
+
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlCommand cmd = new MySqlCommand("UpdateTags", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
-            cmd.Parameters.AddWithValue("@tagID", tagId);
-            cmd.ExecuteNonQuery();
-            return Ok("Tag updated");
+            
+            var distinctList = tags.Distinct().ToList();
+            if (tags.Count != distinctList.Count)
+                return BadRequest("Duplicate tags");
+            
+            for (int i = 0; i < tags.Count; i++) {
+                if (Int32.TryParse(tags[i], out var x)) {
+                    cmd.Parameters.AddWithValue($"@tag{i+1}", x);
+                }
+            }
+            if (tags.Count < 5) {
+                for (int i = tags.Count; i < 6; i++) {
+                    cmd.Parameters.AddWithValue($"@tag{i+1}", DBNull.Value);
+                }
+            }
+            
+            foreach (MySqlParameter param in cmd.Parameters)
+            {
+                Console.WriteLine($"{param.ParameterName} = {param.Value}");
+            }
+            
+            await cmd.ExecuteNonQueryAsync();
+            return Ok("Tags updated");
         }
         catch (MySqlException e) {
             logger.LogError(e.Message);

@@ -115,7 +115,7 @@ public static class Checks {
         return true;
     }
     
-    public static bool IsAlpa(string str)
+    public static bool IsAlpha(string str)
     {
         return str.All(char.IsLetter);
     }
@@ -169,19 +169,19 @@ public static class Checks {
 
     public static ValidationResult ValidateProfileData(UserProfileModel data)
     {
-        if (data.FirstName == null || !IsAlpa(data.FirstName!))
+        if (data.FirstName == null || !IsAlpha(data.FirstName!))
             return new ValidationResult { IsValid = false, Message = "Invalid first name" };
         
-        if (data.LastName == null || !IsAlpa(data.LastName!))
+        if (data.LastName == null || !IsAlpha(data.LastName!))
             return new ValidationResult { IsValid = false, Message = "Invalid last name" };
         
-        if (data.GenderId is null or < 0 or > 2)
-            return new ValidationResult { IsValid = false, Message = "Invalid"};
+        if (data.Gender == null || data.Gender is not (1 or 2))
+            return new ValidationResult { IsValid = false, Message = "Invalid Gender"};
         
-        if (data.SexualOrientation is null or < 0 or > 3)
+        if (data.SexualOrientation is null or < 1 or > 3)
             return new ValidationResult { IsValid = false, Message = "Invalid sexual orientation" };
         
-        if (data.Biography == null || !IsValidBiography(data.Biography!))
+        if (data.Biography != null && data.Biography!.Length > 0 && !IsValidBiography(data.Biography!))
             return new ValidationResult { IsValid = false, Message = "Invalid biography" };
         
         if (data.Coordinates == null || !HasValidLength(data.Coordinates!, 0, 25) || !IsCoordinate(data.Coordinates!))

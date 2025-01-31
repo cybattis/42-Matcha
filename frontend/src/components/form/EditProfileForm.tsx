@@ -18,13 +18,10 @@ import {
   UseFormRegister,
 } from "react-hook-form";
 import { FormEventHandler } from "react";
-import {
-  Tags,
-  UserProfileFormValue,
-} from "@/routes/app/profile/edit-profile.tsx";
 import { useCoordinate } from "@/lib/useCoordinate.ts";
 import { Radio, RadioGroup } from "@/components/ui/radio.tsx";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
+import {Tags, UserProfileFormValue} from "@/routes/_app/profile.edit-info.tsx";
 
 export function EditProfileForm(props: {
   formState: FormState<UserProfileFormValue>;
@@ -105,7 +102,7 @@ export function EditProfileForm(props: {
                   {...register("coordinates")}
                   value={
                     coordinates.lat?.toString() +
-                    " " +
+                    "," +
                     coordinates.lon?.toString()
                   }
                 />

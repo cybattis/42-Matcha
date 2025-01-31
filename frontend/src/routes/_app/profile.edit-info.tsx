@@ -1,20 +1,15 @@
-import {
-  createFileRoute,
-  getRouteApi,
-  Navigate,
-  redirect,
-} from "@tanstack/react-router";
-import { MyRooterContext } from "@/routes/__root.tsx";
+import {createFileRoute, getRouteApi, Navigate, redirect,} from "@tanstack/react-router";
+import {MyRooterContext} from "@/routes/__root.tsx";
 import axios from "axios";
-import { ToasterError } from "@/lib/toaster.ts";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { IAuthContext } from "@/auth.tsx";
-import { toaster } from "@/components/ui/toaster.tsx";
-import { VStack } from "@chakra-ui/react";
-import { EditProfileForm } from "@/components/form/EditProfileForm.tsx";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {ToasterError, ToasterSuccess} from "@/lib/toaster.ts";
+import {useState} from "react";
+import {useForm} from "react-hook-form";
+import {IAuthContext} from "@/auth.tsx";
+import {toaster} from "@/components/ui/toaster.tsx";
+import {VStack} from "@chakra-ui/react";
+import {EditProfileForm} from "@/components/form/EditProfileForm.tsx";
+import {z} from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
 
 export const Route = createFileRoute("/_app/profile/edit-info")({
   component: RouteComponent,
@@ -45,23 +40,51 @@ const formSchema = z.object({
 export type UserProfileFormValue = z.infer<typeof formSchema>;
 
 async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
-  const response = await axios
-    .post("/UserProfile/Update", data, {
+    const profile = await axios.post("/UserProfile/Update", {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        gender: data.gender,
+        sexualOrientation: data.sexualOrientation,
+        biography: data.biography,
+        coordinates: data.coordinates,
+    }, {
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": 'application/x-www-form-urlencoded',
         Authorization: "Bearer " + token,
       },
     })
     .then((res) => {
-      console.log(res);
-      return res.data;
+      console.log("Profile", res.response);
+      return res;
     })
-    .catch((err) => console.log(err));
-  return response;
+    .catch((err) => {
+      console.log("Profile", err.response);
+      return err.response;
+    });
+    
+    if (profile.status !== 200) {
+      return profile;
+    }
+
+  return await axios.post("/Tags/Update", {
+      tags: data.tags,
+    }, {
+      headers: {
+        "Content-Type": 'application/x-www-form-urlencoded',
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((res) => {
+      console.log("Tags", res);
+      return res;
+    })
+    .catch((err) => {
+      return err;
+    });
 }
 
 async function fetchTags(auth: IAuthContext): Promise<Tags[]> {
-  const token = "Bearer " + localStorage.getItem("token");
+  const token = "Bearer " + auth.token;
   console.log(token);
   try {
     const res = await axios.get("/Tags/GetList", {
@@ -100,34 +123,13 @@ function RouteComponent() {
     const token = localStorage.getItem("token");
     const result = await UpdateProfile(token, data);
 
-    console.log(result);
+    console.log("RESULT:", result.statusText);
 
-    // if (result.error) {
-    //   result.error.userName &&
-    //   toaster.error({
-    //     title: 'Erreur',
-    //     description: result.error.userName,
-    //   })
-    //   result.error.password &&
-    //   toaster.error({
-    //     title: 'Erreur',
-    //     description: result.error.password,
-    //   })
-    //   result.error.mail &&
-    //   toaster.error({title: 'Erreur', description: result.error.mail})
-    //   result.error.birthDate &&
-    //   toaster.error({
-    //     title: 'Erreur',
-    //     description: result.error.birthDate,
-    //   })
-    // } else {
-    //   setIsProfileCreated(true)
-    //   ToasterSuccess(
-    //     'Compte créé !',
-    //     'Veuillez vérifier votre boîte mail pour activer votre compte.',
-    //     10000,
-    //   )
-    // }
+    if (result.status !== 200) {
+        ToasterError(result.)
+    } else {
+      ToasterSuccess('Profile Updated')
+    }
 
     toaster.remove(t);
   });
