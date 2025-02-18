@@ -53,30 +53,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const appStatus = useCallback(() => {
     console.log("Checking profile status");
-    if (!UserProfileStatus) {
-      axios
-        .get("/UserProfile/status", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          console.log(res.data);
-          setUserProfileStatus(res.data.status);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    }
-
-    if (UserProfileStatus === "complete") {
-      console.log("Profile is complete");
-    } else {
-      console.log("Profile is not complete");
-      throw redirect({
-        to: "/profile/edit-info",
+    axios
+      .get("/UserProfile/status", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => 
+      {
+        console.log(res.data);
+        if (res.data === "complete") {
+          console.log("Profile is complete");
+          throw redirect({
+            to: "/home",
+          });
+        }
+        else if (res.data === "images") {
+          console.log("Profile is images");
+          throw redirect({
+            to: "/profile/edit-images",
+          });
+        }
+        else {
+          console.log("Profile is not complete");
+          throw redirect({
+            to: "/profile/edit-info",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
       });
-    }
   }, [token]);
 
   return (

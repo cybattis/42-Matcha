@@ -54,7 +54,7 @@ async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
       },
     })
     .then((res) => {
-      console.log("Profile", res.response);
+      console.log("Profile", res);
       return res;
     })
     .catch((err) => {
@@ -126,9 +126,10 @@ function RouteComponent() {
     console.log("RESULT:", result.statusText);
 
     if (result.status !== 200) {
-        ToasterError(result.)
+        ToasterError(result.statusText);
     } else {
-      ToasterSuccess('Profile Updated')
+      ToasterSuccess(result.data);
+      setIsProfileCreated(true);
     }
 
     toaster.remove(t);
@@ -143,7 +144,7 @@ function RouteComponent() {
         formState={formState}
         tagsData={tags}
       />
-      {isProfileCreated ? <Navigate to={"/profile/edit-images"} /> : null}
+      {isProfileCreated ? <Navigate to={"/_app/profile/edit-images"} /> : null}
     </VStack>
   );
 }

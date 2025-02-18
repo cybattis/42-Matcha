@@ -85,7 +85,7 @@ function MatchOption() {
 }
 
 function RouteComponent() {
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>()
   const [id, setId] = useState('')
   let [chat, setChat] = useState<MessageProps[]>([])
 
@@ -94,8 +94,8 @@ function RouteComponent() {
       messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
     }
 
-    const currentUser = users.filter((user) => user.id === id)
-    if (currentUser) setChat(currentUser.chat as MessageProps[])
+    const currentUser = users.filter((user) => user.id === id) as MatchListType;
+    if (currentUser) setChat(currentUser.chat)
   }, [id])
 
   return (

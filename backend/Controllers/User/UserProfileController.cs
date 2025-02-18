@@ -200,7 +200,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             {
                 0 => "Info",
                 1 => "Images",
-                3 => "Complete",
+                2 => "Complete",
                 _ => "Unknown"
             };
             

@@ -40,6 +40,7 @@ function InnerApp() {
 }
 
 function App() {
+  
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
