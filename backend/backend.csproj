@@ -24,6 +24,5 @@
 
     <ItemGroup>
       <Folder Include="images\" />
-      <Folder Include="Services\" />
     </ItemGroup>
 </Project>

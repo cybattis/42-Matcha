@@ -1,15 +1,21 @@
-import { io } from "socket.io-client";
-
 // the following forms are similar
-const socket = io("ws://localhost:5163/ws");
+export const wsUrl = "ws://localhost:5163/ws";
 
-// client-side
-socket.on("connect", () => {
-  console.log(socket.id);
-  console.log(socket.connected); // true
-});
+export type WsMessage = {
+  message: string;
+  data: ChatMessage | Notification;
+}
 
-socket.on("disconnect", () => {
-  console.log(socket.id);
-  console.log(socket.connected); // false
-});
+export type ChatMessage = {
+  userId: number;
+  senderId: number;
+  receiverId: number;
+  message: string;
+  timestamp: string;
+}
+
+export type Notification = {
+  status: number;
+  content: string;
+  timestamp: string;
+}
