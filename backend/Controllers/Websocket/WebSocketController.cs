@@ -1,26 +1,29 @@
+using System.Collections.Concurrent;
 using System.Net.WebSockets;
 using System.Text;
-using Microsoft.AspNetCore.Authorization;
+using backend.Models.Chat;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace backend.Controllers.Websocket;
 
-[Authorize]
-public class WebSocketController(ILogger<WebSocketController> logger) : ControllerBase
+public class WebSocketController : ControllerBase
 {
-    private readonly ILogger<WebSocketController> _logger = logger;
-    private readonly Dictionary<int, WebSocket> _sockets = [];
+    private readonly ConcurrentDictionary<int, WebSocket> _sockets = new();
 
-    [Route("/ws/{id}")]
     [SwaggerIgnore]
-    public async Task Get(int id)
+    [Route("/ws")]
+    public async Task Get()
     {
         if (HttpContext.WebSockets.IsWebSocketRequest)
         {
             using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-            _sockets.Add(id, webSocket);
-            await Echo(id);
+            try {
+                await Echo(webSocket);
+            } catch (Exception e) {
+                Console.WriteLine(e);
+            }
         }
         else
         {
@@ -28,53 +31,94 @@ public class WebSocketController(ILogger<WebSocketController> logger) : Controll
         }
     }
 
-    private async Task Echo(int id)
+    private async Task Echo(WebSocket ws)
     {
-        var webSocket = _sockets[id];
-        var buffer = new byte[1024 * 4];
-        var receiveResult = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+        var buffer = new byte[4096];
         
         try {
+            var receiveResult = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             while (!receiveResult.CloseStatus.HasValue)
             {
-                var message = Encoding.UTF8.GetString(buffer, 0, receiveResult.Count);
-                Console.WriteLine($"Received Count {receiveResult.Count}: {message} ");
+                var data = Encoding.UTF8.GetString(buffer, 0, receiveResult.Count);
+                Console.WriteLine($"Received Count {receiveResult.Count}: {data} ");
+                dynamic message = JsonConvert.DeserializeObject<WebsocketMessage>(data)!;
+                if (message == null) {
+                    Console.WriteLine("Failed to deserialize message");
+                    return;
+                }
                 
                 if (receiveResult.MessageType == WebSocketMessageType.Close) 
                 {
-                    if (webSocket.State == WebSocketState.Open && receiveResult.CloseStatus.HasValue)
+                    if (ws.State == WebSocketState.Open && receiveResult.CloseStatus.HasValue)
                     {
-                        await webSocket.CloseOutputAsync(
+                        await ws.CloseOutputAsync(
                             receiveResult.CloseStatus.Value,
                             receiveResult.CloseStatusDescription,
                             CancellationToken.None);
-                        _sockets.Remove(id);
+                        // if (_sockets.TryRemove(id, out _) == false) {
+                        //     Console.WriteLine("Failed to remove socket");
+                        // }
                         Console.WriteLine("Connection closed");
                     }
                 }
                 
-                if (message == "ping")
+                if (message.Message == "ping")
                 {
-                    await webSocket.SendAsync(
+                    await ws.SendAsync(
                         new ArraySegment<byte>(Encoding.UTF8.GetBytes("pong")),
                         WebSocketMessageType.Text,
                         true,
                         CancellationToken.None);
                 }
                 
-                await webSocket.SendAsync(
-                    new ArraySegment<byte>(buffer, 0, receiveResult.Count),
-                    receiveResult.MessageType,
-                    receiveResult.EndOfMessage,
-                    CancellationToken.None);
+                if (message.Message == "connection")
+                {
+                    Console.WriteLine("Connection request");
+                    await ws.SendAsync(
+                        new ArraySegment<byte>(Encoding.UTF8.GetBytes("authenticate")),
+                        WebSocketMessageType.Text,
+                        true,
+                        CancellationToken.None);
+                    
+                    buffer = new byte[4096];
+                    receiveResult = await ws.ReceiveAsync(
+                        new ArraySegment<byte>(buffer), CancellationToken.None);
+                    
+                    data = Encoding.UTF8.GetString(buffer, 0, receiveResult.Count);
+                    Console.WriteLine($"Received Count {receiveResult.Count}: {message} ");
+                    var authMessage = JsonConvert.DeserializeObject<WebsocketMessage>(data);
+                    
+                    if (authMessage == null || authMessage.Message != "authenticated")
+                    {
+                        Console.WriteLine("Failed to authenticate");
+                        await ws.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Failed to authenticate", CancellationToken.None);
+                        return;
+                    }
+                    
+                    // var token = authMessage.Data as string;
+                    // var id = Utils.JwtHelper.DecodeJwtToken(token!);
+                    // Console.WriteLine($"Authenticated: {id}");
+                    
+                    // _sockets.TryAdd(id, ws);
+                }
                 
-                buffer = new byte[1024 * 4];
-                receiveResult = await webSocket.ReceiveAsync(
+                buffer = new byte[4096];
+                receiveResult = await ws.ReceiveAsync(
                     new ArraySegment<byte>(buffer), CancellationToken.None);
             }
-        } catch (Exception e) {
+        }
+        catch (WebSocketException wse)
+        {
+            Console.WriteLine($"WebSocketException: {wse.Message}");
+            Console.WriteLine($"WebSocketException: {wse.StackTrace}");
+            // if (_sockets.TryRemove(id, out _) == false)
+            // {
+            //     Console.WriteLine("Failed to remove socket");
+            // }
+        }
+        catch (Exception e)
+        {
             Console.WriteLine(e);
-            
         }
     }
 }

@@ -1,6 +1,5 @@
 import {createFileRoute, Outlet, ParsedLocation, redirect} from "@tanstack/react-router";
 import {MyRooterContext} from "@/routes/__root.tsx";
-import {useEffect} from "react";
 
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
@@ -22,6 +21,9 @@ export const Route = createFileRoute("/_app")({
       context.auth.appStatus();
     }
   },
+  loader: async ({context}) => {
+    
+  }
 });
 
 function RouteComponent() {

@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace backend.Models.Chat;
 
 public class MessageModel
@@ -16,4 +18,12 @@ public class NotificationModel
     public string Content { get; set; }
     public int Status { get; set; }
     public DateTime Timestamp { get; set; }
+}
+
+public class WebsocketMessage
+{
+    [JsonProperty("message")]
+    public string Message { get; } = "";
+    // [JsonProperty("data")]
+    // public object? Data { get; } = null;
 }
