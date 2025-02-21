@@ -2,8 +2,8 @@
 export const wsUrl = "ws://localhost:5163/ws";
 
 export type WsMessage = {
-  message: string;
-  data: ChatMessage | Notification;
+  Message: string;
+  Data: ChatMessage | Notification;
 }
 
 export type ChatMessage = {

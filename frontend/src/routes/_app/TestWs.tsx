@@ -21,7 +21,7 @@ function RouteComponent() {
   {
     // protocols: ["Authorization", context.auth.token!],
     heartbeat: {
-      message: 'ping',
+      Message: 'ping',
       returnMessage: 'pong',
       timeout: 60000, // 1 minute, if no response is received, the connection will be closed
       interval: 25000, // every 25 seconds, a ping message will be sent
@@ -30,21 +30,23 @@ function RouteComponent() {
     onOpen: () => {
       console.log('opened')
       const connection = {
-        message: 'connection',
+        Message: 'connection',
+        Data: "Bearer " + context.auth.token,
+      }
+      sendMessage(JSON.stringify(connection));
+      this.close();
+    },
+    onClose: () => {
+      console.log('closed')
+      const connection = {
+        Message: 'close',
+        Data: "Bearer " + context.auth.token,
       }
       sendMessage(JSON.stringify(connection));
     },
-    onClose: () => console.log('closed'),
     onMessage: (event) => {
-        console.log('message received: ', event.data)
-        const message = JSON.parse(event.data)
-        if (message.message === 'connection') {
-          const authenticate = {
-            Message: 'authenticate',
-            data: context.auth.token!,
-          }
-          sendMessage(JSON.stringify(authenticate));
-        }
+        console.log('message received: ', event.data);
+        const message = JSON.parse(event.data);
     },
   })
 

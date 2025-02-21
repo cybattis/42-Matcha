@@ -17,13 +17,13 @@ public class NotificationModel
     public int Id { get; set; }
     public string Content { get; set; }
     public int Status { get; set; }
-    public DateTime Timestamp { get; set; }
+    public DateTime Timestamp { get; set; } 
 }
 
 public class WebsocketMessage
 {
-    [JsonProperty("message")]
-    public string Message { get; } = "";
-    // [JsonProperty("data")]
-    // public object? Data { get; } = null;
+    [JsonProperty]
+    public string? Message { get; set; }
+    [JsonProperty]
+    public object? Data { get; set; } = null;
 }

@@ -40,12 +40,9 @@ public class WebSocketController : ControllerBase
             while (!receiveResult.CloseStatus.HasValue)
             {
                 var data = Encoding.UTF8.GetString(buffer, 0, receiveResult.Count);
-                Console.WriteLine($"Received Count {receiveResult.Count}: {data} ");
-                dynamic message = JsonConvert.DeserializeObject<WebsocketMessage>(data)!;
-                if (message == null) {
-                    Console.WriteLine("Failed to deserialize message");
-                    return;
-                }
+                var message = JsonConvert.DeserializeObject<WebsocketMessage>(data)!;
+                
+                Console.WriteLine($"MESSAGE: {message.Message} - {message.Data}");
                 
                 if (receiveResult.MessageType == WebSocketMessageType.Close) 
                 {
@@ -62,7 +59,7 @@ public class WebSocketController : ControllerBase
                     }
                 }
                 
-                if (message.Message == "ping")
+                if (data == "ping")
                 {
                     await ws.SendAsync(
                         new ArraySegment<byte>(Encoding.UTF8.GetBytes("pong")),
@@ -74,32 +71,11 @@ public class WebSocketController : ControllerBase
                 if (message.Message == "connection")
                 {
                     Console.WriteLine("Connection request");
-                    await ws.SendAsync(
-                        new ArraySegment<byte>(Encoding.UTF8.GetBytes("authenticate")),
-                        WebSocketMessageType.Text,
-                        true,
-                        CancellationToken.None);
                     
-                    buffer = new byte[4096];
-                    receiveResult = await ws.ReceiveAsync(
-                        new ArraySegment<byte>(buffer), CancellationToken.None);
+                    var id = Utils.JwtHelper.DecodeJwtToken(message.Data as string ?? "");
+                    Console.WriteLine($"Authenticated: {id}");
                     
-                    data = Encoding.UTF8.GetString(buffer, 0, receiveResult.Count);
-                    Console.WriteLine($"Received Count {receiveResult.Count}: {message} ");
-                    var authMessage = JsonConvert.DeserializeObject<WebsocketMessage>(data);
-                    
-                    if (authMessage == null || authMessage.Message != "authenticated")
-                    {
-                        Console.WriteLine("Failed to authenticate");
-                        await ws.CloseAsync(WebSocketCloseStatus.PolicyViolation, "Failed to authenticate", CancellationToken.None);
-                        return;
-                    }
-                    
-                    // var token = authMessage.Data as string;
-                    // var id = Utils.JwtHelper.DecodeJwtToken(token!);
-                    // Console.WriteLine($"Authenticated: {id}");
-                    
-                    // _sockets.TryAdd(id, ws);
+                    _sockets.TryAdd(id, ws);
                 }
                 
                 buffer = new byte[4096];
