@@ -3,7 +3,6 @@ using backend.Database;
 using backend.Models.Users;
 using backend.Utils;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 

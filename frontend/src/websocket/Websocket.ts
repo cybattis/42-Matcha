@@ -7,11 +7,9 @@ export type WsMessage = {
 }
 
 export type ChatMessage = {
-  userId: number;
-  senderId: number;
-  receiverId: number;
-  message: string;
-  timestamp: string;
+  ReceiverId: number;
+  Message: string;
+  Timestamp: string;
 }
 
 export type Notification = {

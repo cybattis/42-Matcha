@@ -16,12 +16,16 @@ export const Route = createFileRoute('/_app/TestWs')({
 function RouteComponent() {
   const context: MyRooterContext = useRouteContext({ from: '/_app/TestWs' })
 
+  const [receiverId, setReceiverId] = useState(0);
+
+  const handleChange = event => {
+    setReceiverId(event.target.value);
+  };
+
   const { sendMessage, lastMessage, readyState } = useWebSocket(
     'ws://localhost:5163/ws', 
   {
-    // protocols: ["Authorization", context.auth.token!],
     heartbeat: {
-      Message: 'ping',
       returnMessage: 'pong',
       timeout: 60000, // 1 minute, if no response is received, the connection will be closed
       interval: 25000, // every 25 seconds, a ping message will be sent
@@ -34,15 +38,9 @@ function RouteComponent() {
         Data: "Bearer " + context.auth.token,
       }
       sendMessage(JSON.stringify(connection));
-      this.close();
     },
     onClose: () => {
       console.log('closed')
-      const connection = {
-        Message: 'close',
-        Data: "Bearer " + context.auth.token,
-      }
-      sendMessage(JSON.stringify(connection));
     },
     onMessage: (event) => {
         console.log('message received: ', event.data);
@@ -54,23 +52,23 @@ function RouteComponent() {
     
   }, [])
 
-  function handleMessage(message: string) {
+  function handleMessage(message: string, int: receiverId) {
     if (readyState === 1) {
       const chatMessage: ChatMessage = {
-        userId: 1,
-        senderId: 1,
-        receiverId: 2,
-        message: message,
-        timestamp: Date.now().toString(),
+        ReceiverId: receiverId,
+        Message: message,
+        Timestamp: Date.now().toString(),
       }
 
       const wsMessage = {
-        message: 'chat',
-        data: chatMessage,
+        Message: 'chat',
+        Data: chatMessage,
       }
 
       try {
+        console.log('sending message: ', wsMessage)
         sendMessage(JSON.stringify(wsMessage))
+        console.log('message sent')
       } catch (error) {
         console.error(error)
       }
@@ -80,7 +78,16 @@ function RouteComponent() {
   return (
     <>
       <div>Hello "/_app/TestWs"!</div>
-      <Button onClick={() => handleMessage('Test message hello!')}>Send</Button>
+      <div>WebSocket status: {readyState}</div>
+      <div>Last message: {lastMessage?.data}</div>
+      <input
+        type="text"
+        id="receiverId"
+        name="receiverId"
+        onChange={handleChange}
+        value={receiverId}
+      />
+      <Button onClick={() => handleMessage('Test message hello!', receiverId)}>Send</Button>
     </>
   )
 }

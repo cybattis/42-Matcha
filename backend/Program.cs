@@ -1,11 +1,14 @@
 using System.Text;
+using System.Text.Json;
+using backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add controller
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -42,8 +45,8 @@ builder.Services.AddSwaggerGen(options => {
     });
 });
 
+// Add JWT authentication
 string jwtSecret =  Environment.GetEnvironmentVariable("JWT_SECRET") ?? "";
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -63,6 +66,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddAuthorization();
+
+// Add services.
+builder.Services.AddSingleton<IWebSocketService, WebSocketService>();
+
 
 var app = builder.Build();
 

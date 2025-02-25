@@ -40,7 +40,8 @@
     depends_on:
       - db
     environment:
-      - API_URL={API_URL}
+      - API_URL=${API_URL}
+      - WS_URL=${WS_URL}
 
 volumes:
   db:

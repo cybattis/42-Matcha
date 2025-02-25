@@ -266,25 +266,7 @@ BEGIN
     
     START TRANSACTION;
     
-    IF tag1 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag1);
-    END IF;
-    
-    IF tag2 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag2);
-    END IF;
-    
-    IF tag3 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag3);
-    END IF;
-    
-    IF tag4 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag4);
-    END IF;
-    
-    IF tag5 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag5);
-    END IF;
+    CALL UpdateTags(@userID, tag1, tag2, tag3, tag4, tag5);
     
     COMMIT;
     
@@ -313,6 +295,20 @@ BEGIN
     COMMIT;
     
     CALL UpdateProfileCompletionPercentage(@userID);
+END //
+
+CREATE PROCEDURE GetUserMatches(IN userID INT)
+BEGIN
+    SELECT
+        u.first_name,
+        u.last_name,
+        p.image_url
+    FROM users u
+             LEFT JOIN pictures p ON u.id = p.user_id AND p.position = 1
+    WHERE u.id IN (
+        SELECT first_userid FROM `match` WHERE second_userid = userID
+        UNION
+        SELECT second_userid FROM `match` WHERE first_userid = userID);
 END //
 
 DELIMITER ;

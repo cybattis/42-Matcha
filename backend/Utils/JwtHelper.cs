@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Utils;
 
-public class JwtHelper
+public static class JwtHelper
 {
     /// <summary>
     /// Génère un JWT avec les informations de l'utilisateur.
