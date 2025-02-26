@@ -49,19 +49,19 @@ export function useCoordinate() {
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.permissions
-      .query({ name: "geolocation" })
-      .then(function (result) {
-        console.log(result);
-        if (result.state === "granted") {
-          navigator.geolocation.getCurrentPosition(success, errors, options);
-        } else if (result.state === "prompt") {
-          navigator.geolocation.getCurrentPosition(success, errors, options);
-        } else if (result.state === "denied") {
-          console.log("Location access denied.");
-          // with ip address
-          getLocation().then(r => console.log(r));
-        }
-      });
+        .query({ name: "geolocation" })
+        .then(function (result) {
+          console.log(result);
+          if (result.state === "granted") {
+            navigator.geolocation.getCurrentPosition(success, errors, options);
+          } else if (result.state === "prompt") {
+            navigator.geolocation.getCurrentPosition(success, errors, options);
+          } else if (result.state === "denied") {
+            console.log("Location access denied.");
+            // with ip address
+            getLocation().then((r) => console.log(r));
+          }
+        });
     } else {
       console.log("Geolocation is not supported by this browser.");
     }

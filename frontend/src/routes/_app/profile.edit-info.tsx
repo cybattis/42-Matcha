@@ -1,15 +1,20 @@
-import {createFileRoute, getRouteApi, Navigate, redirect,} from "@tanstack/react-router";
-import {MyRooterContext} from "@/routes/__root.tsx";
+import {
+  createFileRoute,
+  getRouteApi,
+  Navigate,
+  redirect,
+} from "@tanstack/react-router";
+import { MyRooterContext } from "@/routes/__root.tsx";
 import axios from "axios";
-import {ToasterError, ToasterSuccess} from "@/lib/toaster.ts";
-import {useState} from "react";
-import {useForm} from "react-hook-form";
-import {IAuthContext} from "@/auth.tsx";
-import {toaster} from "@/components/ui/toaster.tsx";
-import {VStack} from "@chakra-ui/react";
-import {EditProfileForm} from "@/components/form/EditProfileForm.tsx";
-import {z} from "zod";
-import {zodResolver} from "@hookform/resolvers/zod";
+import { ToasterError, ToasterSuccess } from "@/lib/toaster.ts";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { IAuthContext } from "@/auth.tsx";
+import { toaster } from "@/components/ui/toaster.tsx";
+import { VStack } from "@chakra-ui/react";
+import { EditProfileForm } from "@/components/form/EditProfileForm.tsx";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export const Route = createFileRoute("/_app/profile/edit-info")({
   component: RouteComponent,
@@ -40,19 +45,24 @@ const formSchema = z.object({
 export type UserProfileFormValue = z.infer<typeof formSchema>;
 
 async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
-    const profile = await axios.post("/UserProfile/Update", {
+  const profile = await axios
+    .post(
+      "/UserProfile/Update",
+      {
         firstName: data.firstName,
         lastName: data.lastName,
         gender: data.gender,
         sexualOrientation: data.sexualOrientation,
         biography: data.biography,
         coordinates: data.coordinates,
-    }, {
-      headers: {
-        "Content-Type": 'application/x-www-form-urlencoded',
-        Authorization: "Bearer " + token,
       },
-    })
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
     .then((res) => {
       console.log("Profile", res);
       return res;
@@ -61,19 +71,24 @@ async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
       console.log("Profile", err.response);
       return err.response;
     });
-    
-    if (profile.status !== 200) {
-      return profile;
-    }
 
-  return await axios.post("/Tags/Update", {
-      tags: data.tags,
-    }, {
-      headers: {
-        "Content-Type": 'application/x-www-form-urlencoded',
-        Authorization: "Bearer " + token,
+  if (profile.status !== 200) {
+    return profile;
+  }
+
+  return await axios
+    .post(
+      "/Tags/Update",
+      {
+        tags: data.tags,
       },
-    })
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: "Bearer " + token,
+        },
+      }
+    )
     .then((res) => {
       console.log("Tags", res);
       return res;
@@ -112,7 +127,7 @@ function RouteComponent() {
   const tags = routeApi.useLoaderData() as Tags[];
   const [isProfileCreated, setIsProfileCreated] = useState(false);
 
-  const { handleSubmit, register, formState, control } =
+  const { handleSubmit, register, formState, control, setValue } =
     useForm<UserProfileFormValue>({
       resolver: zodResolver(formSchema),
     });
@@ -126,7 +141,7 @@ function RouteComponent() {
     console.log("RESULT:", result.statusText);
 
     if (result.status !== 200) {
-        ToasterError(result.statusText);
+      ToasterError(result.statusText);
     } else {
       ToasterSuccess(result.data);
       setIsProfileCreated(true);
@@ -143,8 +158,9 @@ function RouteComponent() {
         control={control}
         formState={formState}
         tagsData={tags}
+        setValue={setValue}
       />
-      {isProfileCreated ? <Navigate to={"/_app/profile/edit-images"} /> : null}
+      {isProfileCreated ? <Navigate to={"/profile/edit-images"} /> : null}
     </VStack>
   );
 }

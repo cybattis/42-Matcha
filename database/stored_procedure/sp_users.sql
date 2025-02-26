@@ -56,6 +56,11 @@ BEGIN
     
     COMMIT;
 
+    SELECT users.profile_status INTO @profile_status FROM users WHERE id = userID;
+    IF @profile_status = 0 THEN
+        UPDATE users SET profile_status = 1 WHERE id = userID;
+    END IF;
+
     CALL UpdateProfileCompletionPercentage(userID);
 END //
 

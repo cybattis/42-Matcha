@@ -6,12 +6,11 @@ import {
   useState,
 } from "react";
 import axios from "axios";
-import { redirect } from "@tanstack/react-router";
 
 export interface IAuthContext {
   isAuthenticated: boolean | null;
   token: string | null;
-  appStatus: () => void;
+  appStatus: () => Promise<string>;
   login: (username: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -35,9 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
     !!token
   );
-  const [UserProfileStatus, setUserProfileStatus] = useState<string | null>(
-    null
-  );
 
   const logout = useCallback(async () => {
     setUserToken(null);
@@ -51,39 +47,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(token);
   }, []);
 
-  const appStatus = useCallback(() => {
+  const appStatus = useCallback(async () => {
     console.log("Checking profile status");
-    axios
-      .get("/UserProfile/status", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => 
-      {
-        console.log(res.data);
-        if (res.data === "complete") {
-          console.log("Profile is complete");
-          throw redirect({
-            to: "/home",
-          });
-        }
-        else if (res.data === "images") {
-          console.log("Profile is images");
-          throw redirect({
-            to: "/profile/edit-images",
-          });
-        }
-        else {
-          console.log("Profile is not complete");
-          throw redirect({
-            to: "/profile/edit-info",
-          });
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    const result = await axios.get("/UserProfile/status", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return result.data;
   }, [token]);
 
   return (

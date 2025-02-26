@@ -16,12 +16,17 @@ import {
   FormState,
   useController,
   UseFormRegister,
+  UseFormSetValue,
 } from "react-hook-form";
-import { FormEventHandler } from "react";
+import { FormEventHandler, useEffect, useState } from "react";
 import { useCoordinate } from "@/lib/useCoordinate.ts";
 import { Radio, RadioGroup } from "@/components/ui/radio.tsx";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
-import {Tags, UserProfileFormValue} from "@/routes/_app/profile.edit-info.tsx";
+import {
+  Tags,
+  UserProfileFormValue,
+} from "@/routes/_app/profile.edit-info.tsx";
+import axios from "axios";
 
 export function EditProfileForm(props: {
   formState: FormState<UserProfileFormValue>;
@@ -29,10 +34,16 @@ export function EditProfileForm(props: {
   control: Control<UserProfileFormValue>;
   onSubmit: FormEventHandler<HTMLFormElement>;
   tagsData: Tags[];
+  setValue: UseFormSetValue<UserProfileFormValue>;
 }) {
-  const { formState, tagsData, onSubmit, register, control } = props;
+  const { formState, tagsData, onSubmit, register, control, setValue } = props;
   const errors = formState.errors;
-  const coordinates = useCoordinate();
+
+  const initCoordinates = useCoordinate();
+  const [coordinates, setCoordinates] = useState<string>(
+    initCoordinates.lat + "," + initCoordinates.lon
+  );
+  const [address, setAddress] = useState<string>("");
 
   const tags = useController({
     control,
@@ -40,7 +51,47 @@ export function EditProfileForm(props: {
     defaultValue: [],
   });
 
+  async function GetAddress(lat: number | undefined, lon: number | undefined) {
+    if (!lat || !lon) {
+      return;
+    }
+
+    const reverseGeocoding = await axios.get(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2`
+    );
+    const { city, postcode, road, suburb, town } =
+      reverseGeocoding.data.address;
+    const displayLocation = `${road}, ${suburb ? `${suburb},` : ""}${postcode}, ${city || town}`;
+
+    console.log(displayLocation);
+    setAddress(displayLocation);
+  }
+
+  async function GetCoordinates(address: string) {
+    const parsedAddress = address.replace(/ /g, "+");
+
+    console.log("GetCoordinates:", parsedAddress);
+    const reverseGeocoding = await axios.get(
+      `http://nominatim.openstreetmap.org/search?q=${parsedAddress}&format=jsonv2`
+    );
+
+    if (reverseGeocoding.data.length === 0) return;
+
+    const { lat, lon } = reverseGeocoding.data[0] as {
+      lat: string;
+      lon: string;
+    };
+
+    console.log("NEW CORD", lat.substring(0, 10), lon.substring(0, 10));
+    setCoordinates(lat.substring(0, 10) + "," + lon.substring(0, 10));
+  }
+
   const invalidTags = !!errors.tags;
+
+  useEffect(() => {
+    console.log("Init coordinates:", initCoordinates);
+    GetAddress(initCoordinates.lat, initCoordinates.lon).then();
+  }, [initCoordinates.lat, initCoordinates.lon]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -100,11 +151,17 @@ export function EditProfileForm(props: {
                 </Field.Label>
                 <Input
                   {...register("coordinates")}
-                  value={
-                    coordinates.lat?.toString() +
-                    "," +
-                    coordinates.lon?.toString()
-                  }
+                  value={address}
+                  onBlur={async () => {
+                    console.log("On blur:", address);
+                    await GetCoordinates(address);
+                    setValue("coordinates", coordinates, {
+                      shouldValidate: true,
+                    });
+                  }}
+                  onChange={(e) => {
+                    setAddress(e.target.value);
+                  }}
                 />
                 <Field.ErrorText>{errors.coordinates?.message}</Field.ErrorText>
               </Field.Root>
