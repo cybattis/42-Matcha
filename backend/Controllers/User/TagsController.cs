@@ -55,6 +55,7 @@ public class TagsController(ILogger<TagsController> logger): ControllerBase
     [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Update([FromForm] List<string> tags, [FromHeader] string authorization)
     {
         try {

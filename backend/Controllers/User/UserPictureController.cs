@@ -16,44 +16,31 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     /// <summary>
     /// Upload user picture
     /// </summary>
-    /// <param name="id">User ID</param>
     /// <param name="image">Image data</param>
+    /// <param name="authorization">Token</param>
     /// <response code="200">Picture uploaded</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [Route("[action]/{id:int}")]
+    [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Upload(int id, [FromForm] UserPictureModel image)
+    public async Task<ActionResult> Upload([FromForm] UserPictureModel image, [FromHeader] string authorization)
     {
         try {
-            if (image.Position is < 1 or > 5)
-                return ValidationProblem("Invalid image position");
+            var id = JwtHelper.DecodeJwtToken(authorization);
+            if (image.Position < 1 && image.Position > 5)
+                return BadRequest("Invalid image position");
             
             // Check if image is valid
             if (image.Data.Length == 0)
-                return ValidationProblem("Image is empty");
+                return BadRequest("Image is empty");
             if (image.Data.ContentType != "image/jpeg" && image.Data.ContentType != "image/png")
-                return ValidationProblem("Invalid image type");
+                return BadRequest("Invalid image type");
             if (image.Data.Length > 5 * 1024 * 1024) // 5MB
-                return ValidationProblem("Image is too large");
+                return BadRequest("Image is too large");
             if (image.Data.Length < 1 * 1024) // 1KB
-                return ValidationProblem("Image is too small");
-            
-            await using MySqlConnection conn = DbHelper.GetOpenConnection();
-            await using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
-            getImageCmd.CommandType = CommandType.StoredProcedure;
-            getImageCmd.Parameters.AddWithValue("@userID", id);
-            getImageCmd.Parameters.AddWithValue("@position", image.Position);
-            await using MySqlDataReader reader = getImageCmd.ExecuteReader();
-            
-            // Check if an image already exist at that position
-            if (reader.Read() && reader.HasRows) {
-                logger.LogError("Image already present at that position delete it first");
-                return ValidationProblem("Image already present at that position");
-            }
-            await reader.CloseAsync();
+                return BadRequest("Image is too small");
             
             using var memoryStream = new MemoryStream();
             await image.Data.CopyToAsync(memoryStream);
@@ -61,7 +48,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             var isValid = Files.IsImageFileValid(bytes);
             if (!isValid)
-                return ValidationProblem("Image type not supported");
+                return BadRequest("Image type not supported");
 
             var userFolder = "images/";
             // Check if file path exist
@@ -69,10 +56,11 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
                 Directory.CreateDirectory(userFolder);
             
             // Save image to disk
-            var url = userFolder + Guid.NewGuid() + ".png";
+            var url = userFolder + Guid.NewGuid() + image.Data.ContentType.Split('/')[1];
             await System.IO.File.WriteAllBytesAsync(url, bytes);
             
             // Save image url to database
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("UploadImage", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
