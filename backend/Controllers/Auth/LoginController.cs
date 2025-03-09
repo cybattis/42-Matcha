@@ -67,6 +67,7 @@ public class LoginController : ControllerBase
                 return Ok(new
                 {
                     Message = "Connexion réussie.",
+                    Id = userId,
                     Token = token
                 });
             }

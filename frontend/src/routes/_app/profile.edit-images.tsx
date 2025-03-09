@@ -1,18 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/_app/profile/edit-images")({
-  component: RouteComponent,
-});
-
 import {
   FileUploadDropzone,
   FileUploadRoot,
 } from "@/components/ui/file-upload";
-import { Box } from "@chakra-ui/react";
+import { Box, Image } from "@chakra-ui/react";
 import { ToasterError, ToasterSuccess } from "@/lib/toaster.ts";
 import axios, { AxiosError } from "axios";
+import { useEffect, useState } from "react";
 
-function UploadImage() {
+export const Route = createFileRoute("/_app/profile/edit-images")({
+  component: RouteComponent,
+  loader: () => {},
+});
+
+function ImageComponent({
+  userID,
+  position,
+}: {
+  userID?: number;
+  position: number;
+}) {
+  const [image, setImage] = useState<string>("");
+  if (!userID) {
+    userID = parseInt(localStorage.getItem("id") || "");
+  }
+
+  useEffect(() => {
+    DownloadImage(userID, position).then((data) => {
+      setImage(data);
+    });
+  }, []);
+
   return (
     <FileUploadRoot
       maxW="xl"
@@ -25,8 +43,14 @@ function UploadImage() {
           return;
         }
         console.log("file accepted", file);
+
         // upload file
-        await UploadToServer(file.files[0]);
+        const result = await UploadToServer(file.files[0], position);
+        if (result) {
+          await DownloadImage(userID, position).then((data) => {
+            setImage(data);
+          });
+        }
       }}
       onFileReject={(files) => {
         if (!files.files[0]) {
@@ -47,25 +71,39 @@ function UploadImage() {
       <FileUploadDropzone
         label="Drag and drop here to upload"
         description=".png, .jpg up to 5MB"
-      />
+      >
+        {image ? <Image src={image} alt="Image" /> : null}
+      </FileUploadDropzone>
     </FileUploadRoot>
   );
 }
 
-// type FileUpload = {
-//   position: string;
-//   files: File;
-// };
+async function DownloadImage(userID: number, position: number) {
+  const token = localStorage.getItem("token");
 
-async function UploadToServer(file: File) {
+  const formData = new FormData();
+  formData.append("Position", position.toString());
+
+  return axios
+    .post("/UserPicture/Get/" + userID, formData, {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    });
+}
+
+async function UploadToServer(file: File, position: number) {
   const formData = new FormData();
 
-  formData.append("Position", "1");
+  formData.append("Position", position.toString());
   formData.append("Data", file);
 
   const token = localStorage.getItem("token");
 
-  axios
+  return await axios
     .post("/UserPicture/Upload", formData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -75,17 +113,21 @@ async function UploadToServer(file: File) {
     .then((result) => {
       console.log(result);
       ToasterSuccess(result.data);
+      return true;
     })
     .catch((error: AxiosError<string>) => {
       if (error.response) ToasterError(error.response.data);
       else ToasterError("An error occured");
+      return false;
     });
 }
 
 function RouteComponent() {
+  // const [images, setImages] = useState<string[]>([]);
+
   return (
     <Box>
-      <UploadImage />
+      <ImageComponent position={1} />
     </Box>
   );
 }

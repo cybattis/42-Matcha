@@ -174,8 +174,15 @@ BEGIN
         SET MESSAGE_TEXT = 'Position must be between 1 and 5';
     END IF;
     
-    INSERT INTO pictures (user_id, pictures.position, image_url)
-        VALUES (userID, position, imageUrl);
+    SELECT COUNT(@count) FROM pictures WHERE user_id = userID AND pictures.position = position;
+    
+    IF @count > 0 THEN
+        UPDATE pictures SET image_url = imageUrl WHERE user_id = userID AND pictures.position = position;
+    ELSE
+        INSERT INTO pictures (user_id, pictures.position, image_url)
+            VALUES (userID, position, imageUrl);
+    END IF;
+    
     CALL UpdateProfileCompletionPercentage(userID);
 END //
 

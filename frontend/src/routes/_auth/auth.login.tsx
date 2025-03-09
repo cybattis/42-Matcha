@@ -18,6 +18,7 @@ export interface LoginFormValues {
 
 interface LoginResponse {
   token?: string;
+  id?: string;
   error?: string;
   message?: string;
 }
@@ -50,6 +51,7 @@ function RouteComponent() {
     }
     if (result.token) {
       await auth.login(result.token);
+      localStorage.setItem("id", result.id || "");
       ToasterSuccess("Vous êtes connecté !");
     }
     toaster.remove(t);

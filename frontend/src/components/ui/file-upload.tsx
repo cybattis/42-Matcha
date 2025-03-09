@@ -45,12 +45,15 @@ export const FileUploadDropzone = React.forwardRef<
   const { children, label, description, ...rest } = props;
   return (
     <ChakraFileUpload.Dropzone ref={ref} {...rest}>
-      <UploadIcon />
-      <ChakraFileUpload.DropzoneContent>
-        <div>{label}</div>
-        {description && <Text color="fg.muted">{description}</Text>}
-      </ChakraFileUpload.DropzoneContent>
-      {children}
+      {children || (
+        <>
+          <UploadIcon />
+          <ChakraFileUpload.DropzoneContent>
+            <div>{label}</div>
+            {description && <Text color="fg.muted">{description}</Text>}
+          </ChakraFileUpload.DropzoneContent>
+        </>
+      )}
     </ChakraFileUpload.Dropzone>
   );
 });

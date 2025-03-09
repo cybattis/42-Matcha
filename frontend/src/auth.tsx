@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserToken(null);
     setIsAuthenticated(false);
     setToken(null);
+    localStorage.removeItem("id");
   }, []);
 
   const login = useCallback(async (token: string) => {
