@@ -1,24 +1,24 @@
-import { createFileRoute } from '@tanstack/react-router'
-import axios from 'axios'
-import { UserProfile } from '@/lib/interface.ts'
-import { MyRooterContext } from '@/routes/__root.tsx'
+import { createFileRoute } from "@tanstack/react-router";
+import axios from "axios";
+import { UserProfile } from "@/lib/interface.ts";
+import { MyRooterContext } from "@/routes/__root.tsx";
 
-export const Route = createFileRoute('/_app/profile/me')({
+export const Route = createFileRoute("/_app/profile/me")({
   component: RouteComponent,
-  loader: ({ context }: { context: MyRooterContext }) =>
-    loader(context.auth.token),
-})
+  loader: async ({ context }: { context: MyRooterContext }) =>
+    await GetProfile(context.auth.token),
+});
 
-async function loader(token: string | null) {
-  const response = await axios.get('/UserProfile/Me', {
+async function GetProfile(token: string | null) {
+  const response = await axios.get("/UserProfile/Me", {
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + token,
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
     },
-  })
-  return response.data as UserProfile
+  });
+  return response.data as UserProfile;
 }
 
 function RouteComponent() {
-  return <div>Hello Me!</div>
+  return <div>Hello Me!</div>;
 }

@@ -64,6 +64,14 @@ BEGIN
     CALL UpdateProfileCompletionPercentage(userID);
 END //
 
+CREATE PROCEDURE UpdateProfileStatus(
+    IN userID INT,
+    IN status INT
+)
+BEGIN
+    UPDATE users SET profile_status = status WHERE id = userID;
+END //
+
 # UpdateProfileCompletionPercentage
 CREATE PROCEDURE UpdateProfileCompletionPercentage(IN userID INT)
 BEGIN

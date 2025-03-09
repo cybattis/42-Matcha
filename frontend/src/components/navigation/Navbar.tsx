@@ -29,11 +29,14 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover.tsx";
+import { Route } from "@/routes/_app/profile.edit-images.tsx";
 
 function AppLogo() {
   return (
     <Box w="100%" display="flex" justifyContent={"center"}>
-      <Link to={"/home"}>MATCHA</Link>
+      <Link to={"/home"} preload={false}>
+        MATCHA
+      </Link>
     </Box>
   );
 }
@@ -124,7 +127,7 @@ function NotificationButton() {
 
 const NavbarMenu = () => {
   const auth = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: Route.fullPath });
 
   return (
     <MenuRoot>
@@ -146,10 +149,27 @@ const NavbarMenu = () => {
         <MenuItem
           value="Profile"
           onClick={async () => {
+            console.log("Navigate to profile");
             await navigate({ to: "/profile/me" });
           }}
         >
           Profile
+        </MenuItem>
+        {/*<MenuItem*/}
+        {/*  value="Likes"*/}
+        {/*  onClick={async () => {*/}
+        {/*    await navigate({ to: "/likes" });*/}
+        {/*  }}*/}
+        {/*>*/}
+        {/*  Likes*/}
+        {/*</MenuItem>*/}
+        <MenuItem
+          value="Match"
+          onClick={async () => {
+            await navigate({ to: "/match" });
+          }}
+        >
+          Matches
         </MenuItem>
         <MenuItem
           value="logout"

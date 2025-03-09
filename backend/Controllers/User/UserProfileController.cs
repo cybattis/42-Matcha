@@ -211,4 +211,34 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             return Problem(detail: e.Message);
         }
     }
+    
+    /// <summary>
+    /// Get user profile status
+    /// </summary>
+    /// <response code="200">Success</response>
+    /// <response code="400">Bad request</response>
+    [HttpPost]
+    [Route("[action]/{status:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> UpdateProfileStatus(int status, [FromHeader] string authorization)
+    {
+        var id = JwtHelper.DecodeJwtToken(authorization);
+        
+        try {
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlCommand cmd = new MySqlCommand("UpdateProfileStatus", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@status", status);
+            cmd.ExecuteNonQuery();
+            
+            return Ok("Profile status updated");
+        }
+        catch (MySqlException e) {
+            logger.LogError(e.Message);
+            return Problem(detail: e.Message);
+        }
+    }
 }

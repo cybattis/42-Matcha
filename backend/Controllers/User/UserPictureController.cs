@@ -66,7 +66,8 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
                 return BadRequest("Invalid image type");
             
             // Save image to disk
-            var url = imagePath + Guid.NewGuid() + "." + extension;
+            var imageName = Guid.NewGuid() + "." + extension;
+            var url = imagePath + imageName;
             Console.WriteLine(url);
 
             await System.IO.File.WriteAllBytesAsync(url, bytes);
@@ -90,7 +91,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             addImageCmd.CommandType = CommandType.StoredProcedure;
             addImageCmd.Parameters.AddWithValue("@userID", id);
             addImageCmd.Parameters.AddWithValue("@position", image.Position);
-            addImageCmd.Parameters.AddWithValue("@imageUrl", url);
+            addImageCmd.Parameters.AddWithValue("@imageUrl", imageName);
             var result = addImageCmd.ExecuteNonQuery();
             
             if (result == 0)
@@ -109,18 +110,19 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     /// <summary>
     /// Upload user picture
     /// </summary>
-    /// <param name="id">User ID</param>
     /// <param name="position">Image position</param>
-    /// <response code="200">Picture deleted</response>
+    /// <response code="200">Picture deleted</response>`
     /// <response code="400">Bad request</response>
     [HttpDelete]
-    [Route("[action]/{id:int}")]
+    [Route("[action]/{position:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Delete(int id, [FromForm] int position)
+    public async Task<ActionResult> Delete(int position, [FromHeader] string authorization)
     {
         try {
+            var id = JwtHelper.DecodeJwtToken(authorization);
+            
             if (position is < 1 or > 5) {
                 logger.LogError("Invalid image position");
                 return ValidationProblem("Invalid image position");
@@ -140,8 +142,10 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
                 return ValidationProblem("Image not found");
             }
             
-            var url = reader["image_url"].ToString() ?? "";
+            var fileName = reader["image_url"].ToString() ?? "";
             await reader.CloseAsync();
+            
+            var url = imagePath + fileName;
             
             if (System.IO.File.Exists(url))
                 System.IO.File.Delete(url);
@@ -206,7 +210,6 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             var bytes = await System.IO.File.ReadAllBytesAsync(url);
             var base64String = Convert.ToBase64String(bytes);
-            Console.WriteLine(base64String);
             return Ok("data:image/png;base64," + base64String);
             
         } catch (Exception e) {

@@ -36,7 +36,10 @@ export const Route = createFileRoute("/_app")({
         throw redirect({
           to: "/profile/edit-images",
         });
-      } else if (status === "Complete") {
+      } else if (
+        status === "Complete" &&
+        location.pathname === "/profile/edit-images"
+      ) {
         throw redirect({
           to: "/home",
         });
