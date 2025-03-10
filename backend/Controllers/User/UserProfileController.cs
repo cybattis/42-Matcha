@@ -50,7 +50,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 // Tags
                 if (reader.NextResult()) {
                     while (reader.Read())
-                        profile.Tags.Add(reader["tag_id"] as int? ?? 0);
+                        profile.Tags.Add(reader["name"] as string ?? "");
                 } 
                 
                 // Pictures
@@ -82,9 +82,10 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Me([FromHeader] string authorization)
     {
-        var id = JwtHelper.DecodeJwtToken(authorization);
-        
         try {
+            var id = JwtHelper.DecodeJwtToken(authorization);
+            Console.WriteLine(id);
+        
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
@@ -109,7 +110,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             // Tags
             if (reader.NextResult()) {
                 while (reader.Read())
-                    profile.Tags.Add(reader["tag_id"] as int? ?? 0);
+                    profile.Tags.Add(reader["name"] as string ?? "");
             } 
                 
             // Pictures
@@ -217,21 +218,21 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// </summary>
     /// <response code="200">Success</response>
     /// <response code="400">Bad request</response>
-    [HttpPost]
-    [Route("[action]/{status:int}")]
+    [HttpGet]
+    [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> UpdateProfileStatus(int status, [FromHeader] string authorization)
+    public async Task<ActionResult> UpdateProfileStatus([FromHeader] string authorization)
     {
-        var id = JwtHelper.DecodeJwtToken(authorization);
-        
         try {
+            var id = JwtHelper.DecodeJwtToken(authorization);
+        
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("UpdateProfileStatus", conn);
             cmd.CommandType = CommandType.StoredProcedure;
             cmd.Parameters.AddWithValue("@userID", id);
-            cmd.Parameters.AddWithValue("@status", status);
+            cmd.Parameters.AddWithValue("@status", 2);
             cmd.ExecuteNonQuery();
             
             return Ok("Profile status updated");

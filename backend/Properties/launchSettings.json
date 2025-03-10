@@ -17,16 +17,16 @@
       "applicationUrl": "http://localhost:5163",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DB_CONNECTION_STRING": "Server=localhost;Port=3307;Database=db;user=root;password=rootpassword;",
+        "DB_CONNECTION_STRING": "Server=localhost;Port=3307;Database=db;user=user;password=password;",
         "JWT_SECRET": "this is my very big secret key Ahhhhhhhhhh do not use in production !!!!",
-        "JWT_ISSUER": "http://localhost:5163",
-        "JWT_AUDIENCE": "http://localhost:5163",
+        "JWT_ISSUER": "http://matcha.api.com",
+        "JWT_AUDIENCE": "http://matcha.com",
         "NO_REPLY_MAIL": "noreply.matchaproject@gmail.com",
         "NO_REPLY_MAIL_PASSWORD": "lhxz fazt oapt rrit",
         "SMTP_HOST": "smtp.gmail.com",
         "SMTP_PORT": "587",
         "WS_URL": "ws://localhost:5163/ws",
-        "IMAGE_PATH": "/home/cyril/Dev/42/Occ/Matcha/backend/images/"
+        "IMAGE_PATH": "/home/cybattis/Dev/42/Matcha/backend/images/"
       }
     },
     "https": {

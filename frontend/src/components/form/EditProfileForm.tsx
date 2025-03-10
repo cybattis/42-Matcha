@@ -18,17 +18,20 @@ import {
   UseFormRegister,
   UseFormSetValue,
 } from "react-hook-form";
-import { FormEventHandler, useEffect, useState } from "react";
-import { useCoordinate } from "@/lib/useCoordinate.ts";
-import { Radio, RadioGroup } from "@/components/ui/radio.tsx";
-import { Checkbox } from "@/components/ui/checkbox.tsx";
+import {FormEventHandler, useEffect, useState} from "react";
+import {useCoordinate} from "@/lib/useCoordinate.ts";
+import {Radio, RadioGroup} from "@/components/ui/radio.tsx";
+import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {
   Tags,
   UserProfileFormValue,
 } from "@/routes/_app/profile.edit-info.tsx";
 import axios from "axios";
+import {GetAddress} from "@/lib/utils.ts";
+import {UserProfile} from "@/lib/interface.ts";
 
 export function EditProfileForm(props: {
+  profile: UserProfile;
   formState: FormState<UserProfileFormValue>;
   register: UseFormRegister<UserProfileFormValue>;
   control: Control<UserProfileFormValue>;
@@ -36,7 +39,7 @@ export function EditProfileForm(props: {
   tagsData: Tags[];
   setValue: UseFormSetValue<UserProfileFormValue>;
 }) {
-  const { formState, tagsData, onSubmit, register, control, setValue } = props;
+  const {formState, tagsData, onSubmit, register, control, setValue, profile} = props;
   const errors = formState.errors;
 
   const initCoordinates = useCoordinate();
@@ -51,22 +54,6 @@ export function EditProfileForm(props: {
     defaultValue: [],
   });
 
-  async function GetAddress(lat: number | undefined, lon: number | undefined) {
-    if (!lat || !lon) {
-      return;
-    }
-
-    const reverseGeocoding = await axios.get(
-      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2`
-    );
-    const { city, postcode, road, suburb, town } =
-      reverseGeocoding.data.address;
-    const displayLocation = `${road}, ${suburb ? `${suburb},` : ""}${postcode}, ${city || town}`;
-
-    console.log(displayLocation);
-    setAddress(displayLocation);
-  }
-
   async function GetCoordinates(address: string) {
     const parsedAddress = address.replace(/ /g, "+");
 
@@ -77,7 +64,7 @@ export function EditProfileForm(props: {
 
     if (reverseGeocoding.data.length === 0) return;
 
-    const { lat, lon } = reverseGeocoding.data[0] as {
+    const {lat, lon} = reverseGeocoding.data[0] as {
       lat: string;
       lon: string;
     };
@@ -88,10 +75,24 @@ export function EditProfileForm(props: {
 
   const invalidTags = !!errors.tags;
 
+  // TODO: fix coordinates not set in form value at start
   useEffect(() => {
+    if (profile.coordinates) {
+      console.log("Profile coordinates:", profile.coordinates);
+      setCoordinates(profile.coordinates);
+      const [lat, lon] = profile.coordinates.split(",");
+      GetAddress(lat, lon).then((address) => {
+        setAddress(address);
+      });
+      return;
+    }
+
     console.log("Init coordinates:", initCoordinates);
-    GetAddress(initCoordinates.lat, initCoordinates.lon).then();
-  }, [initCoordinates.lat, initCoordinates.lon]);
+    GetAddress(initCoordinates.lat, initCoordinates.lon).then((address) => {
+      setValue("coordinates", profile.coordinates);
+      setAddress(address);
+    });
+  }, []);
 
   return (
     <form onSubmit={onSubmit}>
@@ -103,7 +104,7 @@ export function EditProfileForm(props: {
                 <Field.Root required invalid={!!errors.firstName}>
                   <Field.Label>
                     First name
-                    <Field.RequiredIndicator />
+                    <Field.RequiredIndicator/>
                   </Field.Label>
                   <Input {...register("firstName")} />
                   <Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
@@ -111,7 +112,7 @@ export function EditProfileForm(props: {
                 <Field.Root required invalid={!!errors.lastName}>
                   <Field.Label>
                     Last name
-                    <Field.RequiredIndicator />
+                    <Field.RequiredIndicator/>
                   </Field.Label>
                   <Input {...register("lastName")} />
                   <Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
@@ -147,7 +148,7 @@ export function EditProfileForm(props: {
               <Field.Root required invalid={!!errors.coordinates}>
                 <Field.Label>
                   City
-                  <Field.RequiredIndicator />
+                  <Field.RequiredIndicator/>
                 </Field.Label>
                 <Input
                   {...register("coordinates")}
@@ -187,14 +188,14 @@ export function EditProfileForm(props: {
                 >
                   {tagsData.length > 0
                     ? tagsData.map((tag: Tags) => (
-                        <Checkbox
-                          key={tag.id}
-                          value={tag.id.toString()}
-                          minW={"100px"}
-                        >
-                          {tag.name}
-                        </Checkbox>
-                      ))
+                      <Checkbox
+                        key={tag.id}
+                        value={tag.id.toString()}
+                        minW={"100px"}
+                      >
+                        {tag.name}
+                      </Checkbox>
+                    ))
                     : null}
                 </Flex>
               </Fieldset.Content>

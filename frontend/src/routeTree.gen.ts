@@ -19,6 +19,7 @@ import { Route as AuthNotVerifyImport } from './routes/_auth/not-verify'
 import { Route as AuthAuthImport } from './routes/_auth/auth_'
 import { Route as AppSearchImport } from './routes/_app/search'
 import { Route as AppMatchImport } from './routes/_app/match'
+import { Route as AppLikesImport } from './routes/_app/likes'
 import { Route as AppHomeImport } from './routes/_app/home'
 import { Route as AppTestWsImport } from './routes/_app/TestWs'
 import { Route as AuthAuthRegisterImport } from './routes/_auth/auth.register'
@@ -73,6 +74,12 @@ const AppSearchRoute = AppSearchImport.update({
 const AppMatchRoute = AppMatchImport.update({
   id: '/match',
   path: '/match',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppLikesRoute = AppLikesImport.update({
+  id: '/likes',
+  path: '/likes',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -163,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHomeImport
       parentRoute: typeof AppImport
     }
+    '/_app/likes': {
+      id: '/_app/likes'
+      path: '/likes'
+      fullPath: '/likes'
+      preLoaderRoute: typeof AppLikesImport
+      parentRoute: typeof AppImport
+    }
     '/_app/match': {
       id: '/_app/match'
       path: '/match'
@@ -248,6 +262,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppTestWsRoute: typeof AppTestWsRoute
   AppHomeRoute: typeof AppHomeRoute
+  AppLikesRoute: typeof AppLikesRoute
   AppMatchRoute: typeof AppMatchRoute
   AppSearchRoute: typeof AppSearchRoute
   AppProfileUsernameRoute: typeof AppProfileUsernameRoute
@@ -259,6 +274,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppTestWsRoute: AppTestWsRoute,
   AppHomeRoute: AppHomeRoute,
+  AppLikesRoute: AppLikesRoute,
   AppMatchRoute: AppMatchRoute,
   AppSearchRoute: AppSearchRoute,
   AppProfileUsernameRoute: AppProfileUsernameRoute,
@@ -292,6 +308,7 @@ export interface FileRoutesByFullPath {
   '': typeof AuthRouteWithChildren
   '/TestWs': typeof AppTestWsRoute
   '/home': typeof AppHomeRoute
+  '/likes': typeof AppLikesRoute
   '/match': typeof AppMatchRoute
   '/search': typeof AppSearchRoute
   '/auth': typeof AuthAuthRoute
@@ -310,6 +327,7 @@ export interface FileRoutesByTo {
   '': typeof AuthRouteWithChildren
   '/TestWs': typeof AppTestWsRoute
   '/home': typeof AppHomeRoute
+  '/likes': typeof AppLikesRoute
   '/match': typeof AppMatchRoute
   '/search': typeof AppSearchRoute
   '/auth': typeof AuthAuthRoute
@@ -330,6 +348,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_app/TestWs': typeof AppTestWsRoute
   '/_app/home': typeof AppHomeRoute
+  '/_app/likes': typeof AppLikesRoute
   '/_app/match': typeof AppMatchRoute
   '/_app/search': typeof AppSearchRoute
   '/_auth/auth_': typeof AuthAuthRoute
@@ -350,6 +369,7 @@ export interface FileRouteTypes {
     | ''
     | '/TestWs'
     | '/home'
+    | '/likes'
     | '/match'
     | '/search'
     | '/auth'
@@ -367,6 +387,7 @@ export interface FileRouteTypes {
     | ''
     | '/TestWs'
     | '/home'
+    | '/likes'
     | '/match'
     | '/search'
     | '/auth'
@@ -385,6 +406,7 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_app/TestWs'
     | '/_app/home'
+    | '/_app/likes'
     | '/_app/match'
     | '/_app/search'
     | '/_auth/auth_'
@@ -434,6 +456,7 @@ export const routeTree = rootRoute
       "children": [
         "/_app/TestWs",
         "/_app/home",
+        "/_app/likes",
         "/_app/match",
         "/_app/search",
         "/_app/profile/$username",
@@ -458,6 +481,10 @@ export const routeTree = rootRoute
     },
     "/_app/home": {
       "filePath": "_app/home.tsx",
+      "parent": "/_app"
+    },
+    "/_app/likes": {
+      "filePath": "_app/likes.tsx",
       "parent": "/_app"
     },
     "/_app/match": {

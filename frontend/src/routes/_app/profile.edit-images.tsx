@@ -1,25 +1,26 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {createFileRoute, useNavigate} from "@tanstack/react-router";
 import {
   FileUploadDropzone,
   FileUploadRoot,
 } from "@/components/ui/file-upload";
-import { AspectRatio, Flex, Grid, Image } from "@chakra-ui/react";
-import { ToasterError, ToasterSuccess } from "@/lib/toaster.ts";
-import axios, { AxiosError } from "axios";
-import { useEffect, useState } from "react";
-import { CloseButton } from "@/components/ui/close-button.tsx";
-import { TrashIcon } from "@/components/Icons.tsx";
-import { Button } from "@/components/ui/button.tsx";
+import {AspectRatio, Flex, Grid, Image} from "@chakra-ui/react";
+import {ToasterError, ToasterSuccess} from "@/lib/toaster.ts";
+import axios, {AxiosError} from "axios";
+import {useEffect, useState} from "react";
+import {CloseButton} from "@/components/ui/close-button.tsx";
+import {TrashIcon} from "@/components/Icons.tsx";
+import {Button} from "@/components/ui/button.tsx";
 
 export const Route = createFileRoute("/_app/profile/edit-images")({
   component: RouteComponent,
-  loader: () => {},
+  loader: () => {
+  },
 });
 
 function ImageComponent({
-  userID,
-  position,
-}: {
+                          userID,
+                          position,
+                        }: {
   userID?: number;
   position: number;
 }) {
@@ -96,16 +97,16 @@ function ImageComponent({
                   onMouseLeave={() => setOnDelete(false)}
                   onClick={async () => {
                     await DeleteImage(position)
-                      .then(() => {
-                        setOnDelete(false);
-                        setImage("");
-                      })
-                      .catch((err) => {
-                        console.log(err);
-                      });
+                    .then(() => {
+                      setOnDelete(false);
+                      setImage("");
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                    });
                   }}
                 >
-                  <TrashIcon />
+                  <TrashIcon/>
                 </CloseButton>
               ) : null}
               <Image
@@ -123,38 +124,40 @@ function ImageComponent({
   );
 }
 
-async function DownloadImage(userID: number, position: number) {
+export async function DownloadImage(userID: number, position: number) {
   const token = localStorage.getItem("token");
 
   const formData = new FormData();
   formData.append("Position", position.toString());
 
   return axios
-    .post("/UserPicture/Get/" + userID, formData, {
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-    })
-    .then((response) => {
-      return response.data;
-    });
+  .post("/UserPicture/Get/" + userID, formData, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  })
+  .then((response) => {
+    return response.data;
+  }).catch(() => {
+
+  });
 }
 
 async function DeleteImage(position: number) {
   const token = localStorage.getItem("token");
 
   return axios
-    .delete("/UserPicture/Delete/" + position, {
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-    })
-    .then((response) => {
-      ToasterSuccess(response.data);
-    })
-    .catch((err) => {
-      ToasterError(err.detail);
-    });
+  .delete("/UserPicture/Delete/" + position, {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  })
+  .then((response) => {
+    ToasterSuccess(response.data);
+  })
+  .catch((err) => {
+    ToasterError(err.detail);
+  });
 }
 
 async function UploadToServer(file: File, position: number) {
@@ -166,56 +169,59 @@ async function UploadToServer(file: File, position: number) {
   const token = localStorage.getItem("token");
 
   return await axios
-    .post("/UserPicture/Upload", formData, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: "Bearer " + token,
-      },
-    })
-    .then((result) => {
-      console.log(result);
-      ToasterSuccess(result.data);
-      return true;
-    })
-    .catch((error: AxiosError<string>) => {
-      if (error.response) ToasterError(error.response.data);
-      else ToasterError("An error occured");
-      return false;
-    });
+  .post("/UserPicture/Upload", formData, {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: "Bearer " + token,
+    },
+  })
+  .then((result) => {
+    console.log(result);
+    ToasterSuccess(result.data);
+    return true;
+  })
+  .catch((error: AxiosError<string>) => {
+    if (error.response) ToasterError(error.response.data);
+    else ToasterError("An error occured");
+    return false;
+  });
 }
 
 async function ValidateProfile() {
   const token = localStorage.getItem("token");
+  console.log(token);
 
   return axios
-    .post("/UserProfile/UpdateProfileStatus/" + 2, {
-      headers: {
-        Authorization: "Bearer " + token,
-      },
-    })
-    .then((response) => {
-      ToasterSuccess(response.data);
-      return true;
-    })
-    .catch((err) => {
-      ToasterError(err.detail);
-      return false;
-    });
+  .get("/UserProfile/UpdateProfileStatus/", {
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  })
+  .then((response) => {
+    ToasterSuccess(response.data);
+    return true;
+  })
+  .catch((err) => {
+    ToasterError(err.detail);
+    return false;
+  });
 }
 
 function RouteComponent() {
-  const navigate = useNavigate({ from: Route.fullPath });
+  const navigate = useNavigate({from: Route.fullPath});
+
 
   return (
     <Grid gap="4" p="4">
       <Flex gap="4" wrap="wrap" justifyContent="center" alignItems="center">
-        <ImageComponent position={1} />
-        <ImageComponent position={2} />
-        <ImageComponent position={3} />
-        <ImageComponent position={4} />
-        <ImageComponent position={5} />
+        <ImageComponent position={1}/>
+        <ImageComponent position={2}/>
+        <ImageComponent position={3}/>
+        <ImageComponent position={4}/>
+        <ImageComponent position={5}/>
       </Flex>
       <Button
+        justifySelf={"center"}
         maxW={75}
         onClick={async () => {
           const result = await ValidateProfile();

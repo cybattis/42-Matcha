@@ -13,7 +13,7 @@ namespace backend.Controllers.User;
 [Route("[controller]")]
 public class UserPictureController(ILogger<UserPictureController> logger) : ControllerBase
 {
-    private string imagePath = "/home/cyril/Dev/42/Occ/Matcha/backend/images/";
+    private string imagePath = "/home/cybattis/Dev/42/Matcha/backend/images/";
         
     /// <summary>
     /// Upload user picture
@@ -200,6 +200,51 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             }
             Console.WriteLine(imagePath);
             var url = imagePath + reader["image_url"];
+            Console.WriteLine(url);
+            await reader.CloseAsync();
+            
+            if (!System.IO.File.Exists(url)) {
+                logger.LogError("Image file does not exist");
+                return ValidationProblem("Image does not exist");
+            }
+            
+            var bytes = await System.IO.File.ReadAllBytesAsync(url);
+            var base64String = Convert.ToBase64String(bytes);
+            return Ok("data:image/png;base64," + base64String);
+            
+        } catch (Exception e) {
+            logger.LogError(e, e.Message);
+            return Problem(e.Message);
+        }
+    }
+    
+        /// <summary>
+    /// Upload user picture
+    /// </summary>
+    /// <param name="imageName">Image url</param>
+    /// <response code="200">Picture deleted</response>
+    /// <response code="400">Bad request</response>
+    [HttpPost]
+    [Route("[action]/{imageName}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Get(string imageName)
+    {
+        try {
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlCommand getImageCmd = new MySqlCommand("GetUserImageByUrl", conn);
+            getImageCmd.CommandType = CommandType.StoredProcedure;
+            getImageCmd.Parameters.AddWithValue("@imageName", imageName);
+            await using var reader = getImageCmd.ExecuteReader();
+            
+            if (!reader.Read()) {
+                logger.LogError("Image not found in database");
+                return ValidationProblem("Image not found");
+            }
+            
+            Console.WriteLine(imagePath);
+            var url = imagePath + reader["image_name"];
             Console.WriteLine(url);
             await reader.CloseAsync();
             

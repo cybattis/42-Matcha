@@ -3,8 +3,11 @@ export interface UserProfile {
   lastName: string;
   biography: string;
   coordinates: string;
-  tags: number[];
+  tags: string[];
   isVerified: boolean;
   profilePercentage: number;
   fameRating: number;
+  images: string[];
+  gender: number;
+  sexualOrientation: number;
 }

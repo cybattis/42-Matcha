@@ -4,22 +4,27 @@ import {
   Navigate,
   redirect,
 } from "@tanstack/react-router";
-import { MyRooterContext } from "@/routes/__root.tsx";
+import {MyRooterContext} from "@/routes/__root.tsx";
 import axios from "axios";
-import { ToasterError, ToasterSuccess } from "@/lib/toaster.ts";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { IAuthContext } from "@/auth.tsx";
-import { toaster } from "@/components/ui/toaster.tsx";
-import { VStack } from "@chakra-ui/react";
-import { EditProfileForm } from "@/components/form/EditProfileForm.tsx";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {ToasterError, ToasterSuccess} from "@/lib/toaster.ts";
+import {useEffect, useState} from "react";
+import {useForm} from "react-hook-form";
+import {IAuthContext} from "@/auth.tsx";
+import {toaster} from "@/components/ui/toaster.tsx";
+import {VStack} from "@chakra-ui/react";
+import {EditProfileForm} from "@/components/form/EditProfileForm.tsx";
+import {z} from "zod";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {GetProfile} from "@/routes/_app/profile.me.tsx";
+import {UserProfile} from "@/lib/interface.ts";
 
 export const Route = createFileRoute("/_app/profile/edit-info")({
   component: RouteComponent,
-  loader: async ({ context }: { context: MyRooterContext }) => {
-    return await fetchTags(context.auth);
+  loader: async ({context}: { context: MyRooterContext }) => {
+    const profile = await GetProfile(context.auth.token);
+    console.log("PROFILE", profile);
+    const tags = await fetchTags(context.auth);
+    return {profile, tags};
   },
 });
 
@@ -46,56 +51,56 @@ export type UserProfileFormValue = z.infer<typeof formSchema>;
 
 async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
   const profile = await axios
-    .post(
-      "/UserProfile/Update",
-      {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        gender: data.gender,
-        sexualOrientation: data.sexualOrientation,
-        biography: data.biography,
-        coordinates: data.coordinates,
+  .post(
+    "/UserProfile/Update",
+    {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      gender: data.gender,
+      sexualOrientation: data.sexualOrientation,
+      biography: data.biography,
+      coordinates: data.coordinates,
+    },
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: "Bearer " + token,
       },
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: "Bearer " + token,
-        },
-      }
-    )
-    .then((res) => {
-      console.log("Profile", res);
-      return res;
-    })
-    .catch((err) => {
-      console.log("Profile", err.response);
-      return err.response;
-    });
+    }
+  )
+  .then((res) => {
+    console.log("Profile", res);
+    return res;
+  })
+  .catch((err) => {
+    console.log("Profile", err.response);
+    return err.response;
+  });
 
   if (profile.status !== 200) {
     return profile;
   }
 
   return await axios
-    .post(
-      "/Tags/Update",
-      {
-        tags: data.tags,
+  .post(
+    "/Tags/Update",
+    {
+      tags: data.tags,
+    },
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: "Bearer " + token,
       },
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: "Bearer " + token,
-        },
-      }
-    )
-    .then((res) => {
-      console.log("Tags", res);
-      return res;
-    })
-    .catch((err) => {
-      return err;
-    });
+    }
+  )
+  .then((res) => {
+    console.log("Tags", res);
+    return res;
+  })
+  .catch((err) => {
+    return err;
+  });
 }
 
 async function fetchTags(auth: IAuthContext): Promise<Tags[]> {
@@ -124,17 +129,30 @@ async function fetchTags(auth: IAuthContext): Promise<Tags[]> {
 
 function RouteComponent() {
   const routeApi = getRouteApi("/_app/profile/edit-info");
-  const tags = routeApi.useLoaderData() as Tags[];
+  const loaderData = routeApi.useLoaderData() as {
+    profile: UserProfile;
+    tags: Tags[];
+  }
   const [isProfileCreated, setIsProfileCreated] = useState(false);
+  const [defaultValue, setDefaultValue] = useState<UserProfileFormValue>();
 
-  const { handleSubmit, register, formState, control, setValue } =
+  const {handleSubmit, register, formState, control, setValue} =
     useForm<UserProfileFormValue>({
       resolver: zodResolver(formSchema),
+      defaultValues: {
+        firstName: loaderData.profile.firstName.length > 0 ? loaderData.profile.firstName : "",
+        lastName: loaderData.profile.lastName.length > 0 ? loaderData.profile.lastName : "",
+        biography: loaderData.profile.biography.length > 0 ? loaderData.profile.biography : "",
+        gender: loaderData.profile.gender || 1,
+        sexualOrientation: loaderData.profile.sexualOrientation || 1,
+        coordinates: loaderData.profile.coordinates.length > 0 ? loaderData.profile.coordinates : "",
+        tags: loaderData.profile.tags || [],
+      }
     });
 
   const onSubmit = handleSubmit(async (data: UserProfileFormValue) => {
     console.log(data);
-    const t = toaster.loading({ title: "Création de compte en cours..." });
+    const t = toaster.loading({title: "Création de compte en cours..."});
     const token = localStorage.getItem("token");
     const result = await UpdateProfile(token, data);
 
@@ -150,17 +168,31 @@ function RouteComponent() {
     toaster.remove(t);
   });
 
+  useEffect(() => {
+    setDefaultValue({
+      firstName: loaderData.profile.firstName.length > 0 ? loaderData.profile.firstName : "",
+      lastName: loaderData.profile.lastName.length > 0 ? loaderData.profile.lastName : "",
+      biography: loaderData.profile.biography.length > 0 ? loaderData.profile.biography : "",
+      gender: loaderData.profile.gender || 1,
+      sexualOrientation: loaderData.profile.sexualOrientation || 1,
+      coordinates: loaderData.profile.coordinates.length > 0 ? loaderData.profile.coordinates : "",
+      tags: loaderData.profile.tags || [],
+    });
+
+  }, [loaderData]);
+
   return (
     <VStack gap={6} align={"center"}>
       <EditProfileForm
+        profile={loaderData.profile}
         onSubmit={onSubmit}
         register={register}
         control={control}
         formState={formState}
-        tagsData={tags}
+        tagsData={loaderData.tags}
         setValue={setValue}
       />
-      {isProfileCreated ? <Navigate to={"/profile/edit-images"} /> : null}
+      {isProfileCreated ? <Navigate to={"/profile/edit-images"}/> : null}
     </VStack>
   );
 }

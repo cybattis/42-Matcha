@@ -29,7 +29,7 @@ function setUserToken(token: string | null) {
   }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({children}: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(getUserToken());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
     !!token
@@ -50,18 +50,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const appStatus = useCallback(async () => {
     console.log("Checking profile status");
-    const result = await axios.get("/UserProfile/status", {
+    return await axios.get("/UserProfile/status", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+    }).then((res) => {
+      return res.data;
+    }).catch((err) => {
+      if (err.status !== 200) {
+        logout();
+        return "Unauthorized";
+      }
     });
 
-    return result.data;
-  }, [token]);
+  }, [token, logout]);
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, token, login, logout, appStatus }}
+      value={{isAuthenticated, token, login, logout, appStatus}}
     >
       {children}
     </AuthContext.Provider>

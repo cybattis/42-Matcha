@@ -19,8 +19,8 @@ import {
   SunIcon,
   UserIcon,
 } from "@/components/Icons.tsx";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { useAuth } from "@/auth.tsx";
+import {Link, useNavigate} from "@tanstack/react-router";
+import {useAuth} from "@/auth.tsx";
 import {
   PopoverArrow,
   PopoverBody,
@@ -29,7 +29,9 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover.tsx";
-import { Route } from "@/routes/_app/profile.edit-images.tsx";
+import {Route} from "@/routes/_app/profile.edit-images.tsx";
+import {useState} from "react";
+import {UserImage} from "@/components/UserImage.tsx";
 
 function AppLogo() {
   return (
@@ -47,21 +49,21 @@ function DarkModeButton(props: {
 }) {
   return (
     <Button onClick={props.onClick} variant="ghost" w={"40px"} h={"40px"}>
-      {props.colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+      {props.colorMode === "light" ? <MoonIcon/> : <SunIcon/>}
     </Button>
   );
 }
 
 export function NavbarAuth() {
-  const { colorMode, toggleColorMode } = useColorMode();
+  const {colorMode, toggleColorMode} = useColorMode();
   return (
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={5} py={2}>
         <Grid templateColumns="repeat(3, 1fr)" gap="6" alignItems={"center"}>
-          <Box />
-          <AppLogo />
+          <Box/>
+          <AppLogo/>
           <Stack direction={"row"} justifyContent={"end"}>
-            <DarkModeButton onClick={toggleColorMode} colorMode={colorMode} />
+            <DarkModeButton onClick={toggleColorMode} colorMode={colorMode}/>
             <Button variant="ghost" p="0" w={"40px"} h={"40px"}>
               <Link to={"/auth/login"} className={"w-full h-full"}>
                 <UserIcon className={"user-icon"}>
@@ -88,18 +90,18 @@ export function NavbarAuth() {
 }
 
 export default function Navbar() {
-  const { colorMode, toggleColorMode } = useColorMode();
+  const {colorMode, toggleColorMode} = useColorMode();
 
   return (
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={5} py={2}>
         <Grid templateColumns="repeat(3, 1fr)" gap="6" alignItems={"center"}>
-          <Box />
-          <AppLogo />
+          <Box/>
+          <AppLogo/>
           <Stack direction={"row"} justifyContent={"end"}>
-            <DarkModeButton onClick={toggleColorMode} colorMode={colorMode} />
-            <NotificationButton />
-            <NavbarMenu />
+            <DarkModeButton onClick={toggleColorMode} colorMode={colorMode}/>
+            <NotificationButton/>
+            <NavbarMenu/>
           </Stack>
         </Grid>
       </Box>
@@ -112,11 +114,11 @@ function NotificationButton() {
     <PopoverRoot>
       <PopoverTrigger asChild>
         <Button size="sm" variant="ghost" alignSelf={"center"}>
-          <NotificationIcon />
+          <NotificationIcon/>
         </Button>
       </PopoverTrigger>
       <PopoverContent>
-        <PopoverArrow />
+        <PopoverArrow/>
         <PopoverBody>
           <PopoverTitle fontWeight="medium">Notifications</PopoverTitle>
         </PopoverBody>
@@ -127,21 +129,15 @@ function NotificationButton() {
 
 const NavbarMenu = () => {
   const auth = useAuth();
-  const navigate = useNavigate({ from: Route.fullPath });
+  const navigate = useNavigate({from: Route.fullPath});
+  const id = parseInt(localStorage.getItem("id") || "");
 
   return (
     <MenuRoot>
       <MenuTrigger asChild position="relative">
         <Button variant="ghost" p="0" w={"40px"} h={"40px"}>
           <UserIcon>
-            <Image
-              src="https://bit.ly/naruto-sage"
-              borderRadius="full"
-              boxSize="cover"
-              w="100%"
-              h="100%"
-              alt="navigation menu"
-            />
+            <UserImage userID={id} position={1} borderRadius={"full"} height={'100%'} width={"100%"}/>
           </UserIcon>
         </Button>
       </MenuTrigger>
@@ -150,23 +146,23 @@ const NavbarMenu = () => {
           value="Profile"
           onClick={async () => {
             console.log("Navigate to profile");
-            await navigate({ to: "/profile/me" });
+            await navigate({to: "/profile/me"});
           }}
         >
           Profile
         </MenuItem>
-        {/*<MenuItem*/}
-        {/*  value="Likes"*/}
-        {/*  onClick={async () => {*/}
-        {/*    await navigate({ to: "/likes" });*/}
-        {/*  }}*/}
-        {/*>*/}
-        {/*  Likes*/}
-        {/*</MenuItem>*/}
+        <MenuItem
+          value="Likes & Views"
+          onClick={async () => {
+            await navigate({to: "/likes"});
+          }}
+        >
+          Likes
+        </MenuItem>
         <MenuItem
           value="Match"
           onClick={async () => {
-            await navigate({ to: "/match" });
+            await navigate({to: "/match"});
           }}
         >
           Matches
@@ -175,7 +171,7 @@ const NavbarMenu = () => {
           value="logout"
           onClick={async () => {
             await auth.logout();
-            await navigate({ to: "/auth/login" });
+            await navigate({to: "/auth/login"});
           }}
         >
           Logout

@@ -7,8 +7,7 @@ BEGIN
            profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage
         FROM users WHERE id = userID;
     
-    SELECT * FROM users_tags WHERE user_id = userID;
-    
+    SELECT name FROM tags WHERE id IN (SELECT tag_id FROM users_tags WHERE user_id = userID);
     SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
 END //
 
