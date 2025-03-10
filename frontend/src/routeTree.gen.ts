@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
+import { Route as AuthVerifyImport } from './routes/auth/verify'
 import { Route as AuthRegisterImport } from './routes/auth/register'
 import { Route as AuthNotVerifyImport } from './routes/auth/not-verify'
 import { Route as AuthLoginImport } from './routes/auth/login'
@@ -26,6 +27,12 @@ import { Route as AuthVerifyIdImport } from './routes/auth/verify.$id'
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AuthVerifyRoute = AuthVerifyImport.update({
+  id: '/auth/verify',
+  path: '/auth/verify',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -137,11 +144,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterImport
       parentRoute: typeof rootRoute
     }
+<<<<<<< Updated upstream
     '/auth/verify/$id': {
       id: '/auth/verify/$id'
       path: '/auth/verify/$id'
       fullPath: '/auth/verify/$id'
       preLoaderRoute: typeof AuthVerifyIdImport
+=======
+    '/auth/verify': {
+      id: '/auth/verify'
+      path: '/auth/verify'
+      fullPath: '/auth/verify'
+      preLoaderRoute: typeof AuthVerifyImport
+>>>>>>> Stashed changes
       parentRoute: typeof rootRoute
     }
   }
@@ -158,7 +173,11 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+<<<<<<< Updated upstream
   '/auth/verify/$id': typeof AuthVerifyIdRoute
+=======
+  '/auth/verify': typeof AuthVerifyRoute
+>>>>>>> Stashed changes
 }
 
 export interface FileRoutesByTo {
@@ -170,7 +189,11 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+<<<<<<< Updated upstream
   '/auth/verify/$id': typeof AuthVerifyIdRoute
+=======
+  '/auth/verify': typeof AuthVerifyRoute
+>>>>>>> Stashed changes
 }
 
 export interface FileRoutesById {
@@ -183,7 +206,11 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/not-verify': typeof AuthNotVerifyRoute
   '/auth/register': typeof AuthRegisterRoute
+<<<<<<< Updated upstream
   '/auth/verify/$id': typeof AuthVerifyIdRoute
+=======
+  '/auth/verify': typeof AuthVerifyRoute
+>>>>>>> Stashed changes
 }
 
 export interface FileRouteTypes {
@@ -197,7 +224,11 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+<<<<<<< Updated upstream
     | '/auth/verify/$id'
+=======
+    | '/auth/verify'
+>>>>>>> Stashed changes
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -208,7 +239,11 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+<<<<<<< Updated upstream
     | '/auth/verify/$id'
+=======
+    | '/auth/verify'
+>>>>>>> Stashed changes
   id:
     | '__root__'
     | '/'
@@ -219,7 +254,11 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/not-verify'
     | '/auth/register'
+<<<<<<< Updated upstream
     | '/auth/verify/$id'
+=======
+    | '/auth/verify'
+>>>>>>> Stashed changes
   fileRoutesById: FileRoutesById
 }
 
@@ -232,7 +271,11 @@ export interface RootRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthNotVerifyRoute: typeof AuthNotVerifyRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+<<<<<<< Updated upstream
   AuthVerifyIdRoute: typeof AuthVerifyIdRoute
+=======
+  AuthVerifyRoute: typeof AuthVerifyRoute
+>>>>>>> Stashed changes
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -244,7 +287,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthNotVerifyRoute: AuthNotVerifyRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+<<<<<<< Updated upstream
   AuthVerifyIdRoute: AuthVerifyIdRoute,
+=======
+  AuthVerifyRoute: AuthVerifyRoute,
+>>>>>>> Stashed changes
 }
 
 export const routeTree = rootRoute
@@ -265,7 +312,11 @@ export const routeTree = rootRoute
         "/auth/login",
         "/auth/not-verify",
         "/auth/register",
+<<<<<<< Updated upstream
         "/auth/verify/$id"
+=======
+        "/auth/verify"
+>>>>>>> Stashed changes
       ]
     },
     "/": {
@@ -292,8 +343,13 @@ export const routeTree = rootRoute
     "/auth/register": {
       "filePath": "auth/register.tsx"
     },
+<<<<<<< Updated upstream
     "/auth/verify/$id": {
       "filePath": "auth/verify.$id.tsx"
+=======
+    "/auth/verify": {
+      "filePath": "auth/verify.tsx"
+>>>>>>> Stashed changes
     }
   }
 }
