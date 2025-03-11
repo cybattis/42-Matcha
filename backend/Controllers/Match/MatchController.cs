@@ -24,9 +24,8 @@ public class MatchController(ILogger<MatchController> logger): ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Get([FromHeader] string authorization)
     {
-        var id = JwtHelper.DecodeJwtToken(authorization);
-        
         try {
+            var id = JwtHelper.DecodeJwtToken(authorization);
             var matches = new List<MatchModel>();
             
             await using MySqlConnection conn = DbHelper.GetOpenConnection();

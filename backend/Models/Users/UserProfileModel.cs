@@ -34,7 +34,7 @@ public class UserProfileModel
     [DefaultValue(false)]
     public bool? IsVerified {get;set;}
     [SwaggerIgnore]
-    public List<string> Tags {get;set;} = new();
+    public Dictionary<string, int> Tags {get;set;} = new();
     [SwaggerIgnore]
     public List<string> Images {get;set;} = new();
 }
