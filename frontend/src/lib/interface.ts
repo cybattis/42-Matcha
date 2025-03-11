@@ -3,7 +3,7 @@ export interface UserProfile {
   lastName: string;
   biography: string;
   coordinates: string;
-  tags: string[];
+  tags: Array<number>;
   isVerified: boolean;
   profilePercentage: number;
   fameRating: number;

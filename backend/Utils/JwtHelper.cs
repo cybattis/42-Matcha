@@ -25,7 +25,6 @@ public static class JwtHelper
         {
             Subject = new ClaimsIdentity([
                 new Claim("Id", Guid.NewGuid().ToString()),
-                new Claim("username", username),
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())

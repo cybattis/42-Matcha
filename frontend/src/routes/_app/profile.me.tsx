@@ -61,8 +61,9 @@ function RouteComponent() {
               <p>{address}</p>
               <p>Fame: {data.fameRating}</p>
               <Flex gap={2} wrap="wrap">
-                {data.tags.map((tag) => (<Badge key={tag} size="lg" variant="solid">{tag}</Badge>)
-                )}
+                {Object.entries(data.tags).map(([key, value]) => {
+                  return <Badge key={value} size="lg" variant="solid">{key}</Badge>;
+                })}
               </Flex>
             </Flex>
             <Flex direction={"column"} gap={1} w="100%" h={150} maxW={"100%"} p={4} borderWidth="1px" borderRadius={8}

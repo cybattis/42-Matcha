@@ -48,10 +48,13 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 };
 
                 // Tags
-                if (reader.NextResult()) {
-                    while (reader.Read())
-                        profile.Tags.Add(reader["name"] as string ?? "");
-                } 
+                while (reader.Read())
+                {
+                    profile.Tags.Add(
+                        reader["name"] as string ?? "",
+                        reader["id"] as int? ?? 0
+                    );
+                }
                 
                 // Pictures
                 if (reader.NextResult()) {
@@ -85,6 +88,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
         try {
             var id = JwtHelper.DecodeJwtToken(authorization);
             Console.WriteLine(id);
+            
         
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
@@ -110,7 +114,12 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             // Tags
             if (reader.NextResult()) {
                 while (reader.Read())
-                    profile.Tags.Add(reader["name"] as string ?? "");
+                {
+                    profile.Tags.Add(
+                        reader["name"] as string ?? "",
+                        reader["id"] as int? ?? 0
+                    );
+                }
             } 
                 
             // Pictures

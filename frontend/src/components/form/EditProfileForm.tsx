@@ -19,9 +19,8 @@ import {
   UseFormSetValue,
 } from "react-hook-form";
 import {FormEventHandler, useEffect, useState} from "react";
-import {useCoordinate} from "@/lib/useCoordinate.ts";
+import {useCoordinate, UserCoordinates} from "@/lib/useCoordinate.ts";
 import {Radio, RadioGroup} from "@/components/ui/radio.tsx";
-import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {
   Tags,
   UserProfileFormValue,
@@ -29,6 +28,7 @@ import {
 import axios from "axios";
 import {GetAddress} from "@/lib/utils.ts";
 import {UserProfile} from "@/lib/interface.ts";
+import {Checkbox} from "@/components/ui/checkbox.tsx";
 
 export function EditProfileForm(props: {
   profile: UserProfile;
@@ -43,16 +43,18 @@ export function EditProfileForm(props: {
   const errors = formState.errors;
 
   const initCoordinates = useCoordinate();
-  const [coordinates, setCoordinates] = useState<string>(
-    initCoordinates.lat + "," + initCoordinates.lon
-  );
+  const [coordinates, setCoordinates] = useState<UserCoordinates>(initCoordinates);
   const [address, setAddress] = useState<string>("");
+
+  const [userTags, setUserTags] = useState<number[]>([]);
 
   const tags = useController({
     control,
     name: "tags",
-    defaultValue: [],
+    defaultValue: profile.tags || [],
   });
+
+  console.log("Tags", tags.field.value);
 
   async function GetCoordinates(address: string) {
     const parsedAddress = address.replace(/ /g, "+");
@@ -75,24 +77,44 @@ export function EditProfileForm(props: {
 
   const invalidTags = !!errors.tags;
 
-  // TODO: fix coordinates not set in form value at start
   useEffect(() => {
-    if (profile.coordinates) {
+    if (profile.tags) {
+      setUserTags(Object.values(profile.tags).map((tag) => {
+        return tag;
+      }));
+    }
+
+    if (profile.coordinates.length > 0) {
       console.log("Profile coordinates:", profile.coordinates);
       setCoordinates(profile.coordinates);
       const [lat, lon] = profile.coordinates.split(",");
-      GetAddress(lat, lon).then((address) => {
+      GetAddress(parseFloat(lat), parseFloat(lon)).then((address) => {
+        if (!address) return;
         setAddress(address);
       });
       return;
     }
 
-    console.log("Init coordinates:", initCoordinates);
-    GetAddress(initCoordinates.lat, initCoordinates.lon).then((address) => {
+    if (!coordinates) return;
+
+    setValue("coordinates", coordinates.latitude + "," + coordinates.longitude);
+    if (coordinates.access) {
+      GetAddress(coordinates.longitude, coordinates.latitude).then((address) => {
+        if (!address) return;
+        setAddress(address);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!coordinates) return;
+
+    GetAddress(coordinates.longitude, coordinates.latitude).then((address) => {
+      if (!address) return;
       setValue("coordinates", profile.coordinates);
       setAddress(address);
     });
-  }, []);
+  }, [coordinates]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -175,9 +197,9 @@ export function EditProfileForm(props: {
             <Fieldset.Legend>Tags</Fieldset.Legend>
             <CheckboxGroup
               invalid={invalidTags}
-              value={tags.field.value.map((v) => v.toString())}
               onValueChange={tags.field.onChange}
               name={tags.field.name}
+              value={userTags}
             >
               <Fieldset.Content>
                 <Flex

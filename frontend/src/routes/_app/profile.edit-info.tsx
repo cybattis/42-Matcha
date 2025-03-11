@@ -168,19 +168,6 @@ function RouteComponent() {
     toaster.remove(t);
   });
 
-  useEffect(() => {
-    setDefaultValue({
-      firstName: loaderData.profile.firstName.length > 0 ? loaderData.profile.firstName : "",
-      lastName: loaderData.profile.lastName.length > 0 ? loaderData.profile.lastName : "",
-      biography: loaderData.profile.biography.length > 0 ? loaderData.profile.biography : "",
-      gender: loaderData.profile.gender || 1,
-      sexualOrientation: loaderData.profile.sexualOrientation || 1,
-      coordinates: loaderData.profile.coordinates.length > 0 ? loaderData.profile.coordinates : "",
-      tags: loaderData.profile.tags || [],
-    });
-
-  }, [loaderData]);
-
   return (
     <VStack gap={6} align={"center"}>
       <EditProfileForm
