@@ -1,11 +1,14 @@
 using backend.Database;
 using backend.Models.App;
+using backend.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 
 namespace backend.Controllers.App;
 
 [ApiController]
+[Authorize]
 [Route("App/")]
 public class DatingController : ControllerBase
 {
@@ -15,8 +18,9 @@ public class DatingController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public IActionResult Dating([FromBody] FiltersModel matchingSettings)
+    public IActionResult Dating([FromBody] FiltersModel matchingSettings, [FromHeader] string authorization)
     {
+        var id = JwtHelper.DecodeJwtToken(authorization);
         List<ProfilesModel> profilesMatchingFilters = new();
         using MySqlConnection dbClient = DbHelper.GetOpenConnection();
         using var command = new MySqlCommand("GetMatchingProfiles", dbClient);
