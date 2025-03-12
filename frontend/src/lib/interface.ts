@@ -10,4 +10,5 @@ export interface UserProfile {
   images: string[];
   gender: number;
   sexualOrientation: number;
+  status: string;
 }

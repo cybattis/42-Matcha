@@ -136,9 +136,7 @@ const NavbarMenu = () => {
     <MenuRoot>
       <MenuTrigger asChild position="relative">
         <Button variant="ghost" p="0" w={"40px"} h={"40px"}>
-          <UserIcon>
-            <UserImage userID={id} position={1} borderRadius={"full"} height={'100%'} width={"100%"}/>
-          </UserIcon>
+          <UserImage userID={id} position={1} borderRadius={"full"} height={'100%'} width={"100%"}/>
         </Button>
       </MenuTrigger>
       <MenuContent pos="absolute" top={"56px"} right={"12px"}>

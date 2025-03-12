@@ -4,14 +4,14 @@ import {
   ParsedLocation,
   redirect,
 } from "@tanstack/react-router";
-import { MyRooterContext } from "@/routes/__root.tsx";
+import {MyRooterContext} from "@/routes/__root.tsx";
 
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
   beforeLoad: async ({
-    context,
-    location,
-  }: {
+                       context,
+                       location,
+                     }: {
     context: MyRooterContext;
     location: ParsedLocation;
   }) => {
@@ -46,9 +46,10 @@ export const Route = createFileRoute("/_app")({
       }
     }
   },
-  loader: async () => {},
+  loader: async () => {
+  },
 });
 
 function RouteComponent() {
-  return <Outlet />;
+  return <Outlet/>;
 }

@@ -4,8 +4,8 @@ DELIMITER //
 CREATE PROCEDURE GetUserProfile(IN userID INT) 
 BEGIN
     SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
-           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage
-        FROM users WHERE id = userID;
+           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage, profile_status, address
+    FROM users WHERE id = userID;
     
     SELECT name, id FROM tags WHERE id IN (SELECT tag_id FROM users_tags WHERE user_id = userID);
     SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
@@ -25,7 +25,8 @@ CREATE PROCEDURE UpdateUserProfile(
     IN genderID INT,
     IN sexualOrientation INT,
     IN coordinates VARCHAR(100),
-    IN biography VARCHAR(250)
+    IN biography VARCHAR(250),
+    IN address VARCHAR(100)
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -52,6 +53,9 @@ BEGIN
     
     UPDATE users SET biography = biography 
                  WHERE id = userID AND users.biography != biography;
+    
+    UPDATE users SET address = address 
+                 WHERE id = userID AND users.address != address;
     
     COMMIT;
 

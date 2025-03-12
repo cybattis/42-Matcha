@@ -170,6 +170,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             cmd.Parameters.AddWithValue("@sexualOrientation", data.SexualOrientation);
             cmd.Parameters.AddWithValue("@biography", data.Biography);
             cmd.Parameters.AddWithValue("@coordinates", data.Coordinates);
+            cmd.Parameters.AddWithValue("@address", data.Address);
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully updated");
         }

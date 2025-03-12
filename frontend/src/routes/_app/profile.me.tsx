@@ -3,10 +3,10 @@ import axios from "axios";
 import {UserProfile} from "@/lib/interface.ts";
 import {MyRooterContext} from "@/routes/__root.tsx";
 import {useEffect, useState} from "react";
-import {GetAddressFromString} from "@/lib/utils.ts";
-import {Badge, Box, Button, Flex, Text} from "@chakra-ui/react";
+import {Badge, Button, Flex, Text} from "@chakra-ui/react";
 import {UserImage} from "@/components/UserImage.tsx";
 import {EditIcon, EditImages} from "@/components/Icons.tsx";
+import {GetAddressFromString} from "@/lib/useCoordinate.ts";
 
 export const Route = createFileRoute("/_app/profile/me")({
   component: RouteComponent,

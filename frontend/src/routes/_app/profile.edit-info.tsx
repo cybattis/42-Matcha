@@ -2,7 +2,7 @@ import {
   createFileRoute,
   getRouteApi,
   Navigate,
-  redirect,
+  redirect, useNavigate,
 } from "@tanstack/react-router";
 import {MyRooterContext} from "@/routes/__root.tsx";
 import axios from "axios";
@@ -22,8 +22,9 @@ export const Route = createFileRoute("/_app/profile/edit-info")({
   component: RouteComponent,
   loader: async ({context}: { context: MyRooterContext }) => {
     const profile = await GetProfile(context.auth.token);
-    console.log("PROFILE", profile);
     const tags = await fetchTags(context.auth);
+    console.log("PROFILE", profile);
+    console.log("TAGS", tags);
     return {profile, tags};
   },
 });
@@ -44,7 +45,7 @@ const formSchema = z.object({
   sexualOrientation: z.number(),
   biography: z.string(),
   coordinates: z.string(),
-  tags: z.array(z.string()),
+  // tags: z.array(z.string()),
 });
 
 export type UserProfileFormValue = z.infer<typeof formSchema>;
@@ -69,11 +70,10 @@ async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
     }
   )
   .then((res) => {
-    console.log("Profile", res);
     return res;
   })
   .catch((err) => {
-    console.log("Profile", err.response);
+    console.log(err);
     return err.response;
   });
 
@@ -95,10 +95,10 @@ async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
     }
   )
   .then((res) => {
-    console.log("Tags", res);
     return res;
   })
   .catch((err) => {
+    console.log(err);
     return err;
   });
 }
@@ -133,28 +133,26 @@ function RouteComponent() {
     profile: UserProfile;
     tags: Tags[];
   }
-  const [isProfileCreated, setIsProfileCreated] = useState(false);
-  const [defaultValue, setDefaultValue] = useState<UserProfileFormValue>();
+  const navigate = useNavigate({from: Route.fullPath});
 
-  const {handleSubmit, register, formState, control, setValue} =
-    useForm<UserProfileFormValue>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        firstName: loaderData.profile.firstName.length > 0 ? loaderData.profile.firstName : "",
-        lastName: loaderData.profile.lastName.length > 0 ? loaderData.profile.lastName : "",
-        biography: loaderData.profile.biography.length > 0 ? loaderData.profile.biography : "",
-        gender: loaderData.profile.gender || 1,
-        sexualOrientation: loaderData.profile.sexualOrientation || 1,
-        coordinates: loaderData.profile.coordinates.length > 0 ? loaderData.profile.coordinates : "",
-        tags: loaderData.profile.tags || [],
-      }
-    });
+  const form = useForm<UserProfileFormValue>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: loaderData.profile.firstName,
+      lastName: loaderData.profile.lastName,
+      biography: loaderData.profile.biography,
+      // tags: loaderData.profile.tags ? Object.values(loaderData.profile.tags) : [],
+    }
+  });
 
-  const onSubmit = handleSubmit(async (data: UserProfileFormValue) => {
+  const onSubmit = form.handleSubmit(async (data: UserProfileFormValue) => {
+    const isCreation = loaderData.profile.status !== "Complete";
+
     console.log(data);
-    const t = toaster.loading({title: "Création de compte en cours..."});
+    const t = toaster.loading({title: isCreation ? "Création de compte en cours..." : "Mise à jour du profil en cours..."});
     const token = localStorage.getItem("token");
     const result = await UpdateProfile(token, data);
+    toaster.remove(t);
 
     console.log("RESULT:", result.statusText);
 
@@ -162,24 +160,21 @@ function RouteComponent() {
       ToasterError(result.statusText);
     } else {
       ToasterSuccess(result.data);
-      setIsProfileCreated(true);
+      if (!isCreation)
+        await navigate({to: "/profile/edit-images"});
+      else
+        await navigate({to: "/profile/me"});
     }
-
-    toaster.remove(t);
   });
 
   return (
     <VStack gap={6} align={"center"}>
       <EditProfileForm
         profile={loaderData.profile}
+        form={form}
         onSubmit={onSubmit}
-        register={register}
-        control={control}
-        formState={formState}
         tagsData={loaderData.tags}
-        setValue={setValue}
       />
-      {isProfileCreated ? <Navigate to={"/profile/edit-images"}/> : null}
     </VStack>
   );
 }

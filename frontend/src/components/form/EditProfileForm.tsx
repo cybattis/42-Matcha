@@ -11,110 +11,96 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import {
-  Control,
   Controller,
-  FormState,
   useController,
-  UseFormRegister,
-  UseFormSetValue,
+  UseFormReturn,
 } from "react-hook-form";
 import {FormEventHandler, useEffect, useState} from "react";
-import {useCoordinate, UserCoordinates} from "@/lib/useCoordinate.ts";
+import {
+  GetAddressFromCoordinates,
+  GetAddressFromString,
+  GetCoordinates,
+  useCoordinate,
+  UserCoordinates
+} from "@/lib/useCoordinate.ts";
 import {Radio, RadioGroup} from "@/components/ui/radio.tsx";
 import {
   Tags,
   UserProfileFormValue,
 } from "@/routes/_app/profile.edit-info.tsx";
-import axios from "axios";
-import {GetAddress} from "@/lib/utils.ts";
 import {UserProfile} from "@/lib/interface.ts";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
 
 export function EditProfileForm(props: {
   profile: UserProfile;
-  formState: FormState<UserProfileFormValue>;
-  register: UseFormRegister<UserProfileFormValue>;
-  control: Control<UserProfileFormValue>;
+  form: UseFormReturn<UserProfileFormValue>;
   onSubmit: FormEventHandler<HTMLFormElement>;
   tagsData: Tags[];
-  setValue: UseFormSetValue<UserProfileFormValue>;
 }) {
-  const {formState, tagsData, onSubmit, register, control, setValue, profile} = props;
+  const {tagsData, form, profile} = props;
+  const {control, onSubmit, register, setValue, formState} = form;
   const errors = formState.errors;
-
   const initCoordinates = useCoordinate();
-  const [coordinates, setCoordinates] = useState<UserCoordinates>(initCoordinates);
+  const [coordinates, setCoordinates] = useState<UserCoordinates>(null);
   const [address, setAddress] = useState<string>("");
 
-  const [userTags, setUserTags] = useState<number[]>([]);
+  const [userTags, setUserTags] = useState<number[]>(profile.tags ? Object.values(profile.tags) : []);
 
   const tags = useController({
     control,
     name: "tags",
-    defaultValue: profile.tags || [],
+    defaultValue: [],
   });
 
-  console.log("Tags", tags.field.value);
-
-  async function GetCoordinates(address: string) {
-    const parsedAddress = address.replace(/ /g, "+");
-
-    console.log("GetCoordinates:", parsedAddress);
-    const reverseGeocoding = await axios.get(
-      `http://nominatim.openstreetmap.org/search?q=${parsedAddress}&format=jsonv2`
-    );
-
-    if (reverseGeocoding.data.length === 0) return;
-
-    const {lat, lon} = reverseGeocoding.data[0] as {
-      lat: string;
-      lon: string;
-    };
-
-    console.log("NEW CORD", lat.substring(0, 10), lon.substring(0, 10));
-    setCoordinates(lat.substring(0, 10) + "," + lon.substring(0, 10));
-  }
-
-  const invalidTags = !!errors.tags;
+  // const invalidTags = !!errors.tags;
 
   useEffect(() => {
-    if (profile.tags) {
-      setUserTags(Object.values(profile.tags).map((tag) => {
-        return tag;
-      }));
-    }
-
     if (profile.coordinates.length > 0) {
       console.log("Profile coordinates:", profile.coordinates);
       setCoordinates(profile.coordinates);
-      const [lat, lon] = profile.coordinates.split(",");
-      GetAddress(parseFloat(lat), parseFloat(lon)).then((address) => {
+      setValue("coordinates", profile.coordinates);
+      GetAddressFromString(profile.coordinates).then((address) => {
         if (!address) return;
         setAddress(address);
       });
       return;
     }
+  }, []);
 
-    if (!coordinates) return;
+  useEffect(() => {
+    if (coordinates) return;
 
-    setValue("coordinates", coordinates.latitude + "," + coordinates.longitude);
-    if (coordinates.access) {
-      GetAddress(coordinates.longitude, coordinates.latitude).then((address) => {
+    if (!initCoordinates) return;
+    console.log("Init coordinates:", initCoordinates);
+
+    if (initCoordinates.access) {
+      GetAddressFromCoordinates(initCoordinates.latitude, initCoordinates.longitude).then((address) => {
         if (!address) return;
         setAddress(address);
       });
     }
-  }, []);
+
+    console.log("Address", address);
+  }, [initCoordinates]);
 
   useEffect(() => {
     if (!coordinates) return;
 
-    GetAddress(coordinates.longitude, coordinates.latitude).then((address) => {
+    GetAddressFromCoordinates(coordinates.latitude, coordinates.longitude).then((address) => {
       if (!address) return;
-      setValue("coordinates", profile.coordinates);
       setAddress(address);
     });
+
+    console.log("Address set by user:", address);
   }, [coordinates]);
+
+  useEffect(() => {
+    console.log("User tags:", userTags);
+    setValue("tags", userTags, {
+      shouldValidate: true,
+    });
+    console.log("Set tags:", tags.field.value);
+  }, [userTags]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -177,8 +163,9 @@ export function EditProfileForm(props: {
                   value={address}
                   onBlur={async () => {
                     console.log("On blur:", address);
-                    await GetCoordinates(address);
-                    setValue("coordinates", coordinates, {
+                    const result = await GetCoordinates(address);
+                    setCoordinates(result);
+                    setValue("coordinates", result?.latitude.toString() + ',' + result?.longitude.toString(), {
                       shouldValidate: true,
                     });
                   }}
@@ -232,5 +219,35 @@ export function EditProfileForm(props: {
         </Fieldset.Root>
       </VStack>
     </form>
+  );
+}
+
+function TagCheckbox({
+                       tag,
+                       userTags,
+                       setUserTags,
+                     }: {
+  tag: Tags;
+  userTags: number[];
+  setUserTags: (tags: number[]) => void;
+}) {
+  const [checked, setChecked] = useState(userTags.includes(tag.id));
+
+  return (
+    <Checkbox
+      minW={"100px"}
+      checked={checked}
+      onCheckedChange={(e) => {
+        setChecked(e.checked);
+
+        if (e.checked && !userTags.includes(tag.id)) {
+          setUserTags([...userTags, tag.id]);
+        } else if (!e.checked && userTags.includes(tag.id)) {
+          setUserTags(userTags.filter((userTag) => userTag !== tag.id));
+        }
+      }}
+    >
+      {tag.name}
+    </Checkbox>
   );
 }
