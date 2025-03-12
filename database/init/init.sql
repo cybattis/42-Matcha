@@ -30,6 +30,7 @@ CREATE TABLE users (
     gender_id INT CHECK (gender_id BETWEEN 1 AND 2), -- 1 Male / 2 Female
     sexual_orientation INT CHECK (sexual_orientation BETWEEN 1 AND 3), -- 1 hetero / 2 homo / 3 bi
     coordinates VARCHAR(100) DEFAULT '',
+    address VARCHAR(100) DEFAULT '',
     biography VARCHAR(280) DEFAULT '',
     profile_status INT DEFAULT 0,
     profile_completion_percentage INT DEFAULT 0,    
