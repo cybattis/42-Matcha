@@ -75,3 +75,9 @@
     width: 30px;
     height: 30px;
 }
+
+.is-hidden {
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+}

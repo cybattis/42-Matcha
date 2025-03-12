@@ -2,56 +2,47 @@ using System.Data;
 using backend.Database;
 using backend.Models.Users;
 using backend.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 
 namespace backend.Controllers.User;
 
 [ApiController]
+[Authorize]
 [Route("[controller]")]
 public class UserPictureController(ILogger<UserPictureController> logger) : ControllerBase
 {
+    private string imagePath = "/home/cybattis/Dev/42/Matcha/backend/images/";
+        
     /// <summary>
     /// Upload user picture
     /// </summary>
-    /// <param name="id">User ID</param>
     /// <param name="image">Image data</param>
+    /// <param name="authorization">Token</param>
     /// <response code="200">Picture uploaded</response>
     /// <response code="400">Bad request</response>
     [HttpPost]
-    [Route("[action]/{id:int}")]
+    [Route("[action]")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Upload(int id, [FromForm] UserPictureModel image)
+    public async Task<ActionResult> Upload([FromForm] UserPictureModel image, [FromHeader] string authorization)
     {
         try {
-            if (image.Position is < 1 or > 5)
-                return ValidationProblem("Invalid image position");
+            var id = JwtHelper.DecodeJwtToken(authorization);
+            if (image.Position < 1 || image.Position > 5)
+                return BadRequest("Invalid image position");
             
             // Check if image is valid
             if (image.Data.Length == 0)
-                return ValidationProblem("Image is empty");
+                return BadRequest("Image is empty");
             if (image.Data.ContentType != "image/jpeg" && image.Data.ContentType != "image/png")
-                return ValidationProblem("Invalid image type");
+                return BadRequest("Invalid image type");
             if (image.Data.Length > 5 * 1024 * 1024) // 5MB
-                return ValidationProblem("Image is too large");
+                return BadRequest("Image is too large");
             if (image.Data.Length < 1 * 1024) // 1KB
-                return ValidationProblem("Image is too small");
-            
-            await using MySqlConnection conn = DbHelper.GetOpenConnection();
-            await using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
-            getImageCmd.CommandType = CommandType.StoredProcedure;
-            getImageCmd.Parameters.AddWithValue("@userID", id);
-            getImageCmd.Parameters.AddWithValue("@position", image.Position);
-            await using MySqlDataReader reader = getImageCmd.ExecuteReader();
-            
-            // Check if an image already exist at that position
-            if (reader.Read() && reader.HasRows) {
-                logger.LogError("Image already present at that position delete it first");
-                return ValidationProblem("Image already present at that position");
-            }
-            await reader.CloseAsync();
+                return BadRequest("Image is too small");
             
             using var memoryStream = new MemoryStream();
             await image.Data.CopyToAsync(memoryStream);
@@ -59,27 +50,57 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             var isValid = Files.IsImageFileValid(bytes);
             if (!isValid)
-                return ValidationProblem("Image type not supported");
+                return BadRequest("Image type not supported");
 
-            var userFolder = "images/";
+            var userFolder = imagePath;
             // Check if file path exist
             if (!Directory.Exists(userFolder))
                 Directory.CreateDirectory(userFolder);
+
+            string extension;
+            if (image.Data.ContentType == "image/jpeg")
+                extension = "jpg";
+            else if (image.Data.ContentType == "image/png")
+                extension = "png";
+            else
+                return BadRequest("Invalid image type");
             
             // Save image to disk
-            var url = userFolder + Guid.NewGuid() + ".png";
+            var imageName = Guid.NewGuid() + "." + extension;
+            var url = imagePath + imageName;
+            Console.WriteLine(url);
+
             await System.IO.File.WriteAllBytesAsync(url, bytes);
             
             // Save image url to database
-            await using MySqlCommand cmd = new MySqlCommand("UploadImage", conn);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
-            cmd.Parameters.AddWithValue("@position", image.Position);
-            cmd.Parameters.AddWithValue("@imageUrl", url);
-            var result = cmd.ExecuteNonQuery();
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
             
-            return result >= 1 ? Ok("Image uploaded") : Problem("Fail to upload image to database", null, 500);
+            await using MySqlCommand deleteImageCmd = new MySqlCommand("GetUserImage", conn);
+            deleteImageCmd.CommandType = CommandType.StoredProcedure;
+            deleteImageCmd.Parameters.AddWithValue("@userID", id);
+            deleteImageCmd.Parameters.AddWithValue("@position", image.Position);
+            await using var reader = deleteImageCmd.ExecuteReader();
+
+            var oldUrl = "";
+            if (await reader.ReadAsync()) {
+                oldUrl = reader["image_url"].ToString() ?? "";
+            }
+            await reader.CloseAsync();
             
+            await using MySqlCommand addImageCmd = new MySqlCommand("UploadImage", conn);
+            addImageCmd.CommandType = CommandType.StoredProcedure;
+            addImageCmd.Parameters.AddWithValue("@userID", id);
+            addImageCmd.Parameters.AddWithValue("@position", image.Position);
+            addImageCmd.Parameters.AddWithValue("@imageUrl", imageName);
+            var result = addImageCmd.ExecuteNonQuery();
+            
+            if (result == 0)
+                return Problem("Fail to upload image to database", null, 500);
+            
+            if (System.IO.File.Exists(oldUrl))
+                System.IO.File.Delete(oldUrl);
+            
+            return Ok("Image uploaded");
         } catch (Exception e) {
             logger.LogError(e, e.Message);
             return Problem(e.Message);
@@ -89,77 +110,42 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     /// <summary>
     /// Upload user picture
     /// </summary>
-    /// <param name="id">User ID</param>
-    /// <param name="swap">Image position info</param>
-    /// <response code="200">Picture swapped</response>
-    /// <response code="400">Bad request</response>
-    [HttpPost]
-    [Route("[action]/{id:int}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult Swap(int id, [FromBody] SwapPicture swap)
-    {
-        try {
-            if (swap.Position is < 1 or > 5)
-                return ValidationProblem("Invalid image position of first image");
-            if (swap.NewPosition is < 1 or > 5)
-                return ValidationProblem("Invalid image position of second image");
-            
-            using MySqlConnection conn = DbHelper.GetOpenConnection();
-            using MySqlCommand cmd = new MySqlCommand("SwapImages", conn);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
-            cmd.Parameters.AddWithValue("@position1", swap.Position);
-            cmd.Parameters.AddWithValue("@position2", swap.NewPosition);
-            var result = cmd.ExecuteNonQuery();
-            
-            return result >= 1 ? Ok("Image swap") : Problem("Fail to swap images", null, 500);
-            
-        } catch (Exception e) {
-            logger.LogError(e, e.Message);
-            return Problem(e.Message);
-        }
-    }
-    
-    /// <summary>
-    /// Upload user picture
-    /// </summary>
-    /// <param name="id">User ID</param>
     /// <param name="position">Image position</param>
-    /// <response code="200">Picture deleted</response>
+    /// <response code="200">Picture deleted</response>`
     /// <response code="400">Bad request</response>
     [HttpDelete]
-    [Route("[action]/{id:int}")]
+    [Route("[action]/{position:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult Delete(int id, [FromForm] int position)
+    public async Task<ActionResult> Delete(int position, [FromHeader] string authorization)
     {
         try {
+            var id = JwtHelper.DecodeJwtToken(authorization);
+            
             if (position is < 1 or > 5) {
                 logger.LogError("Invalid image position");
                 return ValidationProblem("Invalid image position");
             }
             
-            using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
             
-            Console.WriteLine("ID " + id + " Position " + position);
-            
-            using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
+            await using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
             getImageCmd.CommandType = CommandType.StoredProcedure;
             getImageCmd.Parameters.AddWithValue("@userID", id);
             getImageCmd.Parameters.AddWithValue("@position", position);
-            using var reader = getImageCmd.ExecuteReader();
+            await using var reader = getImageCmd.ExecuteReader();
             
             // Delete image from disk
-            if (!reader.Read()) {
+            if (!await reader.ReadAsync()) {
                 logger.LogError("Image not found in database");
                 return ValidationProblem("Image not found");
             }
             
-            var url = reader["image_url"].ToString() ?? "";
-            reader.Close();
+            var fileName = reader["image_url"].ToString() ?? "";
+            await reader.CloseAsync();
+            
+            var url = imagePath + fileName;
             
             if (System.IO.File.Exists(url))
                 System.IO.File.Delete(url);
@@ -168,13 +154,108 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
                 return ValidationProblem("Image does not exist");
             }
             
-            using MySqlCommand deleteImageCmd = new MySqlCommand("DeleteImage", conn);
+            await using MySqlCommand deleteImageCmd = new MySqlCommand("DeleteImage", conn);
             deleteImageCmd.CommandType = CommandType.StoredProcedure;
             deleteImageCmd.Parameters.AddWithValue("@userID", id);
             deleteImageCmd.Parameters.AddWithValue("@position", position);
             var result = deleteImageCmd.ExecuteNonQuery();
             
             return result >= 1 ? Ok("Image deleted") : Problem("Fail to delete image in database", null, 500);
+            
+        } catch (Exception e) {
+            logger.LogError(e, e.Message);
+            return Problem(e.Message);
+        }
+    }
+
+    /// <summary>
+    /// Upload user picture
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <param name="position">Image position</param>
+    /// <response code="200">Picture deleted</response>
+    /// <response code="400">Bad request</response>
+    [HttpPost]
+    [Route("[action]/{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Get(int id, [FromForm] int position)
+    {
+        try {
+            if (position < 1 || position > 5)
+                return BadRequest("Invalid image position");
+            
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            
+            await using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
+            getImageCmd.CommandType = CommandType.StoredProcedure;
+            getImageCmd.Parameters.AddWithValue("@userID", id);
+            getImageCmd.Parameters.AddWithValue("@position", position);
+            await using var reader = getImageCmd.ExecuteReader();
+            
+            if (!reader.Read()) {
+                logger.LogError("Image not found in database");
+                return ValidationProblem("Image not found");
+            }
+            Console.WriteLine(imagePath);
+            var url = imagePath + reader["image_url"];
+            Console.WriteLine(url);
+            await reader.CloseAsync();
+            
+            if (!System.IO.File.Exists(url)) {
+                logger.LogError("Image file does not exist");
+                return ValidationProblem("Image does not exist");
+            }
+            
+            var bytes = await System.IO.File.ReadAllBytesAsync(url);
+            var base64String = Convert.ToBase64String(bytes);
+            return Ok("data:image/png;base64," + base64String);
+            
+        } catch (Exception e) {
+            logger.LogError(e, e.Message);
+            return Problem(e.Message);
+        }
+    }
+    
+        /// <summary>
+    /// Upload user picture
+    /// </summary>
+    /// <param name="imageName">Image url</param>
+    /// <response code="200">Picture deleted</response>
+    /// <response code="400">Bad request</response>
+    [HttpPost]
+    [Route("[action]/{imageName}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> Get(string imageName)
+    {
+        try {
+            await using MySqlConnection conn = DbHelper.GetOpenConnection();
+            await using MySqlCommand getImageCmd = new MySqlCommand("GetUserImageByUrl", conn);
+            getImageCmd.CommandType = CommandType.StoredProcedure;
+            getImageCmd.Parameters.AddWithValue("@imageName", imageName);
+            await using var reader = getImageCmd.ExecuteReader();
+            
+            if (!reader.Read()) {
+                logger.LogError("Image not found in database");
+                return ValidationProblem("Image not found");
+            }
+            
+            Console.WriteLine(imagePath);
+            var url = imagePath + reader["image_name"];
+            Console.WriteLine(url);
+            await reader.CloseAsync();
+            
+            if (!System.IO.File.Exists(url)) {
+                logger.LogError("Image file does not exist");
+                return ValidationProblem("Image does not exist");
+            }
+            
+            var bytes = await System.IO.File.ReadAllBytesAsync(url);
+            var base64String = Convert.ToBase64String(bytes);
+            return Ok("data:image/png;base64," + base64String);
             
         } catch (Exception e) {
             logger.LogError(e, e.Message);

@@ -7,7 +7,7 @@ import { toaster } from "@/components/ui/toaster.tsx";
 import { ToasterError, ToasterSuccess } from "@/lib/toaster.ts";
 import { RiArrowRightLine } from "react-icons/ri";
 
-export const Route = createFileRoute("/auth/login")({
+export const Route = createFileRoute("/_auth/auth/login")({
   component: RouteComponent,
 });
 
@@ -18,6 +18,7 @@ export interface LoginFormValues {
 
 interface LoginResponse {
   token?: string;
+  id?: string;
   error?: string;
   message?: string;
 }
@@ -50,6 +51,7 @@ function RouteComponent() {
     }
     if (result.token) {
       await auth.login(result.token);
+      localStorage.setItem("id", result.id || "");
       ToasterSuccess("Vous êtes connecté !");
     }
     toaster.remove(t);
@@ -80,7 +82,7 @@ function RouteComponent() {
           </Stack>
         </Card.Footer>
       </Card.Root>
-      {auth.isAuthenticated && <Navigate to={"/"} />}
+      {auth.isAuthenticated && <Navigate to={"/home"} />}
     </Flex>
   );
 }

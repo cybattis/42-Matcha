@@ -4,8 +4,6 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import { MyRooterContext } from "./__root";
-import { VStack, Image, Flex, HStack, Button } from "@chakra-ui/react";
-import { LikeIcon, SkipIcon } from "@/components/Icons.tsx";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -16,46 +14,22 @@ export const Route = createFileRoute("/")({
     context: MyRooterContext;
     location: ParsedLocation;
   }) => {
+    console.log("Index layout");
+    console.log("Location: ", location);
     if (!context.auth.isAuthenticated) {
+      console.log("User is not authenticated");
       throw redirect({
         to: "/auth/login",
-        search: {
-          redirect: location.href,
-        },
+      });
+    } else if (location.pathname !== "/home") {
+      console.log("User is authenticated");
+      throw redirect({
+        to: "/home",
       });
     }
-    console.log("User is authenticated");
-    throw redirect({
-      to: "/app/profile-creation",
-      search: {
-        redirect: location.href,
-      },
-    });
   },
-  loader: () => loader(),
 });
 
-async function loader() {}
-
 function Index() {
-  return (
-    <VStack justifyContent={"center"}>
-      <Flex justifyContent={"center"} direction={"column"}>
-        <Image
-          src="https://wallpapercave.com/uwp/uwp4261619.png"
-          alt="Naruto vs Sasuke"
-          aspectRatio={4 / 5}
-          width="md"
-        />
-        <HStack gap={20} justifyContent={"center"}>
-          <Button variant={"ghost"}>
-            <SkipIcon />
-          </Button>
-          <Button variant={"ghost"}>
-            <LikeIcon />
-          </Button>
-        </HStack>
-      </Flex>
-    </VStack>
-  );
+  return <></>;
 }

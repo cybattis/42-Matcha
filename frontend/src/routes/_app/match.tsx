@@ -1,21 +1,24 @@
-import {createFileRoute} from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import {
   Button,
-  Flex, Heading,
+  Flex,
+  Heading,
   HStack,
   IconButton,
   Input,
-  MenuContent, MenuItem,
+  MenuContent,
+  MenuItem,
   MenuRoot,
   MenuTrigger,
   Stack,
-  Text, VStack
+  Text,
+  VStack,
 } from '@chakra-ui/react'
-import {useEffect, useRef, useState} from 'react'
-import {MatchList} from '@/components/MatchList.tsx'
-import {ChatOptionIcon} from "@/components/Icons.tsx";
+import { useEffect, useRef, useState } from 'react'
+import { MatchList } from '@/components/MatchList.tsx'
+import { ChatOptionIcon } from '@/components/Icons.tsx'
 
-export const Route = createFileRoute('/app/match')({
+export const Route = createFileRoute('/_app/match')({
   component: RouteComponent,
 })
 
@@ -33,12 +36,17 @@ export type MatchListType = {
   chat: MessageProps[]
 }
 
-const Message = ({message}: { message: MessageProps }) => {
-  const date = new Date(parseInt(message.timestamp));
-  const time = date ? date.toLocaleTimeString() : '';
+const Message = ({ message }: { message: MessageProps }) => {
+  const date = new Date(message.timestamp)
+  const time = date ? date.toLocaleTimeString() : ''
 
   return (
-    <VStack key={message.id} w="fit-content" alignSelf={message.actor === 'user' ? 'flex-end' : 'flex-start'} gap={1}>
+    <VStack
+      key={message.id}
+      w="fit-content"
+      alignSelf={message.actor === 'user' ? 'flex-end' : 'flex-start'}
+      gap={1}
+    >
       <Flex
         py={2}
         px={4}
@@ -49,7 +57,12 @@ const Message = ({message}: { message: MessageProps }) => {
       >
         <Text>{message.text}</Text>
       </Flex>
-      <Text fontSize="2xs" ml={2} color="gray.400" alignSelf={message.actor === 'user' ? 'flex-end' : 'flex-start'}>
+      <Text
+        fontSize="2xs"
+        ml={2}
+        color="gray.400"
+        alignSelf={message.actor === 'user' ? 'flex-end' : 'flex-start'}
+      >
         {time}
       </Text>
     </VStack>
@@ -58,45 +71,49 @@ const Message = ({message}: { message: MessageProps }) => {
 
 function MatchOption() {
   return (
-    <MenuRoot positioning={{placement: "right-start"}}>
+    <MenuRoot positioning={{ placement: 'right-start' }}>
       <MenuTrigger asChild>
         <IconButton variant="ghost" size="sm">
-          <ChatOptionIcon/>
+          <ChatOptionIcon />
         </IconButton>
       </MenuTrigger>
       <MenuContent pos="absolute" right="-115px">
         <MenuItem value="block">Block 🛇</MenuItem>
       </MenuContent>
     </MenuRoot>
-  );
+  )
 }
 
-
 function RouteComponent() {
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const [id, setId] = useState('');
-  let [chat, setChat] = useState<MessageProps[]>(null);
+  const messagesEndRef = useRef<HTMLDivElement>()
+  const [id, setId] = useState('')
+  let [chat, setChat] = useState<MessageProps[]>([])
 
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
     }
 
-    const currentUser = users.find(user => user.id === id);
-    if (currentUser)
-      setChat(currentUser.chat);
+    const currentUser = users.filter((user) => user.id === id) as MatchListType;
+    if (currentUser) setChat(currentUser.chat)
   }, [id])
 
   return (
     <VStack>
       <Heading>Match and Chat</Heading>
-      <HStack w={'fit-content'} justifyContent={'center'} alignItems={'flex-start'} gap={3} justifySelf={'center'}>
+      <HStack
+        w={'fit-content'}
+        justifyContent={'center'}
+        alignItems={'flex-start'}
+        gap={3}
+        justifySelf={'center'}
+      >
         <Stack gap="2" w={'250px'}>
           {users.map((user: MatchListType) => (
-            <MatchList props={user} setId={setId}/>
+            <MatchList props={user} setId={setId} />
           ))}
         </Stack>
-        {chat ?
+        {chat ? (
           <Flex
             flexDirection="column"
             w="lg"
@@ -113,16 +130,15 @@ function RouteComponent() {
               flex={1}
               ref={messagesEndRef}
             >
-              {chat && chat.map((message) => (
-                <Message message={message}/>
-              ))}
+              {chat && chat.map((message) => <Message message={message} />)}
             </Stack>
             <HStack p={4} bg="gray.100" position="relative">
-              <Input bg="white" placeholder="Enter your text"/>
+              <Input bg="white" placeholder="Enter your text" />
               <Button colorScheme="blue">Send</Button>
-              <MatchOption/>
+              <MatchOption />
             </HStack>
-          </Flex> : null}
+          </Flex>
+        ) : null}
       </HStack>
     </VStack>
   )
@@ -130,65 +146,65 @@ function RouteComponent() {
 
 const users = [
   {
-    id: "1",
-    name: "John Mason",
-    avatar: "https://i.pravatar.cc/300?u=iu",
+    id: '1',
+    name: 'John Mason',
+    avatar: 'https://i.pravatar.cc/300?u=iu',
     chat: [
       {
-        id: "1",
-        text: "Hi John",
+        id: '1',
+        text: 'Hi John',
         timestamp: '1737991939',
-        actor: "user",
+        actor: 'user',
       },
       {
-        id: "2",
-        text: "Hello User",
+        id: '2',
+        text: 'Hello User',
         timestamp: '1737991939',
-        actor: "bot",
+        actor: 'bot',
       },
       {
-        id: "3",
-        text: "How are you doing?",
+        id: '3',
+        text: 'How are you doing?',
         timestamp: '1737991939',
-        actor: "bot",
+        actor: 'bot',
       },
       {
-        id: "4",
+        id: '4',
         text: "I'm fine !",
         timestamp: '1737992039',
-        actor: "user",
+        actor: 'user',
       },
     ],
   },
   {
-    id: "2",
-    name: "Melissa Jones",
-    email: "melissa.jones@example.com",
-    avatar: "https://i.pravatar.cc/300?u=po",
+    id: '2',
+    name: 'Melissa Jones',
+    email: 'melissa.jones@example.com',
+    avatar: 'https://i.pravatar.cc/300?u=po',
     chat: [
       {
-        id: "1",
-        text: "Hi Melissa",
+        id: '1',
+        text: 'Hi Melissa',
         timestamp: '',
-        actor: "user",
+        actor: 'user',
       },
       {
-        id: "2",
-        text: "Hello",
+        id: '2',
+        text: 'Hello',
         timestamp: '',
-        actor: "bot",
+        actor: 'bot',
       },
       {
-        id: "3",
-        text: "How may I help you?",
+        id: '3',
+        text: 'How may I help you?',
         timestamp: '',
-        actor: "bot",
+        actor: 'bot',
       },
       {
-        id: "4",
-        text: "HEEEEEEEEEEEEE",
+        id: '4',
+        text: 'HEEEEEEEEEEEEE',
         timestamp: '',
-        actor: "user",
+        actor: 'user',
       },
     ],
   },

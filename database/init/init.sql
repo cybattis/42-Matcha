@@ -13,11 +13,6 @@ CREATE TABLE status (
     name VARCHAR(30) UNIQUE NOT NULL
 );
 
-CREATE TABLE reaction (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30) UNIQUE NOT NULL
-);
-
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(200) NOT NULL,
@@ -36,6 +31,7 @@ CREATE TABLE users (
     sexual_orientation INT CHECK (sexual_orientation BETWEEN 1 AND 3), -- 1 hetero / 2 homo / 3 bi
     coordinates VARCHAR(100) DEFAULT '',
     biography VARCHAR(280) DEFAULT '',
+    profile_status INT DEFAULT 0,
     profile_completion_percentage INT DEFAULT 0,    
     fame INT DEFAULT 0,
     created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -47,6 +43,7 @@ CREATE TABLE users (
 CREATE TABLE users_tags (
     user_id INT NOT NULL,
     tag_id INT NOT NULL,
+    id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (tag_id) REFERENCES tags(id)
 );
@@ -92,17 +89,13 @@ CREATE TABLE `match` (
 CREATE TABLE message (
     id INT AUTO_INCREMENT PRIMARY KEY,
     match_id INT NOT NULL,
-    sender INT NOT NULL,
-    receiver INT NOT NULL,
-    message_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    senderId INT NOT NULL,
+    receiverId INT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     content VARCHAR(255),
-    sender_reaction_id INT,
-    receiver_reaction_id INT,
     message_status_id INT NOT NULL DEFAULT 0,
-    FOREIGN KEY (sender) REFERENCES users(id),
-    FOREIGN KEY (receiver) REFERENCES users(id),
-    FOREIGN KEY (sender_reaction_id) REFERENCES reaction(id),
-    FOREIGN KEY (receiver_reaction_id) REFERENCES reaction(id),
+    FOREIGN KEY (senderId) REFERENCES users(id),
+    FOREIGN KEY (receiverId) REFERENCES users(id),
     FOREIGN KEY (message_status_id) REFERENCES status(id),
     FOREIGN KEY (match_id) REFERENCES `match`(id)
 );
@@ -110,9 +103,9 @@ CREATE TABLE message (
 CREATE TABLE notification (
     id INT AUTO_INCREMENT PRIMARY KEY,
     userid INT,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     content VARCHAR(255) NOT NULL,
     statusid INT NOT NULL,
-    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userid) REFERENCES users(id),
     FOREIGN KEY (statusid) REFERENCES status(id)
 );
@@ -158,7 +151,7 @@ BEGIN
         SET NEW.first_userid = NEW.second_userid;
         SET NEW.second_userid = @temp;
     END IF;
-END//
+END //
 
 CREATE TRIGGER notify_view
 BEFORE INSERT ON views
@@ -173,6 +166,6 @@ BEGIN
         INSERT INTO notification (userid, content, statusid, created_on)
         VALUES (NEW.userid_seen, CONCAT('Your profile was viewed by ', NEW.userid), 2, NOW());
     END IF;
-END//
+END //
 
 DELIMITER ;

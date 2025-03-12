@@ -5,10 +5,12 @@ import {
   useContext,
   useState,
 } from "react";
+import axios from "axios";
 
 export interface IAuthContext {
   isAuthenticated: boolean | null;
   token: string | null;
+  appStatus: () => Promise<string>;
   login: (username: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -27,7 +29,7 @@ function setUserToken(token: string | null) {
   }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({children}: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(getUserToken());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
     !!token
@@ -37,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserToken(null);
     setIsAuthenticated(false);
     setToken(null);
+    localStorage.removeItem("id");
   }, []);
 
   const login = useCallback(async (token: string) => {
@@ -45,8 +48,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(token);
   }, []);
 
+  const appStatus = useCallback(async () => {
+    console.log("Checking profile status");
+    return await axios.get("/UserProfile/status", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((res) => {
+      return res.data;
+    }).catch((err) => {
+      if (err.status !== 200) {
+        logout();
+        return "Unauthorized";
+      }
+    });
+
+  }, [token, logout]);
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
+    <AuthContext.Provider
+      value={{isAuthenticated, token, login, logout, appStatus}}
+    >
       {children}
     </AuthContext.Provider>
   );

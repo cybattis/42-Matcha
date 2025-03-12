@@ -1,13 +1,14 @@
 import axios from "axios";
-import { useEffect } from "react";
-import { useState } from "react";
+import {useEffect} from "react";
+import {useState} from "react";
 
-interface UserCoordinates {
+export interface UserCoordinates {
   latitude: number;
   longitude: number;
+  access: boolean;
 }
 
-export function useCoordinate() {
+export function useCoordinate(): UserCoordinates {
   const [locationData, setLocationData] = useState<UserCoordinates>();
 
   const options: PositionOptions = {
@@ -17,14 +18,19 @@ export function useCoordinate() {
   };
 
   function success(pos: GeolocationPosition) {
+    if (!pos.coords) return;
+
     const crd: UserCoordinates = {
+      access: true,
       latitude: pos.coords.latitude,
       longitude: pos.coords.longitude,
     };
-    setLocationData(pos.coords);
+
     console.log("Your current position is:");
-    console.log(`Latitude : ${crd?.latitude}`);
-    console.log(`Longitude: ${crd?.longitude}`);
+    console.log(`Latitude : ${crd.latitude}`);
+    console.log(`Longitude: ${crd.longitude}`);
+
+    setLocationData(crd);
   }
 
   async function errors(err: GeolocationPositionError) {
@@ -39,6 +45,7 @@ export function useCoordinate() {
     console.log(res);
     if (res.status === 200) {
       const out: UserCoordinates = {
+        access: false,
         latitude: res.data.lat,
         longitude: res.data.lon,
       };
@@ -49,7 +56,7 @@ export function useCoordinate() {
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.permissions
-      .query({ name: "geolocation" })
+      .query({name: "geolocation"})
       .then(function (result) {
         console.log(result);
         if (result.state === "granted") {
@@ -59,7 +66,7 @@ export function useCoordinate() {
         } else if (result.state === "denied") {
           console.log("Location access denied.");
           // with ip address
-          getLocation().then(r => console.log(r));
+          getLocation().then((r) => console.log(r));
         }
       });
     } else {
@@ -67,8 +74,5 @@ export function useCoordinate() {
     }
   }, []);
 
-  return {
-    lat: locationData?.latitude,
-    lon: locationData?.longitude,
-  };
+  return locationData;
 }

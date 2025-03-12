@@ -11,18 +11,35 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as AuthImport } from './routes/_auth'
+import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
-import { Route as AuthVerifyImport } from './routes/auth/verify'
-import { Route as AuthRegisterImport } from './routes/auth/register'
-import { Route as AuthNotVerifyImport } from './routes/auth/not-verify'
-import { Route as AuthLoginImport } from './routes/auth/login'
-import { Route as AppSearchImport } from './routes/app/search'
-import { Route as AppProfileCreationImport } from './routes/app/profile-creation'
-import { Route as AppProfileImport } from './routes/app/profile'
-import { Route as AppMatchImport } from './routes/app/match'
-import { Route as AuthVerifyIdImport } from './routes/auth/verify.$id'
+import { Route as AuthVerifyImport } from './routes/_auth/verify'
+import { Route as AuthNotVerifyImport } from './routes/_auth/not-verify'
+import { Route as AuthAuthImport } from './routes/_auth/auth_'
+import { Route as AppSearchImport } from './routes/_app/search'
+import { Route as AppMatchImport } from './routes/_app/match'
+import { Route as AppLikesImport } from './routes/_app/likes'
+import { Route as AppHomeImport } from './routes/_app/home'
+import { Route as AppTestWsImport } from './routes/_app/TestWs'
+import { Route as AuthAuthRegisterImport } from './routes/_auth/auth.register'
+import { Route as AuthAuthLoginImport } from './routes/_auth/auth.login'
+import { Route as AppProfileMeImport } from './routes/_app/profile.me'
+import { Route as AppProfileEditInfoImport } from './routes/_app/profile.edit-info'
+import { Route as AppProfileEditImagesImport } from './routes/_app/profile.edit-images'
+import { Route as AppProfileUsernameImport } from './routes/_app/profile.$username'
 
 // Create/Update Routes
+
+const AuthRoute = AuthImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AppRoute = AppImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -31,57 +48,93 @@ const IndexRoute = IndexImport.update({
 } as any)
 
 const AuthVerifyRoute = AuthVerifyImport.update({
-  id: '/auth/verify',
-  path: '/auth/verify',
-  getParentRoute: () => rootRoute,
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AuthRoute,
 } as any)
 
-const AuthRegisterRoute = AuthRegisterImport.update({
-  id: '/auth/register',
-  path: '/auth/register',
-  getParentRoute: () => rootRoute,
+const AuthVerifyRoute = AuthVerifyImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AuthRoute,
 } as any)
 
 const AuthNotVerifyRoute = AuthNotVerifyImport.update({
-  id: '/auth/not-verify',
-  path: '/auth/not-verify',
-  getParentRoute: () => rootRoute,
+  id: '/not-verify',
+  path: '/not-verify',
+  getParentRoute: () => AuthRoute,
 } as any)
 
-const AuthLoginRoute = AuthLoginImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRoute,
+const AuthAuthRoute = AuthAuthImport.update({
+  id: '/auth_',
+  path: '/auth',
+  getParentRoute: () => AuthRoute,
 } as any)
 
 const AppSearchRoute = AppSearchImport.update({
-  id: '/app/search',
-  path: '/app/search',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AppProfileCreationRoute = AppProfileCreationImport.update({
-  id: '/app/profile-creation',
-  path: '/app/profile-creation',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AppProfileRoute = AppProfileImport.update({
-  id: '/app/profile',
-  path: '/app/profile',
-  getParentRoute: () => rootRoute,
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AppRoute,
 } as any)
 
 const AppMatchRoute = AppMatchImport.update({
-  id: '/app/match',
-  path: '/app/match',
-  getParentRoute: () => rootRoute,
+  id: '/match',
+  path: '/match',
+  getParentRoute: () => AppRoute,
 } as any)
 
-const AuthVerifyIdRoute = AuthVerifyIdImport.update({
-  id: '/auth/verify/$id',
-  path: '/auth/verify/$id',
-  getParentRoute: () => rootRoute,
+const AppLikesRoute = AppLikesImport.update({
+  id: '/likes',
+  path: '/likes',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppHomeRoute = AppHomeImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppTestWsRoute = AppTestWsImport.update({
+  id: '/TestWs',
+  path: '/TestWs',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AuthAuthRegisterRoute = AuthAuthRegisterImport.update({
+  id: '/auth/register',
+  path: '/auth/register',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthAuthLoginRoute = AuthAuthLoginImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AppProfileMeRoute = AppProfileMeImport.update({
+  id: '/profile/me',
+  path: '/profile/me',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppProfileEditInfoRoute = AppProfileEditInfoImport.update({
+  id: '/profile/edit-info',
+  path: '/profile/edit-info',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppProfileEditImagesRoute = AppProfileEditImagesImport.update({
+  id: '/profile/edit-images',
+  path: '/profile/edit-images',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppProfileUsernameRoute = AppProfileUsernameImport.update({
+  id: '/profile/$username',
+  path: '/profile/$username',
+  getParentRoute: () => AppRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -95,134 +148,244 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/app/match': {
-      id: '/app/match'
-      path: '/app/match'
-      fullPath: '/app/match'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AppImport
+      parentRoute: typeof rootRoute
+    }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthImport
+      parentRoute: typeof rootRoute
+    }
+    '/_app/TestWs': {
+      id: '/_app/TestWs'
+      path: '/TestWs'
+      fullPath: '/TestWs'
+      preLoaderRoute: typeof AppTestWsImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/home': {
+      id: '/_app/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AppHomeImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/likes': {
+      id: '/_app/likes'
+      path: '/likes'
+      fullPath: '/likes'
+      preLoaderRoute: typeof AppLikesImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/match': {
+      id: '/_app/match'
+      path: '/match'
+      fullPath: '/match'
       preLoaderRoute: typeof AppMatchImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof AppImport
     }
-    '/app/profile': {
-      id: '/app/profile'
-      path: '/app/profile'
-      fullPath: '/app/profile'
-      preLoaderRoute: typeof AppProfileImport
-      parentRoute: typeof rootRoute
-    }
-    '/app/profile-creation': {
-      id: '/app/profile-creation'
-      path: '/app/profile-creation'
-      fullPath: '/app/profile-creation'
-      preLoaderRoute: typeof AppProfileCreationImport
-      parentRoute: typeof rootRoute
-    }
-    '/app/search': {
-      id: '/app/search'
-      path: '/app/search'
-      fullPath: '/app/search'
+    '/_app/search': {
+      id: '/_app/search'
+      path: '/search'
+      fullPath: '/search'
       preLoaderRoute: typeof AppSearchImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof AppImport
     }
-    '/auth/login': {
-      id: '/auth/login'
+    '/_auth/auth_': {
+      id: '/_auth/auth_'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthAuthImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/not-verify': {
+      id: '/_auth/not-verify'
+      path: '/not-verify'
+      fullPath: '/not-verify'
+      preLoaderRoute: typeof AuthNotVerifyImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/verify': {
+      id: '/_auth/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof AuthVerifyImport
+      parentRoute: typeof AuthImport
+    }
+    '/_app/profile/$username': {
+      id: '/_app/profile/$username'
+      path: '/profile/$username'
+      fullPath: '/profile/$username'
+      preLoaderRoute: typeof AppProfileUsernameImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/profile/edit-images': {
+      id: '/_app/profile/edit-images'
+      path: '/profile/edit-images'
+      fullPath: '/profile/edit-images'
+      preLoaderRoute: typeof AppProfileEditImagesImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/profile/edit-info': {
+      id: '/_app/profile/edit-info'
+      path: '/profile/edit-info'
+      fullPath: '/profile/edit-info'
+      preLoaderRoute: typeof AppProfileEditInfoImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/profile/me': {
+      id: '/_app/profile/me'
+      path: '/profile/me'
+      fullPath: '/profile/me'
+      preLoaderRoute: typeof AppProfileMeImport
+      parentRoute: typeof AppImport
+    }
+    '/_auth/auth/login': {
+      id: '/_auth/auth/login'
       path: '/auth/login'
       fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthAuthLoginImport
+      parentRoute: typeof AuthImport
     }
-    '/auth/not-verify': {
-      id: '/auth/not-verify'
-      path: '/auth/not-verify'
-      fullPath: '/auth/not-verify'
-      preLoaderRoute: typeof AuthNotVerifyImport
-      parentRoute: typeof rootRoute
-    }
-    '/auth/register': {
-      id: '/auth/register'
+    '/_auth/auth/register': {
+      id: '/_auth/auth/register'
       path: '/auth/register'
       fullPath: '/auth/register'
-      preLoaderRoute: typeof AuthRegisterImport
-      parentRoute: typeof rootRoute
-    }
-<<<<<<< Updated upstream
-    '/auth/verify/$id': {
-      id: '/auth/verify/$id'
-      path: '/auth/verify/$id'
-      fullPath: '/auth/verify/$id'
-      preLoaderRoute: typeof AuthVerifyIdImport
-=======
-    '/auth/verify': {
-      id: '/auth/verify'
-      path: '/auth/verify'
-      fullPath: '/auth/verify'
-      preLoaderRoute: typeof AuthVerifyImport
->>>>>>> Stashed changes
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthAuthRegisterImport
+      parentRoute: typeof AuthImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface AppRouteChildren {
+  AppTestWsRoute: typeof AppTestWsRoute
+  AppHomeRoute: typeof AppHomeRoute
+  AppLikesRoute: typeof AppLikesRoute
+  AppMatchRoute: typeof AppMatchRoute
+  AppSearchRoute: typeof AppSearchRoute
+  AppProfileUsernameRoute: typeof AppProfileUsernameRoute
+  AppProfileEditImagesRoute: typeof AppProfileEditImagesRoute
+  AppProfileEditInfoRoute: typeof AppProfileEditInfoRoute
+  AppProfileMeRoute: typeof AppProfileMeRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppTestWsRoute: AppTestWsRoute,
+  AppHomeRoute: AppHomeRoute,
+  AppLikesRoute: AppLikesRoute,
+  AppMatchRoute: AppMatchRoute,
+  AppSearchRoute: AppSearchRoute,
+  AppProfileUsernameRoute: AppProfileUsernameRoute,
+  AppProfileEditImagesRoute: AppProfileEditImagesRoute,
+  AppProfileEditInfoRoute: AppProfileEditInfoRoute,
+  AppProfileMeRoute: AppProfileMeRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
+interface AuthRouteChildren {
+  AuthAuthRoute: typeof AuthAuthRoute
+  AuthNotVerifyRoute: typeof AuthNotVerifyRoute
+  AuthVerifyRoute: typeof AuthVerifyRoute
+  AuthAuthLoginRoute: typeof AuthAuthLoginRoute
+  AuthAuthRegisterRoute: typeof AuthAuthRegisterRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthAuthRoute: AuthAuthRoute,
+  AuthNotVerifyRoute: AuthNotVerifyRoute,
+  AuthVerifyRoute: AuthVerifyRoute,
+  AuthAuthLoginRoute: AuthAuthLoginRoute,
+  AuthAuthRegisterRoute: AuthAuthRegisterRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app/match': typeof AppMatchRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/profile-creation': typeof AppProfileCreationRoute
-  '/app/search': typeof AppSearchRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/not-verify': typeof AuthNotVerifyRoute
-  '/auth/register': typeof AuthRegisterRoute
-<<<<<<< Updated upstream
-  '/auth/verify/$id': typeof AuthVerifyIdRoute
-=======
-  '/auth/verify': typeof AuthVerifyRoute
->>>>>>> Stashed changes
+  '': typeof AuthRouteWithChildren
+  '/TestWs': typeof AppTestWsRoute
+  '/home': typeof AppHomeRoute
+  '/likes': typeof AppLikesRoute
+  '/match': typeof AppMatchRoute
+  '/search': typeof AppSearchRoute
+  '/auth': typeof AuthAuthRoute
+  '/not-verify': typeof AuthNotVerifyRoute
+  '/verify': typeof AuthVerifyRoute
+  '/profile/$username': typeof AppProfileUsernameRoute
+  '/profile/edit-images': typeof AppProfileEditImagesRoute
+  '/profile/edit-info': typeof AppProfileEditInfoRoute
+  '/profile/me': typeof AppProfileMeRoute
+  '/auth/login': typeof AuthAuthLoginRoute
+  '/auth/register': typeof AuthAuthRegisterRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app/match': typeof AppMatchRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/profile-creation': typeof AppProfileCreationRoute
-  '/app/search': typeof AppSearchRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/not-verify': typeof AuthNotVerifyRoute
-  '/auth/register': typeof AuthRegisterRoute
-<<<<<<< Updated upstream
-  '/auth/verify/$id': typeof AuthVerifyIdRoute
-=======
-  '/auth/verify': typeof AuthVerifyRoute
->>>>>>> Stashed changes
+  '': typeof AuthRouteWithChildren
+  '/TestWs': typeof AppTestWsRoute
+  '/home': typeof AppHomeRoute
+  '/likes': typeof AppLikesRoute
+  '/match': typeof AppMatchRoute
+  '/search': typeof AppSearchRoute
+  '/auth': typeof AuthAuthRoute
+  '/not-verify': typeof AuthNotVerifyRoute
+  '/verify': typeof AuthVerifyRoute
+  '/profile/$username': typeof AppProfileUsernameRoute
+  '/profile/edit-images': typeof AppProfileEditImagesRoute
+  '/profile/edit-info': typeof AppProfileEditInfoRoute
+  '/profile/me': typeof AppProfileMeRoute
+  '/auth/login': typeof AuthAuthLoginRoute
+  '/auth/register': typeof AuthAuthRegisterRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/app/match': typeof AppMatchRoute
-  '/app/profile': typeof AppProfileRoute
-  '/app/profile-creation': typeof AppProfileCreationRoute
-  '/app/search': typeof AppSearchRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/not-verify': typeof AuthNotVerifyRoute
-  '/auth/register': typeof AuthRegisterRoute
-<<<<<<< Updated upstream
-  '/auth/verify/$id': typeof AuthVerifyIdRoute
-=======
-  '/auth/verify': typeof AuthVerifyRoute
->>>>>>> Stashed changes
+  '/_app': typeof AppRouteWithChildren
+  '/_auth': typeof AuthRouteWithChildren
+  '/_app/TestWs': typeof AppTestWsRoute
+  '/_app/home': typeof AppHomeRoute
+  '/_app/likes': typeof AppLikesRoute
+  '/_app/match': typeof AppMatchRoute
+  '/_app/search': typeof AppSearchRoute
+  '/_auth/auth_': typeof AuthAuthRoute
+  '/_auth/not-verify': typeof AuthNotVerifyRoute
+  '/_auth/verify': typeof AuthVerifyRoute
+  '/_app/profile/$username': typeof AppProfileUsernameRoute
+  '/_app/profile/edit-images': typeof AppProfileEditImagesRoute
+  '/_app/profile/edit-info': typeof AppProfileEditInfoRoute
+  '/_app/profile/me': typeof AppProfileMeRoute
+  '/_auth/auth/login': typeof AuthAuthLoginRoute
+  '/_auth/auth/register': typeof AuthAuthRegisterRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/app/match'
-    | '/app/profile'
-    | '/app/profile-creation'
-    | '/app/search'
+    | ''
+    | '/TestWs'
+    | '/home'
+    | '/likes'
+    | '/match'
+    | '/search'
+    | '/auth'
+    | '/not-verify'
+    | '/verify'
+    | '/profile/$username'
+    | '/profile/edit-images'
+    | '/profile/edit-info'
+    | '/profile/me'
     | '/auth/login'
-    | '/auth/not-verify'
     | '/auth/register'
 <<<<<<< Updated upstream
     | '/auth/verify/$id'
@@ -232,12 +395,20 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/app/match'
-    | '/app/profile'
-    | '/app/profile-creation'
-    | '/app/search'
+    | ''
+    | '/TestWs'
+    | '/home'
+    | '/likes'
+    | '/match'
+    | '/search'
+    | '/auth'
+    | '/not-verify'
+    | '/verify'
+    | '/profile/$username'
+    | '/profile/edit-images'
+    | '/profile/edit-info'
+    | '/profile/me'
     | '/auth/login'
-    | '/auth/not-verify'
     | '/auth/register'
 <<<<<<< Updated upstream
     | '/auth/verify/$id'
@@ -247,51 +418,35 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/app/match'
-    | '/app/profile'
-    | '/app/profile-creation'
-    | '/app/search'
-    | '/auth/login'
-    | '/auth/not-verify'
-    | '/auth/register'
-<<<<<<< Updated upstream
-    | '/auth/verify/$id'
-=======
-    | '/auth/verify'
->>>>>>> Stashed changes
+    | '/_app'
+    | '/_auth'
+    | '/_app/TestWs'
+    | '/_app/home'
+    | '/_app/likes'
+    | '/_app/match'
+    | '/_app/search'
+    | '/_auth/auth_'
+    | '/_auth/not-verify'
+    | '/_auth/verify'
+    | '/_app/profile/$username'
+    | '/_app/profile/edit-images'
+    | '/_app/profile/edit-info'
+    | '/_app/profile/me'
+    | '/_auth/auth/login'
+    | '/_auth/auth/register'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppMatchRoute: typeof AppMatchRoute
-  AppProfileRoute: typeof AppProfileRoute
-  AppProfileCreationRoute: typeof AppProfileCreationRoute
-  AppSearchRoute: typeof AppSearchRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthNotVerifyRoute: typeof AuthNotVerifyRoute
-  AuthRegisterRoute: typeof AuthRegisterRoute
-<<<<<<< Updated upstream
-  AuthVerifyIdRoute: typeof AuthVerifyIdRoute
-=======
-  AuthVerifyRoute: typeof AuthVerifyRoute
->>>>>>> Stashed changes
+  AppRoute: typeof AppRouteWithChildren
+  AuthRoute: typeof AuthRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppMatchRoute: AppMatchRoute,
-  AppProfileRoute: AppProfileRoute,
-  AppProfileCreationRoute: AppProfileCreationRoute,
-  AppSearchRoute: AppSearchRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthNotVerifyRoute: AuthNotVerifyRoute,
-  AuthRegisterRoute: AuthRegisterRoute,
-<<<<<<< Updated upstream
-  AuthVerifyIdRoute: AuthVerifyIdRoute,
-=======
-  AuthVerifyRoute: AuthVerifyRoute,
->>>>>>> Stashed changes
+  AppRoute: AppRouteWithChildren,
+  AuthRoute: AuthRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -305,51 +460,92 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/app/match",
-        "/app/profile",
-        "/app/profile-creation",
-        "/app/search",
-        "/auth/login",
-        "/auth/not-verify",
-        "/auth/register",
-<<<<<<< Updated upstream
-        "/auth/verify/$id"
-=======
-        "/auth/verify"
->>>>>>> Stashed changes
+        "/_app",
+        "/_auth"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/app/match": {
-      "filePath": "app/match.tsx"
+    "/_app": {
+      "filePath": "_app.tsx",
+      "children": [
+        "/_app/TestWs",
+        "/_app/home",
+        "/_app/likes",
+        "/_app/match",
+        "/_app/search",
+        "/_app/profile/$username",
+        "/_app/profile/edit-images",
+        "/_app/profile/edit-info",
+        "/_app/profile/me"
+      ]
     },
-    "/app/profile": {
-      "filePath": "app/profile.tsx"
+    "/_auth": {
+      "filePath": "_auth.tsx",
+      "children": [
+        "/_auth/auth_",
+        "/_auth/not-verify",
+        "/_auth/verify",
+        "/_auth/auth/login",
+        "/_auth/auth/register"
+      ]
     },
-    "/app/profile-creation": {
-      "filePath": "app/profile-creation.tsx"
+    "/_app/TestWs": {
+      "filePath": "_app/TestWs.tsx",
+      "parent": "/_app"
     },
-    "/app/search": {
-      "filePath": "app/search.tsx"
+    "/_app/home": {
+      "filePath": "_app/home.tsx",
+      "parent": "/_app"
     },
-    "/auth/login": {
-      "filePath": "auth/login.tsx"
+    "/_app/likes": {
+      "filePath": "_app/likes.tsx",
+      "parent": "/_app"
     },
-    "/auth/not-verify": {
-      "filePath": "auth/not-verify.tsx"
+    "/_app/match": {
+      "filePath": "_app/match.tsx",
+      "parent": "/_app"
     },
-    "/auth/register": {
-      "filePath": "auth/register.tsx"
+    "/_app/search": {
+      "filePath": "_app/search.tsx",
+      "parent": "/_app"
     },
-<<<<<<< Updated upstream
-    "/auth/verify/$id": {
-      "filePath": "auth/verify.$id.tsx"
-=======
-    "/auth/verify": {
-      "filePath": "auth/verify.tsx"
->>>>>>> Stashed changes
+    "/_auth/auth_": {
+      "filePath": "_auth/auth_.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/not-verify": {
+      "filePath": "_auth/not-verify.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/verify": {
+      "filePath": "_auth/verify.tsx",
+      "parent": "/_auth"
+    },
+    "/_app/profile/$username": {
+      "filePath": "_app/profile.$username.tsx",
+      "parent": "/_app"
+    },
+    "/_app/profile/edit-images": {
+      "filePath": "_app/profile.edit-images.tsx",
+      "parent": "/_app"
+    },
+    "/_app/profile/edit-info": {
+      "filePath": "_app/profile.edit-info.tsx",
+      "parent": "/_app"
+    },
+    "/_app/profile/me": {
+      "filePath": "_app/profile.me.tsx",
+      "parent": "/_app"
+    },
+    "/_auth/auth/login": {
+      "filePath": "_auth/auth.login.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/auth/register": {
+      "filePath": "_auth/auth.register.tsx",
+      "parent": "/_auth"
     }
   }
 }

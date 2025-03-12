@@ -1,32 +1,40 @@
 ﻿services:
-  #  backend:
-  #    image: backend
-  #    build:
-  #      context: .
-  #      dockerfile: backend/Dockerfile
-  #    restart: always
-  #    environment:
-  #      - ASPNETCORE_ENVIRONMENT=Development
-  #      - DB_CONNECTION_STRING=$DB_CONNECTION_STRING
-  #    networks:
-  #      - back-net
-  #      - front-net
-  #    ports:
-  #      - "5163:8080"
-  #    depends_on:
-  #      db:
-  #        condition: service_healthy
+  backend:
+    image: backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - DB_CONNECTION_STRING=$DB_CONNECTION_STRING
+      - JWT_SECRET=$JWT_SECRET
+      - JWT_ISSUER=$JWT_ISSUER
+      - JWT_AUDIENCE=$JWT_AUDIENCE
+      - NO_REPLY_MAIL=$NO_REPLY_MAIL
+      - NO_REPLY_MAIL_PASSWORD=NO_REPLY_MAIL_PASSWORD
+      - SMTP_HOST=$SMTP_HOST
+      - SMTP_PORT=$SMTP_PORT
+    networks:
+      - back-net
+      - front-net
+    ports:
+      - "5163:8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     image: mysql:latest
     container_name: database
-    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
     restart: always
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      LANG: C.UTF-8
     networks:
       - back-net
     ports:
@@ -57,7 +65,8 @@
     depends_on:
       - db
     environment:
-      - API_URL={API_URL}
+      - API_URL=${API_URL}
+      - WS_URL=${WS_URL}
 
 volumes:
   db:

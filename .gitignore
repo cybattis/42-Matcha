@@ -1,5 +1,6 @@
 .idea/
 .env
-!/backend/images/
+/backend/images/
+/images/
 /RandomUserGenerator/bin/
 /RandomUserGenerator/obj/
