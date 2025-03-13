@@ -4,7 +4,7 @@ DELIMITER //
 CREATE PROCEDURE GetUserProfile(IN userID INT) 
 BEGIN
     SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
-           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage
+           profile_completion_percentage, ST_AsText(coordinates) AS coordinates, fame, is_verified, profile_completion_percentage
         FROM users WHERE id = userID;
     
     SELECT name, id FROM tags WHERE id IN (SELECT tag_id FROM users_tags WHERE user_id = userID);

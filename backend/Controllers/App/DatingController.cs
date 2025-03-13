@@ -1,5 +1,7 @@
+using System.Data;
 using backend.Database;
 using backend.Models.App;
+using backend.Models.Users;
 using backend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,28 +23,63 @@ public class DatingController : ControllerBase
     public IActionResult Dating([FromBody] FiltersModel matchingSettings, [FromHeader] string authorization)
     {
         var id = JwtHelper.DecodeJwtToken(authorization);
-        List<ProfilesModel> profilesMatchingFilters = new();
+
+        using MySqlConnection conn = DbHelper.GetOpenConnection();
+        using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@userID", id);
+
+            using MySqlDataReader reader = cmd.ExecuteReader();
+            if (!reader.Read()) return ValidationProblem();
+            
+            var profile = new UserProfileModel
+            {
+                Gender = reader.GetInt32("gender_id"),
+                SexualOrientation = reader.GetInt32("sexual_orientation"),
+                Coordinates = reader.GetString("coordinates"),
+                ProfileCompletionPercentage = reader.GetInt32("profile_completion_percentage"),
+                FameRating = reader.GetInt32("fame"),
+                birthDate = reader.GetDateTime("birth_date")
+            };
+        //recuperer les profils des utilisateurs concerne par les filtres
+        // les organiser en liste et renvoyer cette liste au front
+        // GetMatchingProfiles (
+        // IN ref_user_id INT,
+        // IN max_age_gap INT,
+        // IN fame_gap INT,
+        // IN ref_fame INT,
+        // IN ref_birthdate DATE,
+        // IN ref_gender_id INT,
+        // IN ref_sexual_orientation_id INT
         using MySqlConnection dbClient = DbHelper.GetOpenConnection();
         using var command = new MySqlCommand("GetMatchingProfiles", dbClient);
-        command.CommandType = System.Data.CommandType.StoredProcedure;
+        command.CommandType = CommandType.StoredProcedure;
 
         // Paramètres : tu peux les adapter à ton modèle DatingModel
         command.Parameters.AddWithValue("@ref_user_id", matchingSettings.id);
-        command.Parameters.AddWithValue("@max_distance_km", matchingSettings.range);
         command.Parameters.AddWithValue("@max_age_gap", matchingSettings.ageGap);
+        command.Parameters.AddWithValue("fame_gap", matchingSettings.fameGap);
+        command.Parameters.AddWithValue("ref_fame", profile.FameRating);
+        command.Parameters.AddWithValue("ref_birthdate", profile.birthDate);
+        command.Parameters.AddWithValue("ref_gender_id", profile.Gender);
+        command.Parameters.AddWithValue("ref_sexual_orientation_id", profile.SexualOrientation);
+        command.Parameters.AddWithValue("ref_coordinates", profile.Coordinates);
+
         try
         {
-            using var reader = command.ExecuteReader();
-
-            while (reader.Read())
+            var readerProfiles = command.ExecuteReader();
+            List<ProfilesModel> profilesMatchingFilters = new();
+            while (readerProfiles.Read())
             {
                 profilesMatchingFilters.Add(new ProfilesModel
                 {
-                    Id = reader.GetInt32("id"),
-                    Name = reader.GetString("name"),
-                    age = CalculateAge(reader.GetDateTime("birthdate")),
-                    tags = reader.GetString("tags").Split(','), // si tu as une colonne "tags" séparée par virgule
-                    profileImageUrl = reader.GetString("profileImageUrl")
+                    Id = readerProfiles.GetInt32("id"),
+                    userName = readerProfiles.GetString("username"),
+                    FirstName = readerProfiles.GetString("first_name"),
+                    age = CalculateAge(readerProfiles.GetDateTime("birth_date")),
+                    address = readerProfiles.GetString("address"),
+                    tags = readerProfiles.GetString("tags").Split(','), // si tu as une colonne "tags" séparée par virgule
+                    profileImageUrl = readerProfiles.GetString("profileImageUrl")
                 });
             }
 
