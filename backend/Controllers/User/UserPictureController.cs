@@ -13,7 +13,7 @@ namespace backend.Controllers.User;
 [Route("[controller]")]
 public class UserPictureController(ILogger<UserPictureController> logger) : ControllerBase
 {
-    private string imagePath = "/home/cybattis/Dev/42/Matcha/backend/images/";
+    private string imagePath = "/home/cyril/Dev/42/Occ/Matcha/images/";
         
     /// <summary>
     /// Upload user picture
@@ -121,7 +121,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     public async Task<ActionResult> Delete(int position, [FromHeader] string authorization)
     {
         try {
-            var id = JwtHelper.DecodeJwtToken(authorization);
+            var token = JwtHelper.DecodeJwtToken(authorization);
             
             if (position is < 1 or > 5) {
                 logger.LogError("Invalid image position");
@@ -132,7 +132,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             await using MySqlCommand getImageCmd = new MySqlCommand("GetUserImage", conn);
             getImageCmd.CommandType = CommandType.StoredProcedure;
-            getImageCmd.Parameters.AddWithValue("@userID", id);
+            getImageCmd.Parameters.AddWithValue("@userID", token.id);
             getImageCmd.Parameters.AddWithValue("@position", position);
             await using var reader = getImageCmd.ExecuteReader();
             
@@ -156,7 +156,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             await using MySqlCommand deleteImageCmd = new MySqlCommand("DeleteImage", conn);
             deleteImageCmd.CommandType = CommandType.StoredProcedure;
-            deleteImageCmd.Parameters.AddWithValue("@userID", id);
+            deleteImageCmd.Parameters.AddWithValue("@userID", token.id);
             deleteImageCmd.Parameters.AddWithValue("@position", position);
             var result = deleteImageCmd.ExecuteNonQuery();
             

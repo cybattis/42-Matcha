@@ -10,25 +10,18 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import {
-  Controller,
-  useController,
-  UseFormReturn,
-} from "react-hook-form";
-import {FormEventHandler, useEffect, useState} from "react";
+import { Controller, useController, UseFormReturn } from "react-hook-form";
+import { FormEventHandler, useEffect, useState } from "react";
 import {
   GetAddressFromCoordinates,
   GetAddressFromString,
   GetCoordinates,
   useCoordinate,
-  UserCoordinates
 } from "@/lib/useCoordinate.ts";
-import {Radio, RadioGroup} from "@/components/ui/radio.tsx";
-import {
-  UserProfileFormValue,
-} from "@/routes/_app/profile.edit-info.tsx";
-import {Tags, UserProfile} from "@/lib/interface.ts";
-import {Checkbox} from "@/components/ui/checkbox.tsx";
+import { Radio, RadioGroup } from "@/components/ui/radio.tsx";
+import { UserProfileFormValue } from "@/routes/_app/profile.edit-info.tsx";
+import { Tags, UserProfile } from "@/lib/interface.ts";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
 
 export function EditProfileForm(props: {
   profile: UserProfile;
@@ -36,11 +29,11 @@ export function EditProfileForm(props: {
   onSubmit: FormEventHandler<HTMLFormElement>;
   tagsData: Tags[];
 }) {
-  const {tagsData, form, profile, onSubmit} = props;
-  const {control, register, setValue, formState} = form;
+  const { tagsData, form, profile, onSubmit } = props;
+  const { control, register, setValue, formState } = form;
   const errors = formState.errors;
   const initCoordinates = useCoordinate();
-  const [coordinates, setCoordinates] = useState<UserCoordinates>(null);
+  const [coordinates, setCoordinates] = useState<string>("");
   const [address, setAddress] = useState<string>("");
 
   const tags = useController({
@@ -52,7 +45,9 @@ export function EditProfileForm(props: {
   const invalidTags = !!errors.tags;
 
   useEffect(() => {
-    if (profile.coordinates.length > 0) {
+    if (!profile.coordinates) return;
+
+    if (profile?.coordinates.length > 0) {
       console.log("Profile coordinates:", profile.coordinates);
       setCoordinates(profile.coordinates);
       GetAddressFromString(profile.coordinates).then((address) => {
@@ -69,26 +64,32 @@ export function EditProfileForm(props: {
     console.log("Init coordinates:", initCoordinates);
 
     if (initCoordinates.access) {
-      setValue("coordinates", initCoordinates.latitude.toString() + ',' + initCoordinates.longitude.toString());
-      GetAddressFromCoordinates(initCoordinates.latitude, initCoordinates.longitude).then((address) => {
+      setValue(
+        "coordinates",
+        initCoordinates.latitude.toString() +
+          "," +
+          initCoordinates.longitude.toString()
+      );
+      GetAddressFromCoordinates(
+        initCoordinates.latitude,
+        initCoordinates.longitude
+      ).then((address) => {
         if (!address) return;
         setAddress(address);
         setValue("address", address);
       });
     }
-
   }, [initCoordinates]);
 
   useEffect(() => {
     if (!coordinates) return;
 
     setValue("coordinates", coordinates);
-    GetAddressFromCoordinates(coordinates.latitude, coordinates.longitude).then((address) => {
+    GetAddressFromString(coordinates).then((address) => {
       if (!address) return;
       setAddress(address);
       setValue("address", address);
     });
-
   }, [coordinates]);
 
   return (
@@ -101,7 +102,7 @@ export function EditProfileForm(props: {
                 <Field.Root required invalid={!!errors.firstName}>
                   <Field.Label>
                     First name
-                    <Field.RequiredIndicator/>
+                    <Field.RequiredIndicator />
                   </Field.Label>
                   <Input {...register("firstName")} />
                   <Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
@@ -109,7 +110,7 @@ export function EditProfileForm(props: {
                 <Field.Root required invalid={!!errors.lastName}>
                   <Field.Label>
                     Last name
-                    <Field.RequiredIndicator/>
+                    <Field.RequiredIndicator />
                   </Field.Label>
                   <Input {...register("lastName")} />
                   <Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
@@ -145,7 +146,7 @@ export function EditProfileForm(props: {
               <Field.Root required invalid={!!errors.coordinates}>
                 <Field.Label>
                   City
-                  <Field.RequiredIndicator/>
+                  <Field.RequiredIndicator />
                 </Field.Label>
                 <Input
                   {...register("coordinates")}
@@ -153,10 +154,16 @@ export function EditProfileForm(props: {
                   onBlur={async () => {
                     console.log("On blur:", address);
                     const result = await GetCoordinates(address);
-                    setCoordinates(result);
-                    setValue("coordinates", result?.latitude.toString() + ',' + result?.longitude.toString(), {
-                      shouldValidate: true,
-                    });
+                    setCoordinates(result?.latitude + "," + result?.longitude);
+                    setValue(
+                      "coordinates",
+                      result?.latitude.toString() +
+                        "," +
+                        result?.longitude.toString(),
+                      {
+                        shouldValidate: true,
+                      }
+                    );
                   }}
                   onChange={(e) => {
                     setAddress(e.target.value);
@@ -174,7 +181,10 @@ export function EditProfileForm(props: {
             <CheckboxGroup
               invalid={invalidTags}
               value={tags.field.value.map((v) => v.toString())}
-              onValueChange={tags.field.onChange}
+              onValueChange={(e) => {
+                console.log("Tags field value:", e);
+                tags.field.onChange(e.map((v) => parseInt(v)));
+              }}
               name={tags.field.name}
             >
               <Fieldset.Content>
@@ -186,14 +196,14 @@ export function EditProfileForm(props: {
                 >
                   {tagsData.length > 0
                     ? tagsData.map((tag: Tags) => (
-                      <Checkbox
-                        key={tag.id}
-                        value={tag.id.toString()}
-                        minW={"100px"}
-                      >
-                        {tag.name}
-                      </Checkbox>
-                    ))
+                        <Checkbox
+                          key={tag.id}
+                          value={tag.id.toString()}
+                          minW={"100px"}
+                        >
+                          {tag.name}
+                        </Checkbox>
+                      ))
                     : null}
                 </Flex>
               </Fieldset.Content>
@@ -208,35 +218,5 @@ export function EditProfileForm(props: {
         </Fieldset.Root>
       </VStack>
     </form>
-  );
-}
-
-function TagCheckbox({
-                       tag,
-                       userTags,
-                       setUserTags,
-                     }: {
-  tag: Tags;
-  userTags: number[];
-  setUserTags: (tags: number[]) => void;
-}) {
-  const [checked, setChecked] = useState(userTags.includes(tag.id));
-
-  return (
-    <Checkbox
-      minW={"100px"}
-      checked={checked}
-      onCheckedChange={(e) => {
-        setChecked(e.checked);
-
-        if (e.checked && !userTags.includes(tag.id)) {
-          setUserTags([...userTags, tag.id]);
-        } else if (!e.checked && userTags.includes(tag.id)) {
-          setUserTags(userTags.filter((userTag) => userTag !== tag.id));
-        }
-      }}
-    >
-      {tag.name}
-    </Checkbox>
   );
 }

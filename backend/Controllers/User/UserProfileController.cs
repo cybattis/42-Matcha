@@ -232,7 +232,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <response code="400">Bad request</response>
     [HttpGet]
     [Route("[action]")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]     
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> UpdateProfileStatus([FromHeader] string authorization)

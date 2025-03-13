@@ -1,16 +1,14 @@
-import {useEffect, useState} from "react";
-import {Box, Image} from "@chakra-ui/react";
-import {DownloadImage} from "@/lib/query.ts";
+import { useEffect, useState } from "react";
+import { Box, Image } from "@chakra-ui/react";
+import { DownloadImage } from "@/lib/query.ts";
 
 export function UserImage({
-                            username,
-                            position,
-                            width,
-                            height,
-                            borderRadius,
-                          }: {
-  username?: string;
-  position: number;
+  imageName,
+  width,
+  height,
+  borderRadius,
+}: {
+  imageName?: string;
   width?: string;
   height?: string;
   borderRadius?: string;
@@ -18,14 +16,15 @@ export function UserImage({
   const [image, setImage] = useState<string>("");
 
   useEffect(() => {
-    DownloadImage(username, position).then((data) => {
+    if (!imageName) return;
+    DownloadImage(imageName).then((data) => {
       setImage(data);
     });
   }, []);
 
   return (
     <>
-      {image ?
+      {image ? (
         <Box w={width ?? "500px"} h={height ?? "500px"}>
           <Image
             rounded={borderRadius ?? "md"}
@@ -36,7 +35,7 @@ export function UserImage({
             fit={"cover"}
           />
         </Box>
-        : null}
+      ) : null}
     </>
   );
 }

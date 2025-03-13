@@ -134,6 +134,8 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id, id)
                 VALUES (userID, tag2, 2);
         END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 2;
     END IF;
     
     IF tag3 IS NOT NULL THEN
@@ -145,6 +147,8 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id, id)
                 VALUES (userID, tag3, 3);
         END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 3;
     END IF;
     
     IF tag4 IS NOT NULL THEN
@@ -156,6 +160,8 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id, id)
                 VALUES (userID, tag4, 4);
         END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 4;
     END IF;
     
     IF tag5 IS NOT NULL THEN
@@ -167,6 +173,8 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id, id)
                 VALUES (userID, tag5, 5);
         END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 5;
     END IF;
 
     CALL UpdateProfileCompletionPercentage(userID);
