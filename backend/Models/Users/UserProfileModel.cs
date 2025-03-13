@@ -34,10 +34,17 @@ public class UserProfileModel
     
     // For GET request
     [SwaggerIgnore]
-    [DefaultValue(false)]
     public bool? IsVerified {get;set;}
+    
     [SwaggerIgnore]
     public Dictionary<string, int> Tags {get;set;} = new();
+    
     [SwaggerIgnore]
     public List<string> Images {get;set;} = new();
+    
+    [SwaggerIgnore]
+    public string? Username {get;set;}
+    
+    [SwaggerIgnore]
+    public int? Status {get;set;}
 }

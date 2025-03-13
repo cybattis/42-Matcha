@@ -25,10 +25,9 @@ import {
 } from "@/lib/useCoordinate.ts";
 import {Radio, RadioGroup} from "@/components/ui/radio.tsx";
 import {
-  Tags,
   UserProfileFormValue,
 } from "@/routes/_app/profile.edit-info.tsx";
-import {UserProfile} from "@/lib/interface.ts";
+import {Tags, UserProfile} from "@/lib/interface.ts";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
 
 export function EditProfileForm(props: {
@@ -37,14 +36,12 @@ export function EditProfileForm(props: {
   onSubmit: FormEventHandler<HTMLFormElement>;
   tagsData: Tags[];
 }) {
-  const {tagsData, form, profile} = props;
-  const {control, onSubmit, register, setValue, formState} = form;
+  const {tagsData, form, profile, onSubmit} = props;
+  const {control, register, setValue, formState} = form;
   const errors = formState.errors;
   const initCoordinates = useCoordinate();
   const [coordinates, setCoordinates] = useState<UserCoordinates>(null);
   const [address, setAddress] = useState<string>("");
-
-  const [userTags, setUserTags] = useState<number[]>(profile.tags ? Object.values(profile.tags) : []);
 
   const tags = useController({
     control,
@@ -52,55 +49,47 @@ export function EditProfileForm(props: {
     defaultValue: [],
   });
 
-  // const invalidTags = !!errors.tags;
+  const invalidTags = !!errors.tags;
 
   useEffect(() => {
     if (profile.coordinates.length > 0) {
       console.log("Profile coordinates:", profile.coordinates);
       setCoordinates(profile.coordinates);
-      setValue("coordinates", profile.coordinates);
       GetAddressFromString(profile.coordinates).then((address) => {
         if (!address) return;
         setAddress(address);
+        setValue("address", address);
       });
       return;
     }
   }, []);
 
   useEffect(() => {
-    if (coordinates) return;
-
     if (!initCoordinates) return;
     console.log("Init coordinates:", initCoordinates);
 
     if (initCoordinates.access) {
+      setValue("coordinates", initCoordinates.latitude.toString() + ',' + initCoordinates.longitude.toString());
       GetAddressFromCoordinates(initCoordinates.latitude, initCoordinates.longitude).then((address) => {
         if (!address) return;
         setAddress(address);
+        setValue("address", address);
       });
     }
 
-    console.log("Address", address);
   }, [initCoordinates]);
 
   useEffect(() => {
     if (!coordinates) return;
 
+    setValue("coordinates", coordinates);
     GetAddressFromCoordinates(coordinates.latitude, coordinates.longitude).then((address) => {
       if (!address) return;
       setAddress(address);
+      setValue("address", address);
     });
 
-    console.log("Address set by user:", address);
   }, [coordinates]);
-
-  useEffect(() => {
-    console.log("User tags:", userTags);
-    setValue("tags", userTags, {
-      shouldValidate: true,
-    });
-    console.log("Set tags:", tags.field.value);
-  }, [userTags]);
 
   return (
     <form onSubmit={onSubmit}>
@@ -184,9 +173,9 @@ export function EditProfileForm(props: {
             <Fieldset.Legend>Tags</Fieldset.Legend>
             <CheckboxGroup
               invalid={invalidTags}
+              value={tags.field.value.map((v) => v.toString())}
               onValueChange={tags.field.onChange}
               name={tags.field.name}
-              value={userTags}
             >
               <Fieldset.Content>
                 <Flex

@@ -4,14 +4,16 @@ import {
   ParsedLocation,
   redirect,
 } from "@tanstack/react-router";
-import { MyRooterContext } from "@/routes/__root.tsx";
+import {MyRooterContext} from "@/routes/__root.tsx";
+import Navbar, {NavbarAuth} from "@/components/navigation/Navbar.tsx";
+import {Box} from "@chakra-ui/react";
 
 export const Route = createFileRoute("/_auth")({
   component: RouteComponent,
   beforeLoad: async ({
-    context,
-    location,
-  }: {
+                       context,
+                       location,
+                     }: {
     context: MyRooterContext;
     location: ParsedLocation;
   }) => {
@@ -27,5 +29,12 @@ export const Route = createFileRoute("/_auth")({
 });
 
 function RouteComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <NavbarAuth/>
+      <Box flexGrow="1" p={5}>
+        <Outlet/>
+      </Box>
+    </>
+  );
 }

@@ -5,12 +5,10 @@ import {
   useContext,
   useState,
 } from "react";
-import axios from "axios";
 
 export interface IAuthContext {
   isAuthenticated: boolean | null;
   token: string | null;
-  appStatus: () => Promise<string>;
   login: (username: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -39,7 +37,6 @@ export function AuthProvider({children}: { children: ReactNode }) {
     setUserToken(null);
     setIsAuthenticated(false);
     setToken(null);
-    localStorage.removeItem("id");
   }, []);
 
   const login = useCallback(async (token: string) => {
@@ -48,26 +45,9 @@ export function AuthProvider({children}: { children: ReactNode }) {
     setToken(token);
   }, []);
 
-  const appStatus = useCallback(async () => {
-    console.log("Checking profile status");
-    return await axios.get("/UserProfile/status", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((res) => {
-      return res.data;
-    }).catch((err) => {
-      if (err.status !== 200) {
-        logout();
-        return "Unauthorized";
-      }
-    });
-
-  }, [token, logout]);
-
   return (
     <AuthContext.Provider
-      value={{isAuthenticated, token, login, logout, appStatus}}
+      value={{isAuthenticated, token, login, logout}}
     >
       {children}
     </AuthContext.Provider>

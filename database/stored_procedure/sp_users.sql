@@ -1,14 +1,17 @@
 DELIMITER //
 
 # GetUserProfile
-CREATE PROCEDURE GetUserProfile(IN userID INT) 
-BEGIN
-    SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
-           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage, profile_status, address
-    FROM users WHERE id = userID;
+CREATE PROCEDURE GetUserProfile(IN username VARCHAR(50))
+BEGIN   
+    SELECT id INTO @userID FROM users WHERE users.username = username;
     
-    SELECT name, id FROM tags WHERE id IN (SELECT tag_id FROM users_tags WHERE user_id = userID);
-    SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
+    SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography,
+           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage, 
+           profile_status, users.address, users.username
+    FROM users WHERE users.id = @userID;
+
+    SELECT name, id FROM tags WHERE id IN (SELECT tag_id FROM users_tags WHERE user_id = @userID);
+    SELECT image_url FROM pictures WHERE user_id = @userID ORDER BY position;
 END //
 
 CREATE PROCEDURE GetUserProfileStatus(IN userID INT)
