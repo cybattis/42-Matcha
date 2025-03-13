@@ -57,7 +57,7 @@ BEGIN
             OR (ref_sexual_orientation_id = 3 AND NOT (u.gender_id = ref_gender_id AND u.sexual_orientation_id = 1))
         )
         GROUP BY u.id, u.username, u.first_name, u.birth_date, u.address, tags, distance_to_ref
-        ORDER BY distance_to_ref;
+        ORDER BY calculatedFame;
     )
     SELECT * FROM FilteredUsers
     LIMIT result_limit OFFSET result_offset;
