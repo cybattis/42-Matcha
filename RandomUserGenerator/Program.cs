@@ -4,7 +4,8 @@ using RandomUserGenerator;
 
 var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? 
                        "Server=localhost;Port=3307;Database=db;user=user;password=password;";
-var imagesPath = "/home/cybattis/Dev/42/Matcha/backend/images/";
+
+var imagesPath = "/home/cyril/Dev/42/Occ/Matcha/backend/images/";
 
 // Ask for number of male and female users to generate
 Console.WriteLine("Welcome to Random User Generator!");

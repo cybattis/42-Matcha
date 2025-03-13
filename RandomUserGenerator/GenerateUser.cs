@@ -71,7 +71,7 @@ public static class GenerateUser
                 
                 // Insert images
                 // TODO: Add Human face pictures cartoon pictures
-                var numberOfImages = random.Int(0, 4);
+                var numberOfImages = random.Int(1, 4);
                 for (int i = 0; i < numberOfImages; i++) {
                     var imageUrl = $"https://picsum.photos/400/500.jpg?random={random.Int(1, 1000)}";
                     

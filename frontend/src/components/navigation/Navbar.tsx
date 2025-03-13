@@ -14,10 +14,10 @@ import {
   useColorModeValue,
 } from "@/components/ui/color-mode.tsx";
 import {
+  DefaultAvatar,
   MoonIcon,
   NotificationIcon,
   SunIcon,
-  UserIcon,
 } from "@/components/Icons.tsx";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/auth.tsx";
@@ -29,11 +29,17 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover.tsx";
+import { Route } from "@/routes/_app/profile.edit-images.tsx";
+import { useContext, useEffect, useState } from "react";
+import { DownloadImage } from "@/lib/query.ts";
+import { UserContext } from "@/routes/_app.tsx";
 
 function AppLogo() {
   return (
     <Box w="100%" display="flex" justifyContent={"center"}>
-      <Link to={"/"}>MATCHA</Link>
+      <Link to={"/home"} preload={false}>
+        MATCHA
+      </Link>
     </Box>
   );
 }
@@ -61,20 +67,7 @@ export function NavbarAuth() {
             <DarkModeButton onClick={toggleColorMode} colorMode={colorMode} />
             <Button variant="ghost" p="0" w={"40px"} h={"40px"}>
               <Link to={"/auth/login"} className={"w-full h-full"}>
-                <UserIcon className={"user-icon"}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </UserIcon>
+                <DefaultAvatar />
               </Link>
             </Button>
           </Stack>
@@ -115,7 +108,7 @@ function NotificationButton() {
       <PopoverContent>
         <PopoverArrow />
         <PopoverBody>
-          <PopoverTitle fontWeight="medium">Notifications</PopoverTitle>
+          <PopoverTitle>Notifications</PopoverTitle>
         </PopoverBody>
       </PopoverContent>
     </PopoverRoot>
@@ -124,32 +117,63 @@ function NotificationButton() {
 
 const NavbarMenu = () => {
   const auth = useAuth();
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const image = useContext(UserContext)?.profileData?.images[0];
+  const [avatar, setAvatar] = useState<string>("");
+
+  async function fetchAvatar() {
+    if (!image) return;
+    const url = await DownloadImage(image);
+    setAvatar(url);
+  }
+
+  useEffect(() => {
+    fetchAvatar().then();
+  }, [image]);
 
   return (
     <MenuRoot>
       <MenuTrigger asChild position="relative">
         <Button variant="ghost" p="0" w={"40px"} h={"40px"}>
-          <UserIcon>
+          {avatar ? (
             <Image
-              src="https://bit.ly/naruto-sage"
-              borderRadius="full"
-              boxSize="cover"
-              w="100%"
-              h="100%"
-              alt="navigation menu"
+              src={avatar}
+              alt="Avatar"
+              w={"100%"}
+              h={"100%"}
+              fit={"cover"}
+              borderRadius={"full"}
             />
-          </UserIcon>
+          ) : (
+            <DefaultAvatar />
+          )}
         </Button>
       </MenuTrigger>
       <MenuContent pos="absolute" top={"56px"} right={"12px"}>
         <MenuItem
           value="Profile"
           onClick={async () => {
-            await navigate({ to: "/app/profile" });
+            console.log("Navigate to profile");
+            await navigate({ to: "/profile/me" });
           }}
         >
           Profile
+        </MenuItem>
+        <MenuItem
+          value="Likes & Views"
+          onClick={async () => {
+            await navigate({ to: "/likes" });
+          }}
+        >
+          Likes
+        </MenuItem>
+        <MenuItem
+          value="Match"
+          onClick={async () => {
+            await navigate({ to: "/match" });
+          }}
+        >
+          Matches
         </MenuItem>
         <MenuItem
           value="logout"

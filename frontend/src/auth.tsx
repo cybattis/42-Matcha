@@ -27,7 +27,7 @@ function setUserToken(token: string | null) {
   }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({children}: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(getUserToken());
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(
     !!token
@@ -46,7 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
+    <AuthContext.Provider
+      value={{isAuthenticated, token, login, logout}}
+    >
       {children}
     </AuthContext.Provider>
   );

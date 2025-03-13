@@ -53,7 +53,7 @@ public class NewAccountController : ControllerBase
             using MySqlConnection dbClient = DbHelper.GetOpenConnection();
             if (!CheckUserInfo(newAccount)) {
                 return new ObjectResult(new {
-                    Message = _responseMessage,
+                    Error = _responseMessage,
                 }) {
                     StatusCode = 400
                 };
@@ -114,13 +114,13 @@ public class NewAccountController : ControllerBase
             string emailVerificationLink = reader.GetString("email_verification_link");
             bool profileCompleted = reader.GetBoolean("profile_completed");
             string email = reader.GetString("email");
-            DateTime forgotenPasswordLinkExpiration = reader.GetDateTime("forgoten_password_link_expiration");
+            DateTime forgottenPasswordLinkExpiration = reader.GetDateTime("forgotten_password_link_expiration");
             // Vérifier l'état de l'utilisateur
             if (isVerified)
             {
                 return BadRequest("Account is already verified.");
             }
-            if (emailVerificationLink != verificationID || forgotenPasswordLinkExpiration < DateTime.UtcNow)
+            if (emailVerificationLink != verificationID || forgottenPasswordLinkExpiration < DateTime.UtcNow)
             {
                 return BadRequest("Email expired.");
             }

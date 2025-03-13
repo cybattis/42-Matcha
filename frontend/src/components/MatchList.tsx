@@ -6,9 +6,9 @@ import {
   Button, IconButton,
 } from "@chakra-ui/react";
 import {Avatar} from "@/components/ui/avatar"
-import {MatchListType} from "@/routes/app/match.tsx";
 import {useNavigate} from "@tanstack/react-router";
 import {ConversationIcon} from "@/components/Icons.tsx";
+import {MatchListType} from "@/routes/_app/match.tsx";
 
 export function MatchList({props, setId}: { props: MatchListType; setId: (value: number) => void }) {
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export function MatchList({props, setId}: { props: MatchListType; setId: (value:
             borderColor="gray.200">
       <Button variant={'ghost'}
               onClick={async () => {
-                await navigate({to: '/app/profile/' + props.id});
+                await navigate({to: '/profile/' + props.id});
               }}>
         <Avatar name={props.name} size="lg" src={props.avatar}>
           <Float placement="bottom-end" offsetX="1" offsetY="1">

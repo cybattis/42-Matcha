@@ -6,6 +6,9 @@ INSERT INTO `status`(name)
     VALUES ('Pending'), ('Sent'), ('Delivered'), ('Read'), ('Error'), ('Edited');
 
 INSERT INTO tags (name)
+    VALUES ('NONE');
+
+INSERT INTO tags (name)
     VALUES ('Dessin / Peinture'), 
            ('Écriture'), 
            ('Photographie'), 

@@ -1,27 +1,23 @@
 DELIMITER //
 
-# GetUser
-CREATE PROCEDURE GetUserByID(IN userID INT)
-BEGIN
-    SELECT *  FROM users WHERE id = userID;
-END //
-
-# GetUserAuthData
-CREATE PROCEDURE GetUserAuthData(IN userID INT)
-BEGIN
-    SELECT username, password, email, birth_date FROM users WHERE id = userID;
-END //
-
 # GetUserProfile
-CREATE PROCEDURE GetUserProfile(IN userID INT) 
+CREATE PROCEDURE GetUserProfile(IN username VARCHAR(50))
+BEGIN   
+    SELECT id INTO @userID FROM users WHERE users.username = username;
+    
+    SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography,
+           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage, 
+           profile_status, users.address, users.username
+    FROM users WHERE users.id = @userID;
+
+    SELECT name, id FROM tags WHERE id IN (SELECT tag_id FROM users_tags WHERE user_id = @userID);
+    SELECT image_url FROM pictures WHERE user_id = @userID ORDER BY position;
+END //
+
+CREATE PROCEDURE GetUserProfileStatus(IN userID INT)
 BEGIN
-    SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
-           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage
+    SELECT profile_status
         FROM users WHERE id = userID;
-    
-    SELECT * FROM users_tags WHERE user_id = userID;
-    
-    SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
 END //
 
 # UpdateUserProfile
@@ -32,7 +28,8 @@ CREATE PROCEDURE UpdateUserProfile(
     IN genderID INT,
     IN sexualOrientation INT,
     IN coordinates VARCHAR(100),
-    IN biography VARCHAR(250)
+    IN biography VARCHAR(250),
+    IN address VARCHAR(100)
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -60,9 +57,25 @@ BEGIN
     UPDATE users SET biography = biography 
                  WHERE id = userID AND users.biography != biography;
     
+    UPDATE users SET address = address 
+                 WHERE id = userID AND users.address != address;
+    
     COMMIT;
 
+    SELECT users.profile_status INTO @profile_status FROM users WHERE id = userID;
+    IF @profile_status = 0 THEN
+        UPDATE users SET profile_status = 1 WHERE id = userID;
+    END IF;
+
     CALL UpdateProfileCompletionPercentage(userID);
+END //
+
+CREATE PROCEDURE UpdateProfileStatus(
+    IN userID INT,
+    IN status INT
+)
+BEGIN
+    UPDATE users SET profile_status = status WHERE id = userID;
 END //
 
 # UpdateProfileCompletionPercentage
@@ -88,27 +101,85 @@ END //
 
 CREATE PROCEDURE GetAllTags()
 BEGIN
-    SELECT *  FROM tags;
+    SELECT * FROM tags;
 END //
 
-CREATE PROCEDURE UpdateTag(
+CREATE PROCEDURE UpdateTags(
     IN userID INT,
-    IN tagID INT
+    IN tag1 INT,
+    IN tag2 INT,
+    IN tag3 INT,
+    IN tag4 INT,
+    IN tag5 INT
 )
 BEGIN
-    SELECT COUNT(*) INTO @count
-    FROM users_tags
-    WHERE user_id = userID AND tag_id = tagID;
     
-    IF @count = 0 THEN
-        INSERT INTO users_tags (user_id, tag_id)
-            VALUES (userID, tagID);
-    ELSE
-        DELETE FROM users_tags
-        WHERE user_id = userID AND tag_id = tagID;
+    IF tag1 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 1) THEN
+            UPDATE users_tags
+                SET tag_id = tag1
+                WHERE user_id = userID AND id = 1;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag1, 1);
+        END IF;
     END IF;
+
+    IF tag2 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 2) THEN
+            UPDATE users_tags
+                SET tag_id = tag2
+                WHERE user_id = userID AND id = 2;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag2, 2);
+        END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 2;
+    END IF;
+    
+    IF tag3 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 3) THEN
+            UPDATE users_tags
+                SET tag_id = tag3
+                WHERE user_id = userID AND id = 3;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag3, 3);
+        END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 3;
+    END IF;
+    
+    IF tag4 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 4) THEN
+            UPDATE users_tags
+                SET tag_id = tag4
+                WHERE user_id = userID AND id = 4;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag4, 4);
+        END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 4;
+    END IF;
+    
+    IF tag5 IS NOT NULL THEN
+        IF EXISTS (SELECT * FROM users_tags WHERE user_id = userID AND id = 5) THEN
+            UPDATE users_tags
+                SET tag_id = tag5
+                WHERE user_id = userID AND id = 5;
+        ELSE
+            INSERT INTO users_tags (user_id, tag_id, id)
+                VALUES (userID, tag5, 5);
+        END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 5;
+    END IF;
+
     CALL UpdateProfileCompletionPercentage(userID);
 END //
+    
     
 # IMAGE PROCEDURES
 # =================================================================================================
@@ -125,8 +196,15 @@ BEGIN
         SET MESSAGE_TEXT = 'Position must be between 1 and 5';
     END IF;
     
-    INSERT INTO pictures (user_id, pictures.position, image_url)
-        VALUES (userID, position, imageUrl);
+    SELECT COUNT(@count) FROM pictures WHERE user_id = userID AND pictures.position = position;
+    
+    IF @count > 0 THEN
+        UPDATE pictures SET image_url = imageUrl WHERE user_id = userID AND pictures.position = position;
+    ELSE
+        INSERT INTO pictures (user_id, pictures.position, image_url)
+            VALUES (userID, position, imageUrl);
+    END IF;
+    
     CALL UpdateProfileCompletionPercentage(userID);
 END //
 
@@ -222,25 +300,7 @@ BEGIN
     
     START TRANSACTION;
     
-    IF tag1 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag1);
-    END IF;
-    
-    IF tag2 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag2);
-    END IF;
-    
-    IF tag3 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag3);
-    END IF;
-    
-    IF tag4 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag4);
-    END IF;
-    
-    IF tag5 IS NOT NULL THEN
-        CALL UpdateTag(@userID, tag5);
-    END IF;
+    CALL UpdateTags(@userID, tag1, tag2, tag3, tag4, tag5);
     
     COMMIT;
     
@@ -269,6 +329,20 @@ BEGIN
     COMMIT;
     
     CALL UpdateProfileCompletionPercentage(@userID);
+END //
+
+CREATE PROCEDURE GetUserMatches(IN userID INT)
+BEGIN
+    SELECT
+        u.first_name,
+        u.last_name,
+        p.image_url
+    FROM users u
+             LEFT JOIN pictures p ON u.id = p.user_id AND p.position = 1
+    WHERE u.id IN (
+        SELECT first_userid FROM `match` WHERE second_userid = userID
+        UNION
+        SELECT second_userid FROM `match` WHERE first_userid = userID);
 END //
 
 DELIMITER ;
