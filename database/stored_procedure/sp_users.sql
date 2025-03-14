@@ -1,14 +1,17 @@
 DELIMITER //
 
 # GetUserProfile
-CREATE PROCEDURE GetUserProfile(IN userID INT) 
-BEGIN
-    SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography, 
-           profile_completion_percentage, ST_AsText(coordinates) AS coordinates, fame, is_verified, profile_completion_percentage
-        FROM users WHERE id = userID;
+CREATE PROCEDURE GetUserProfile(IN username VARCHAR(50))
+BEGIN   
+    SELECT id INTO @userID FROM users WHERE users.username = username;
     
-    SELECT name, id FROM tags WHERE id IN (SELECT tag_id FROM users_tags WHERE user_id = userID);
-    SELECT image_url FROM pictures WHERE user_id = userID ORDER BY position;
+    SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography,
+           profile_completion_percentage, ST_AsText(coordinates) AS coordinates, fame, is_verified, profile_completion_percentage, 
+           profile_status, users.address, users.username
+    FROM users WHERE users.id = @userID;
+
+    SELECT name, id FROM tags WHERE id IN (SELECT tag_id FROM users_tags WHERE user_id = @userID);
+    SELECT image_url FROM pictures WHERE user_id = @userID ORDER BY position;
 END //
 
 CREATE PROCEDURE GetUserProfileStatus(IN userID INT)
@@ -25,7 +28,8 @@ CREATE PROCEDURE UpdateUserProfile(
     IN genderID INT,
     IN sexualOrientation INT,
     IN coordinates VARCHAR(100),
-    IN biography VARCHAR(250)
+    IN biography VARCHAR(250),
+    IN address VARCHAR(100)
 )
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -35,23 +39,26 @@ BEGIN
     
     START TRANSACTION;
 
-    UPDATE users SET first_name = firstName 
-                 WHERE id = userID AND first_name != firstName;
+    UPDATE users SET users.first_name = firstName 
+                 WHERE id = userID AND users.first_name != firstName;
     
-    UPDATE users SET last_name = lastName 
-                 WHERE id = userID AND last_name != lastName;
+    UPDATE users SET users.last_name = lastName 
+                 WHERE id = userID AND users.last_name != lastName;
     
-    UPDATE users SET gender_id = genderID 
-                 WHERE id = userID;
+    UPDATE users SET users.gender_id = genderID 
+                 WHERE id = userID AND users.gender_id != genderID;
 
     UPDATE users SET users.sexual_orientation = sexualOrientation 
-                 WHERE id = userID;
+                 WHERE id = userID AND users.sexual_orientation != users.sexual_orientation
     
     UPDATE users SET users.coordinates = coordinates 
                  WHERE id = userID AND users.coordinates != coordinates;
     
-    UPDATE users SET biography = biography 
+    UPDATE users SET users.biography = biography 
                  WHERE id = userID AND users.biography != biography;
+    
+    UPDATE users SET users.address = address 
+                 WHERE id = userID AND users.address != address;
     
     COMMIT;
 
@@ -127,6 +134,8 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id, id)
                 VALUES (userID, tag2, 2);
         END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 2;
     END IF;
     
     IF tag3 IS NOT NULL THEN
@@ -138,6 +147,8 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id, id)
                 VALUES (userID, tag3, 3);
         END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 3;
     END IF;
     
     IF tag4 IS NOT NULL THEN
@@ -149,6 +160,8 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id, id)
                 VALUES (userID, tag4, 4);
         END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 4;
     END IF;
     
     IF tag5 IS NOT NULL THEN
@@ -160,6 +173,8 @@ BEGIN
             INSERT INTO users_tags (user_id, tag_id, id)
                 VALUES (userID, tag5, 5);
         END IF;
+    ELSE
+        DELETE FROM users_tags WHERE user_id = userID AND id = 5;
     END IF;
 
     CALL UpdateProfileCompletionPercentage(userID);

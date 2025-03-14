@@ -18,36 +18,40 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <summary>
     /// Get user profile
     /// </summary>
-    /// <param name="id">User ID</param>
+    /// <param name="username">Username</param>
     /// <response code="200">Success</response>
     /// <response code="400">Bad request</response>
     [HttpGet]
-    [Route("[action]/{id:int}")]
+    [Route("[action]/{username}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult> Get(int id)
+    public async Task<ActionResult> Get(string username)
     {
         try {
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@username", username);
             
             await using MySqlDataReader reader = cmd.ExecuteReader();
-            if (reader.Read())
+            if (!reader.Read()) return ValidationProblem();
+            
+            var profile = new UserProfileModel
             {
-                var profile = new UserProfileModel
-                {
-                    FirstName = reader["first_name"].ToString() ?? "",
-                    LastName = reader["last_name"].ToString() ?? "",
-                    Gender = reader["gender_id"] as int?,
-                    SexualOrientation = reader["sexual_orientation"] as int?,
-                    Biography = reader["biography"].ToString() ?? "",
-                    Coordinates = reader["coordinates"].ToString() ?? "",
-                };
+                Username = reader.GetString("username") ?? "",
+                FirstName = reader["first_name"].ToString() ?? "",
+                LastName = reader["last_name"].ToString() ?? "",
+                Gender = reader["gender_id"] as int?,
+                SexualOrientation = reader["sexual_orientation"] as int?,
+                Biography = reader["biography"].ToString() ?? "",
+                Coordinates = reader["coordinates"].ToString() ?? "",
+                FameRating = reader["fame"] as int? ?? 0,
+                Address = reader["address"].ToString() ?? "",
+            };
 
-                // Tags
+            // Tags
+            if (reader.NextResult()) {
                 while (reader.Read())
                 {
                     profile.Tags.Add(
@@ -55,16 +59,15 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                         reader["id"] as int? ?? 0
                     );
                 }
+            } 
                 
-                // Pictures
-                if (reader.NextResult()) {
-                    while (reader.Read())
-                        profile.Images.Add(reader["image_url"] as string ?? "");
-                }
-                await reader.CloseAsync();
-                return Ok(profile);
+            // Pictures
+            if (reader.NextResult()) {
+                while (reader.Read())
+                    profile.Images.Add(reader["image_url"] as string ?? "");
             }
-            return ValidationProblem();
+            await reader.CloseAsync();
+            return Ok(profile);
         }
         catch (MySqlException e)
         {
@@ -86,14 +89,12 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     public async Task<ActionResult> Me([FromHeader] string authorization)
     {
         try {
-            var id = JwtHelper.DecodeJwtToken(authorization);
-            Console.WriteLine(id);
+            var token= JwtHelper.DecodeJwtToken(authorization);
             
-        
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("GetUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@username", token.username);
 
             await using MySqlDataReader reader = cmd.ExecuteReader();
             if (!reader.Read()) return ValidationProblem();
@@ -108,7 +109,10 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                 Coordinates = reader["coordinates"].ToString() ?? "",
                 IsVerified = reader["is_verified"] as bool? ?? false,
                 ProfileCompletionPercentage = reader["profile_completion_percentage"] as int? ?? 0,
-                FameRating = reader["fame"] as int? ?? 0
+                FameRating = reader["fame"] as int? ?? 0,
+                Status = reader["profile_status"] as int? ?? 0,
+                Address = reader["address"].ToString() ?? "",
+                Username = reader["username"] as string ?? "",
             };
 
             // Tags
@@ -154,7 +158,7 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     public ActionResult Update([FromHeader] string authorization, [FromForm] UserProfileModel data)
     {
         var result = Checks.ValidateProfileData(data);
-        var id = JwtHelper.DecodeJwtToken(authorization);
+        var token = JwtHelper.DecodeJwtToken(authorization);
         
         if (!result.IsValid)
             return BadRequest(result.Message);
@@ -163,13 +167,14 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             using MySqlConnection conn = DbHelper.GetOpenConnection();
             using MySqlCommand cmd = new MySqlCommand("UpdateUserProfile", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@userID", token.id);
             cmd.Parameters.AddWithValue("@firstName", data.FirstName);
             cmd.Parameters.AddWithValue("@lastName", data.LastName);
             cmd.Parameters.AddWithValue("@genderID", data.Gender);
             cmd.Parameters.AddWithValue("@sexualOrientation", data.SexualOrientation);
             cmd.Parameters.AddWithValue("@biography", data.Biography);
             cmd.Parameters.AddWithValue("@coordinates", data.Coordinates);
+            cmd.Parameters.AddWithValue("@address", data.Address);
             cmd.ExecuteNonQuery();
             return Ok("Profile successfully updated");
         }
@@ -191,13 +196,13 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> Status([FromHeader] string authorization)
     {
-        var id = JwtHelper.DecodeJwtToken(authorization);
+        var token = JwtHelper.DecodeJwtToken(authorization);
         
         try {
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("GetUserProfileStatus", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@userID", token.id);
             cmd.ExecuteNonQuery();
             
             await using MySqlDataReader reader = cmd.ExecuteReader();
@@ -229,18 +234,18 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
     /// <response code="400">Bad request</response>
     [HttpGet]
     [Route("[action]")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]     
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult> UpdateProfileStatus([FromHeader] string authorization)
     {
         try {
-            var id = JwtHelper.DecodeJwtToken(authorization);
+            var token = JwtHelper.DecodeJwtToken(authorization);
         
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("UpdateProfileStatus", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@userID", token.id);
             cmd.Parameters.AddWithValue("@status", 2);
             cmd.ExecuteNonQuery();
             

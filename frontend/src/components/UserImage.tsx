@@ -1,34 +1,35 @@
 import {useEffect, useState} from "react";
-import {AspectRatio, Box, Image} from "@chakra-ui/react";
-import {DownloadImage} from "@/routes/_app/profile.edit-images.tsx";
+import {Box, Image} from "@chakra-ui/react";
+import {DownloadImage} from "@/lib/query.ts";
+import {useAuth} from "@/auth.tsx";
 
 export function UserImage({
-                            userID,
-                            position,
+                            imageName,
                             width,
                             height,
                             borderRadius,
                           }: {
-  userID?: number;
-  position: number;
+  imageName?: string;
   width?: string;
   height?: string;
   borderRadius?: string;
 }) {
   const [image, setImage] = useState<string>("");
-  if (!userID) {
-    userID = parseInt(localStorage.getItem("id") || "");
-  }
+  const auth = useAuth();
 
   useEffect(() => {
-    DownloadImage(userID, position).then((data) => {
-      setImage(data);
+    if (!imageName) return;
+    DownloadImage(imageName).then((data) => {
+      setImage(data.data);
+    }).catch(async (error) => {
+      if (error.status) await auth.logout();
+      console.error(error);
     });
   }, []);
 
   return (
     <>
-      {image ?
+      {image ? (
         <Box w={width ?? "500px"} h={height ?? "500px"}>
           <Image
             rounded={borderRadius ?? "md"}
@@ -39,49 +40,7 @@ export function UserImage({
             fit={"cover"}
           />
         </Box>
-        : null}
-    </>
-  );
-}
-
-export function DownloadImageUrl({
-                                   userID,
-                                   url,
-                                   width,
-                                   height,
-                                   borderRadius,
-                                 }: {
-  userID?: number;
-  position: number;
-  width?: string;
-  height?: string;
-  borderRadius?: string;
-}) {
-  const [image, setImage] = useState<string>("");
-  if (!userID) {
-    userID = parseInt(localStorage.getItem("id") || "");
-  }
-
-  useEffect(() => {
-    DownloadImageUrl(url).then((data) => {
-      setImage(data);
-    });
-  }, []);
-
-  return (
-    <>
-      {image ?
-        <Box w={width ?? "500px"} h={height ?? "500px"}>
-          <Image
-            rounded={borderRadius ?? "md"}
-            src={image}
-            alt="Image"
-            width={"100%"}
-            height={"100%"}
-            fit={"cover"}
-          />
-        </Box>
-        : null}
+      ) : null}
     </>
   );
 }

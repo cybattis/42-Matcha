@@ -1,37 +1,24 @@
-import {
-  createFileRoute,
-  getRouteApi,
-  Navigate,
-  redirect,
-} from "@tanstack/react-router";
+import {createFileRoute, redirect, useNavigate} from "@tanstack/react-router";
 import {MyRooterContext} from "@/routes/__root.tsx";
-import axios from "axios";
-import {ToasterError, ToasterSuccess} from "@/lib/toaster.ts";
-import {useEffect, useState} from "react";
+import {ToasterSuccess} from "@/lib/toaster.ts";
 import {useForm} from "react-hook-form";
-import {IAuthContext} from "@/auth.tsx";
 import {toaster} from "@/components/ui/toaster.tsx";
 import {VStack} from "@chakra-ui/react";
 import {EditProfileForm} from "@/components/form/EditProfileForm.tsx";
 import {z} from "zod";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {GetProfile} from "@/routes/_app/profile.me.tsx";
-import {UserProfile} from "@/lib/interface.ts";
+import {ProfileStatus, Tags} from "@/lib/interface.ts";
+import {FetchTagsList, UpdateProfile} from "@/lib/query.ts";
+import {useAuth} from "@/auth.tsx";
+import {useContext} from "react";
+import {IUserContext, UserContext} from "@/routes/_app.tsx";
 
 export const Route = createFileRoute("/_app/profile/edit-info")({
   component: RouteComponent,
   loader: async ({context}: { context: MyRooterContext }) => {
-    const profile = await GetProfile(context.auth.token);
-    console.log("PROFILE", profile);
-    const tags = await fetchTags(context.auth);
-    return {profile, tags};
+    return await FetchTagsList(context.auth);
   },
 });
-
-export interface Tags {
-  id: number;
-  name: string;
-}
 
 const formSchema = z.object({
   firstName: z.string().nonempty({
@@ -44,142 +31,70 @@ const formSchema = z.object({
   sexualOrientation: z.number(),
   biography: z.string(),
   coordinates: z.string(),
-  tags: z.array(z.string()),
+  address: z.string(),
+  tags: z.array(z.number()).min(1, {
+    message: "At least one tag is required",
+  }).max(5, {
+    message: "Maximum of 5 tags",
+  }),
 });
-
 export type UserProfileFormValue = z.infer<typeof formSchema>;
 
-async function UpdateProfile(token: string | null, data: UserProfileFormValue) {
-  const profile = await axios
-  .post(
-    "/UserProfile/Update",
-    {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      gender: data.gender,
-      sexualOrientation: data.sexualOrientation,
-      biography: data.biography,
-      coordinates: data.coordinates,
-    },
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: "Bearer " + token,
-      },
-    }
-  )
-  .then((res) => {
-    console.log("Profile", res);
-    return res;
-  })
-  .catch((err) => {
-    console.log("Profile", err.response);
-    return err.response;
-  });
-
-  if (profile.status !== 200) {
-    return profile;
-  }
-
-  return await axios
-  .post(
-    "/Tags/Update",
-    {
-      tags: data.tags,
-    },
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: "Bearer " + token,
-      },
-    }
-  )
-  .then((res) => {
-    console.log("Tags", res);
-    return res;
-  })
-  .catch((err) => {
-    return err;
-  });
-}
-
-async function fetchTags(auth: IAuthContext): Promise<Tags[]> {
-  const token = "Bearer " + auth.token;
-  console.log(token);
-  try {
-    const res = await axios.get("/Tags/GetList", {
-      headers: {
-        "Content-Type": "text/plain;charset=utf-8",
-        Authorization: token,
-      },
-    });
-    return res.data;
-  } catch (err) {
-    if (err.response.status === 401) {
-      await auth.logout();
-      throw redirect({
-        to: "/auth/login",
-      });
-    }
-    console.log(err);
-    ToasterError("Erreur serveur", "Impossible de récupérer la liste des tags");
-    return [];
-  }
-}
-
 function RouteComponent() {
-  const routeApi = getRouteApi("/_app/profile/edit-info");
-  const loaderData = routeApi.useLoaderData() as {
-    profile: UserProfile;
-    tags: Tags[];
-  }
-  const [isProfileCreated, setIsProfileCreated] = useState(false);
-  const [defaultValue, setDefaultValue] = useState<UserProfileFormValue>();
+  const auth = useAuth();
+  const navigate = useNavigate({from: Route.fullPath});
+  const {profileData, setProfileData} =
+  (useContext(UserContext) as IUserContext) || {};
+  const tags = Route.useLoaderData() as Tags[];
 
-  const {handleSubmit, register, formState, control, setValue} =
-    useForm<UserProfileFormValue>({
-      resolver: zodResolver(formSchema),
-      defaultValues: {
-        firstName: loaderData.profile.firstName.length > 0 ? loaderData.profile.firstName : "",
-        lastName: loaderData.profile.lastName.length > 0 ? loaderData.profile.lastName : "",
-        biography: loaderData.profile.biography.length > 0 ? loaderData.profile.biography : "",
-        gender: loaderData.profile.gender || 1,
-        sexualOrientation: loaderData.profile.sexualOrientation || 1,
-        coordinates: loaderData.profile.coordinates.length > 0 ? loaderData.profile.coordinates : "",
-        tags: loaderData.profile.tags || [],
-      }
+  const form = useForm<UserProfileFormValue>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: profileData.firstName || "",
+      lastName: profileData.lastName || "",
+      biography: profileData.biography || "",
+      coordinates: profileData.coordinates || "",
+      address: profileData.address || "",
+      tags: profileData.tags ? Object.values(profileData.tags) : [],
+    },
+  });
+
+  const onSubmit = form.handleSubmit(async (data: UserProfileFormValue) => {
+    const isCreation = profileData.status !== ProfileStatus.COMPLETED;
+
+    const t = toaster.loading({
+      title: isCreation
+        ? "Création de compte en cours..."
+        : "Mise à jour du profil en cours...",
     });
+    const result = await UpdateProfile(auth, data);
+    toaster.remove(t);
 
-  const onSubmit = handleSubmit(async (data: UserProfileFormValue) => {
-    console.log(data);
-    const t = toaster.loading({title: "Création de compte en cours..."});
-    const token = localStorage.getItem("token");
-    const result = await UpdateProfile(token, data);
-
-    console.log("RESULT:", result.statusText);
-
-    if (result.status !== 200) {
-      ToasterError(result.statusText);
-    } else {
-      ToasterSuccess(result.data);
-      setIsProfileCreated(true);
+    if (result.status === 401) {
+      await auth.logout();
+      return;
     }
 
-    toaster.remove(t);
+    if (result.status === 200) {
+      ToasterSuccess("Profil mis à jour avec succès");
+      setProfileData({
+        ...profileData,
+        ...data,
+        tags: data.tags,
+      });
+      if (isCreation) await navigate({to: "/profile/edit-images"});
+      else await navigate({to: "/profile/me"});
+    }
   });
 
   return (
     <VStack gap={6} align={"center"}>
       <EditProfileForm
-        profile={loaderData.profile}
+        profile={profileData}
+        form={form}
         onSubmit={onSubmit}
-        register={register}
-        control={control}
-        formState={formState}
-        tagsData={loaderData.tags}
-        setValue={setValue}
+        tagsData={tags}
       />
-      {isProfileCreated ? <Navigate to={"/profile/edit-images"}/> : null}
     </VStack>
   );
 }

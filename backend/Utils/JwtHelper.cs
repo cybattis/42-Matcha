@@ -25,6 +25,7 @@ public static class JwtHelper
         {
             Subject = new ClaimsIdentity([
                 new Claim("Id", Guid.NewGuid().ToString()),
+                new Claim("Username", username),
                 new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -36,18 +37,18 @@ public static class JwtHelper
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        // var jwtToken = tokenHandler.WriteToken(token);
         var stringToken = tokenHandler.WriteToken(token);
         return stringToken;
     }
     
-    public static int DecodeJwtToken(string authorization)
+    public static (int id, string username) DecodeJwtToken(string authorization)
     {
         var token = authorization.Replace("Bearer ", "");
         var handler = new JwtSecurityTokenHandler();
         var tokenS = handler.ReadToken(token) as JwtSecurityToken;
         var id = int.Parse(tokenS?.Claims.First(claim => claim.Type == "sub").Value ?? "0");
+        var username = tokenS?.Claims.First(claim => claim.Type == "Username").Value ?? "";
         
-        return id;
+        return (id, username);
     }
 }

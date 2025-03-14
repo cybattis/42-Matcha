@@ -10,109 +10,97 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import {
-  Control,
-  Controller,
-  FormState,
-  useController,
-  UseFormRegister,
-  UseFormSetValue,
-} from "react-hook-form";
+import {Controller, useController, UseFormReturn} from "react-hook-form";
 import {FormEventHandler, useEffect, useState} from "react";
-import {useCoordinate, UserCoordinates} from "@/lib/useCoordinate.ts";
-import {Radio, RadioGroup} from "@/components/ui/radio.tsx";
 import {
-  Tags,
-  UserProfileFormValue,
-} from "@/routes/_app/profile.edit-info.tsx";
-import axios from "axios";
-import {GetAddress} from "@/lib/utils.ts";
-import {UserProfile} from "@/lib/interface.ts";
+  GetAddressFromCoordinates,
+  GetAddressFromString,
+  GetCoordinates,
+  useCoordinate,
+} from "@/lib/useCoordinate.ts";
+import {Radio, RadioGroup} from "@/components/ui/radio.tsx";
+import {UserProfileFormValue} from "@/routes/_app/profile.edit-info.tsx";
+import {Tags, UserProfile} from "@/lib/interface.ts";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
 
 export function EditProfileForm(props: {
   profile: UserProfile;
-  formState: FormState<UserProfileFormValue>;
-  register: UseFormRegister<UserProfileFormValue>;
-  control: Control<UserProfileFormValue>;
+  form: UseFormReturn<UserProfileFormValue>;
   onSubmit: FormEventHandler<HTMLFormElement>;
   tagsData: Tags[];
-  setValue: UseFormSetValue<UserProfileFormValue>;
 }) {
-  const {formState, tagsData, onSubmit, register, control, setValue, profile} = props;
+  const {tagsData, form, profile, onSubmit} = props;
+  const {control, register, setValue, formState} = form;
   const errors = formState.errors;
-
   const initCoordinates = useCoordinate();
-  const [coordinates, setCoordinates] = useState<UserCoordinates>(initCoordinates);
+  const [coordinates, setCoordinates] = useState<string>("");
   const [address, setAddress] = useState<string>("");
-
-  const [userTags, setUserTags] = useState<number[]>([]);
 
   const tags = useController({
     control,
     name: "tags",
-    defaultValue: profile.tags || [],
+    defaultValue: [],
+    rules: {
+      validate: (value: number[]) => {
+        if (value.length < 1) {
+          return "At least one tag is required";
+        }
+        if (value.length > 5) {
+          return "You can't have more than 5 tags";
+        }
+        return true;
+      },
+    }
   });
 
-  console.log("Tags", tags.field.value);
-
-  async function GetCoordinates(address: string) {
-    const parsedAddress = address.replace(/ /g, "+");
-
-    console.log("GetCoordinates:", parsedAddress);
-    const reverseGeocoding = await axios.get(
-      `http://nominatim.openstreetmap.org/search?q=${parsedAddress}&format=jsonv2`
-    );
-
-    if (reverseGeocoding.data.length === 0) return;
-
-    const {lat, lon} = reverseGeocoding.data[0] as {
-      lat: string;
-      lon: string;
-    };
-
-    console.log("NEW CORD", lat.substring(0, 10), lon.substring(0, 10));
-    setCoordinates(lat.substring(0, 10) + "," + lon.substring(0, 10));
-  }
-
   const invalidTags = !!errors.tags;
+  console.log("invalidTags:", invalidTags);
 
   useEffect(() => {
-    if (profile.tags) {
-      setUserTags(Object.values(profile.tags).map((tag) => {
-        return tag;
-      }));
-    }
+    if (!profile.coordinates) return;
 
-    if (profile.coordinates.length > 0) {
+    if (profile?.coordinates.length > 0) {
       console.log("Profile coordinates:", profile.coordinates);
       setCoordinates(profile.coordinates);
-      const [lat, lon] = profile.coordinates.split(",");
-      GetAddress(parseFloat(lat), parseFloat(lon)).then((address) => {
+      GetAddressFromString(profile.coordinates).then((address) => {
         if (!address) return;
         setAddress(address);
+        setValue("address", address);
       });
       return;
-    }
-
-    if (!coordinates) return;
-
-    setValue("coordinates", coordinates.latitude + "," + coordinates.longitude);
-    if (coordinates.access) {
-      GetAddress(coordinates.longitude, coordinates.latitude).then((address) => {
-        if (!address) return;
-        setAddress(address);
-      });
     }
   }, []);
 
   useEffect(() => {
+    if (!initCoordinates) return;
+    console.log("Init coordinates:", initCoordinates);
+
+    if (initCoordinates.access) {
+      setValue(
+        "coordinates",
+        initCoordinates.latitude.toString() +
+        "," +
+        initCoordinates.longitude.toString()
+      );
+      GetAddressFromCoordinates(
+        initCoordinates.latitude,
+        initCoordinates.longitude
+      ).then((address) => {
+        if (!address) return;
+        setAddress(address);
+        setValue("address", address);
+      });
+    }
+  }, [initCoordinates]);
+
+  useEffect(() => {
     if (!coordinates) return;
 
-    GetAddress(coordinates.longitude, coordinates.latitude).then((address) => {
+    setValue("coordinates", coordinates);
+    GetAddressFromString(coordinates).then((address) => {
       if (!address) return;
-      setValue("coordinates", profile.coordinates);
       setAddress(address);
+      setValue("address", address);
     });
   }, [coordinates]);
 
@@ -177,10 +165,17 @@ export function EditProfileForm(props: {
                   value={address}
                   onBlur={async () => {
                     console.log("On blur:", address);
-                    await GetCoordinates(address);
-                    setValue("coordinates", coordinates, {
-                      shouldValidate: true,
-                    });
+                    const result = await GetCoordinates(address);
+                    setCoordinates(result?.latitude + "," + result?.longitude);
+                    setValue(
+                      "coordinates",
+                      result?.latitude.toString() +
+                      "," +
+                      result?.longitude.toString(),
+                      {
+                        shouldValidate: true,
+                      }
+                    );
                   }}
                   onChange={(e) => {
                     setAddress(e.target.value);
@@ -197,9 +192,12 @@ export function EditProfileForm(props: {
             <Fieldset.Legend>Tags</Fieldset.Legend>
             <CheckboxGroup
               invalid={invalidTags}
-              onValueChange={tags.field.onChange}
+              value={tags.field.value.map((v) => v.toString())}
+              onValueChange={(e) => {
+                console.log("Tags field value:", e);
+                tags.field.onChange(e.map((v) => parseInt(v)));
+              }}
               name={tags.field.name}
-              value={userTags}
             >
               <Fieldset.Content>
                 <Flex
@@ -222,8 +220,8 @@ export function EditProfileForm(props: {
                 </Flex>
               </Fieldset.Content>
             </CheckboxGroup>
-            {errors.tags && (
-              <Fieldset.ErrorText>{errors.tags.message}</Fieldset.ErrorText>
+            {invalidTags && (
+              <Fieldset.ErrorText>{tags.fieldState.error?.message}</Fieldset.ErrorText>
             )}
           </Stack>
           <Button type="submit" size="md" cursor="pointer">

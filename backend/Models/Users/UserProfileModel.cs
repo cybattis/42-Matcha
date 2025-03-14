@@ -22,21 +22,32 @@ public class UserProfileModel
 
     [DefaultValue("45.7736192,4.7579136")] // 45.7736192 4.7579136 → École 42 position
     public string? Coordinates {get;set;}
+
+    [DefaultValue("")]
+    public string? Address {get;set;}
     
     [DefaultValue(0)]
     public int? ProfileCompletionPercentage {get;set;}
     
     [DefaultValue(0)]
     public int? FameRating {get;set;}
-
+    
     // For GET request
     [SwaggerIgnore]
-    [DefaultValue(false)]
     public bool? IsVerified {get;set;}
+    
     [SwaggerIgnore]
     public Dictionary<string, int> Tags {get;set;} = new();
+    
     [SwaggerIgnore]
     public List<string> Images {get;set;} = new();
-        [SwaggerIgnore]
+    
+    [SwaggerIgnore]
     public DateTime birthDate {get;set;}
+    
+    [SwaggerIgnore]
+    public string? Username {get;set;}
+    
+    [SwaggerIgnore]
+    public int? Status {get;set;}
 }

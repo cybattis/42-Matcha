@@ -65,7 +65,7 @@ public class WebSocketService(ILogger<IWebSocketService> logger): IWebSocketServ
                 {
                     logger.LogInformation("Connection request");
                     
-                    id = Utils.JwtHelper.DecodeJwtToken(message.Data as string ?? "");
+                    id = Utils.JwtHelper.DecodeJwtToken(message.Data as string ?? "").id;
                     if (_connections.ContainsKey(id)) {
                         logger.LogWarning("Connection already exists for id: {id}", id);
                         _connections.TryGetValue(id, out var existing);

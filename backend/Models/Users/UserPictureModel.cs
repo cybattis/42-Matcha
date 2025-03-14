@@ -6,10 +6,3 @@ public class UserPictureModel
     
     public IFormFile Data { get; set; } = null!;
 }
-
-public class SwapPicture
-{
-    public int Position { get; set; }
-    
-    public int NewPosition { get; set; }
-}

@@ -27,7 +27,7 @@ CREATE TABLE users (
     is_verified BOOLEAN DEFAULT FALSE,
     first_name VARCHAR(50) DEFAULT '',
     last_name VARCHAR(50) DEFAULT '',
-    `address` VARCHAR (255),
+    `address` VARCHAR (100),
     gender_id INT CHECK (gender_id BETWEEN 1 AND 2), -- 1 Male / 2 Female
     sexual_orientation INT CHECK (sexual_orientation BETWEEN 1 AND 3), -- 1 hetero / 2 homo / 3 bi
     coordinates POINT,

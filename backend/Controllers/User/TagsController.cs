@@ -59,7 +59,7 @@ public class TagsController(ILogger<TagsController> logger): ControllerBase
     public async Task<ActionResult> Update([FromForm] List<string> tags, [FromHeader] string authorization)
     {
         try {
-            var id = JwtHelper.DecodeJwtToken(authorization);
+            var token = JwtHelper.DecodeJwtToken(authorization);
             if (tags.Count < 1)
                 return Ok("No changes");
             
@@ -69,7 +69,7 @@ public class TagsController(ILogger<TagsController> logger): ControllerBase
             await using MySqlConnection conn = DbHelper.GetOpenConnection();
             await using MySqlCommand cmd = new MySqlCommand("UpdateTags", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@userID", id);
+            cmd.Parameters.AddWithValue("@userID", token.id);
             
             var distinctList = tags.Distinct().ToList();
             if (tags.Count != distinctList.Count)
