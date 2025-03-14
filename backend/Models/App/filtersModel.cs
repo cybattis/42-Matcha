@@ -10,6 +10,8 @@ namespace backend.Models.App
         public required string id { get; set;}
         public required int range { get; set; }
         public required int ageGap { get; set; }
+        public required int distanceGap { get; set; }
         public required int fameGap { get; set; }
+        public required string sortBy { get; set; }
     }
 }

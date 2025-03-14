@@ -10,6 +10,7 @@ namespace backend.Models.App
         public required int Id { get; set;}
         public required string userName { get; set;}
         public required string FirstName { get; set;}
+        public required string LastName { get; set;}
         public required int age { get; set;}
         public required string address { get; set;}
         public required string [] tags { get; set; }

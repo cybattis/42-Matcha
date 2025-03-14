@@ -41,16 +41,6 @@ public class DatingController : ControllerBase
                 FameRating = reader.GetInt32("fame"),
                 birthDate = reader.GetDateTime("birth_date")
             };
-        //recuperer les profils des utilisateurs concerne par les filtres
-        // les organiser en liste et renvoyer cette liste au front
-        // GetMatchingProfiles (
-        // IN ref_user_id INT,
-        // IN max_age_gap INT,
-        // IN fame_gap INT,
-        // IN ref_fame INT,
-        // IN ref_birthdate DATE,
-        // IN ref_gender_id INT,
-        // IN ref_sexual_orientation_id INT
         using MySqlConnection dbClient = DbHelper.GetOpenConnection();
         using var command = new MySqlCommand("GetMatchingProfiles", dbClient);
         command.CommandType = CommandType.StoredProcedure;
@@ -58,7 +48,9 @@ public class DatingController : ControllerBase
         // Paramètres : tu peux les adapter à ton modèle DatingModel
         command.Parameters.AddWithValue("@ref_user_id", matchingSettings.id);
         command.Parameters.AddWithValue("@max_age_gap", matchingSettings.ageGap);
+        command.Parameters.AddWithValue("@max_distance_gap", matchingSettings.distanceGap);
         command.Parameters.AddWithValue("fame_gap", matchingSettings.fameGap);
+        command.Parameters.AddWithValue("sort_by", matchingSettings.sortBy);
         command.Parameters.AddWithValue("ref_fame", profile.FameRating);
         command.Parameters.AddWithValue("ref_birthdate", profile.birthDate);
         command.Parameters.AddWithValue("ref_gender_id", profile.Gender);
@@ -76,6 +68,7 @@ public class DatingController : ControllerBase
                     Id = readerProfiles.GetInt32("id"),
                     userName = readerProfiles.GetString("username"),
                     FirstName = readerProfiles.GetString("first_name"),
+                    LastName = readerProfiles.GetString("last_name"),
                     age = CalculateAge(readerProfiles.GetDateTime("birth_date")),
                     address = readerProfiles.GetString("address"),
                     tags = readerProfiles.GetString("tags").Split(','), // si tu as une colonne "tags" séparée par virgule
