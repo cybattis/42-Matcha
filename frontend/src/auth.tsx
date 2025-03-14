@@ -13,7 +13,7 @@ export interface IAuthContext {
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<IAuthContext | null>(null);
+export const AuthContext = createContext<IAuthContext | null>(null);
 
 export function getUserToken() {
   return localStorage.getItem("token");
@@ -37,6 +37,7 @@ export function AuthProvider({children}: { children: ReactNode }) {
     setUserToken(null);
     setIsAuthenticated(false);
     setToken(null);
+    window.location.reload();
   }, []);
 
   const login = useCallback(async (token: string) => {

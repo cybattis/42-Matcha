@@ -35,20 +35,23 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
             cmd.Parameters.AddWithValue("@username", username);
             
             await using MySqlDataReader reader = cmd.ExecuteReader();
-            if (reader.Read())
+            if (!reader.Read()) return ValidationProblem();
+            
+            var profile = new UserProfileModel
             {
-                var profile = new UserProfileModel
-                {
-                    Username = reader.GetString("username") ?? "",
-                    FirstName = reader["first_name"].ToString() ?? "",
-                    LastName = reader["last_name"].ToString() ?? "",
-                    Gender = reader["gender_id"] as int?,
-                    SexualOrientation = reader["sexual_orientation"] as int?,
-                    Biography = reader["biography"].ToString() ?? "",
-                    Coordinates = reader["coordinates"].ToString() ?? "",
-                };
+                Username = reader.GetString("username") ?? "",
+                FirstName = reader["first_name"].ToString() ?? "",
+                LastName = reader["last_name"].ToString() ?? "",
+                Gender = reader["gender_id"] as int?,
+                SexualOrientation = reader["sexual_orientation"] as int?,
+                Biography = reader["biography"].ToString() ?? "",
+                Coordinates = reader["coordinates"].ToString() ?? "",
+                FameRating = reader["fame"] as int? ?? 0,
+                Address = reader["address"].ToString() ?? "",
+            };
 
-                // Tags
+            // Tags
+            if (reader.NextResult()) {
                 while (reader.Read())
                 {
                     profile.Tags.Add(
@@ -56,16 +59,15 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
                         reader["id"] as int? ?? 0
                     );
                 }
+            } 
                 
-                // Pictures
-                if (reader.NextResult()) {
-                    while (reader.Read())
-                        profile.Images.Add(reader["image_url"] as string ?? "");
-                }
-                await reader.CloseAsync();
-                return Ok(profile);
+            // Pictures
+            if (reader.NextResult()) {
+                while (reader.Read())
+                    profile.Images.Add(reader["image_url"] as string ?? "");
             }
-            return ValidationProblem();
+            await reader.CloseAsync();
+            return Ok(profile);
         }
         catch (MySqlException e)
         {

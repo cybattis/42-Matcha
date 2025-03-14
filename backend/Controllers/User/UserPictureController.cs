@@ -13,8 +13,8 @@ namespace backend.Controllers.User;
 [Route("[controller]")]
 public class UserPictureController(ILogger<UserPictureController> logger) : ControllerBase
 {
-    private string imagePath = "/home/cyril/Dev/42/Occ/Matcha/images/";
-        
+    private readonly string _imagePath = Environment.GetEnvironmentVariable("IMAGE_PATH") ?? "/home/cybattis/Dev/42/Matcha/backend/images/";
+
     /// <summary>
     /// Upload user picture
     /// </summary>
@@ -52,7 +52,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             if (!isValid)
                 return BadRequest("Image type not supported");
 
-            var userFolder = imagePath;
+            var userFolder = _imagePath;
             // Check if file path exist
             if (!Directory.Exists(userFolder))
                 Directory.CreateDirectory(userFolder);
@@ -67,7 +67,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             
             // Save image to disk
             var imageName = Guid.NewGuid() + "." + extension;
-            var url = imagePath + imageName;
+            var url = _imagePath + imageName;
             Console.WriteLine(url);
 
             await System.IO.File.WriteAllBytesAsync(url, bytes);
@@ -145,7 +145,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
             var fileName = reader["image_url"].ToString() ?? "";
             await reader.CloseAsync();
             
-            var url = imagePath + fileName;
+            var url = _imagePath + fileName;
             
             if (System.IO.File.Exists(url))
                 System.IO.File.Delete(url);
@@ -182,7 +182,7 @@ public class UserPictureController(ILogger<UserPictureController> logger) : Cont
     public async Task<ActionResult> Get([FromForm] string imageName)
     {
         try {
-            var url = imagePath + imageName;
+            var url = _imagePath + imageName;
             Console.WriteLine(url);
             
             if (!System.IO.File.Exists(url)) {
