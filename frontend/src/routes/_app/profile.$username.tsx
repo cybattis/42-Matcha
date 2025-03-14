@@ -6,18 +6,17 @@ import {UserProfile} from "@/lib/interface.ts";
 
 export const Route = createFileRoute('/_app/profile/$username')({
   component: RouteComponent,
-  beforeLoad: async ({context}: { context: MyRooterContext }) => {
-    console.log("Before load: Profile username");
-    const {username} = this.useParams();
-    const profile = await GetUserProfile(username, context.auth.token);
+  loader: async ({context, params}: { context: MyRooterContext }) => {
+    const {username} = params as { username: string };
+    const profile = await GetUserProfile(username, context.auth);
     return {profile}
   }
 })
 
 function RouteComponent() {
-  const {data} = Route.useLoaderData() as UserProfile;
+  const {profile} = Route.useLoaderData() as UserProfile;
 
   return (
-    <Profile data={data} isMe={false}/>
+    <Profile data={profile} isMe={false}/>
   )
 }

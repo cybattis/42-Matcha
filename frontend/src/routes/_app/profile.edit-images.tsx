@@ -1,7 +1,7 @@
-import {createFileRoute, useNavigate} from '@tanstack/react-router'
+import {createFileRoute, redirect, useNavigate, useSearch} from '@tanstack/react-router'
 import {FileUploadDropzone, FileUploadRoot} from '@/components/ui/file-upload'
 import {AspectRatio, Flex, Grid, Image} from '@chakra-ui/react'
-import {ToasterError} from '@/lib/toaster.ts'
+import {ToasterError, ToasterSuccess} from '@/lib/toaster.ts'
 import {useContext, useEffect, useState} from 'react'
 import {CloseButton} from '@/components/ui/close-button.tsx'
 import {TrashIcon} from '@/components/Icons.tsx'
@@ -14,6 +14,7 @@ import {
 } from '@/lib/query.ts'
 import {UserContext} from "@/routes/_app.tsx";
 import {UserProfile} from "@/lib/interface.ts";
+import {useAuth} from "@/auth.tsx";
 
 export const Route = createFileRoute('/_app/profile/edit-images')({
   component: RouteComponent,
@@ -26,6 +27,7 @@ function UploadImageComponent({
   imageName?: string
   position: number
 }) {
+  const auth = useAuth();
   const [isHovering, setIsHovering] = useState(false)
   const [onDelete, setOnDelete] = useState(false)
   const [image, setImage] = useState<string>('')
@@ -33,11 +35,14 @@ function UploadImageComponent({
   useEffect(() => {
     if (!imageName)
       return
-    
-    DownloadImage(imageName).then((data) => {
-      setImage(data)
+
+    DownloadImage(imageName).then((res) => {
+      setImage(res.data);
+    }).catch(async (err) => {
+      if (err.status === 401) await auth.logout();
+      ToasterError('An error occured');
     })
-  }, [])
+  }, [imageName]);
 
   return (
     <FileUploadRoot
@@ -48,19 +53,18 @@ function UploadImageComponent({
       accept={['image/png', 'image/jpeg']}
       maxFileSize={5000000}
       onFileAccept={async (file) => {
-        if (!file.files[0]) {
-          return
-        }
-        console.log('file accepted', file)
-        console.log('Position', position)
+        if (!file.files[0]) return;
 
         // upload file
-        const result = await UploadToServer(file.files[0], position)
-        if (result) {
-          await DownloadImage(result).then((data) => {
-            setImage(data)
-          })
-        }
+        const result = await UploadToServer(file.files[0], position);
+        if (!result) return;
+
+        await DownloadImage(result).then((res) => {
+          setImage(res.data);
+        }).catch(async (error) => {
+          if (error.status === 401) await auth.logout();
+          console.error(error);
+        });
       }}
       onFileReject={(files) => {
         if (!files.files[0]) {
@@ -102,9 +106,11 @@ function UploadImageComponent({
                     .then(() => {
                       setOnDelete(false)
                       setImage('')
+                      ToasterSuccess('Image deleted successfully')
                     })
-                    .catch((err) => {
-                      console.log(err)
+                    .catch(async (err) => {
+                      if (err.status === 401) await auth.logout();
+                      ToasterError('An error occured');
                     })
                   }}
                 >
@@ -127,8 +133,9 @@ function UploadImageComponent({
 }
 
 function RouteComponent() {
-  const navigate = useNavigate({from: Route.fullPath})
-  const profile = useContext(UserContext)?.user as UserProfile
+  const navigate = useNavigate({from: Route.fullPath});
+  const {fromProfile} = Route.useSearch();
+  const profile = useContext(UserContext)?.profileData as UserProfile;
 
   return (
     <Grid gap="4" p="4">
@@ -145,9 +152,16 @@ function RouteComponent() {
         onClick={async () => {
           const result = await ValidateProfile()
           if (result) {
-            await navigate({
-              to: '/home',
-            })
+            if (fromProfile) {
+              await navigate({
+                to: '/profile/me',
+              })
+              return;
+            } else {
+              await navigate({
+                to: '/home',
+              })
+            }
           }
         }}
       >

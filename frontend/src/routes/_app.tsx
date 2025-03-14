@@ -4,39 +4,34 @@ import {
   ParsedLocation,
   redirect,
 } from "@tanstack/react-router";
-import { MyRooterContext } from "@/routes/__root.tsx";
+import {MyRooterContext} from "@/routes/__root.tsx";
 import Navbar from "@/components/navigation/Navbar.tsx";
-import { Box } from "@chakra-ui/react";
-import { GetMeProfile } from "@/lib/query.ts";
-import { ProfileStatus, UserProfile } from "@/lib/interface.ts";
-import { createContext, useState } from "react";
+import {Box} from "@chakra-ui/react";
+import {GetMeProfile} from "@/lib/query.ts";
+import {ProfileStatus, UserProfile} from "@/lib/interface.ts";
+import {createContext, useState} from "react";
+import {ToasterError} from "@/lib/toaster.ts";
 
 export const Route = createFileRoute("/_app")({
   component: RouteComponent,
-  beforeLoad: async ({ context }: { context: MyRooterContext }) => {
+  beforeLoad: async ({context}: { context: MyRooterContext }) => {
     if (!context.auth.isAuthenticated) {
+      ToasterError("Erreur", "Vous n'êtes pas connecté");
       throw redirect({
         to: "/auth/login",
       });
     }
   },
   loader: async ({
-    context,
-    location,
-  }: {
+                   context,
+                   location,
+                 }: {
     context: MyRooterContext;
     location: ParsedLocation;
   }) => {
-    const profile = await GetMeProfile(context.auth.token);
-    if (!profile) {
-      await context.auth.logout();
-      redirect({
-        to: "/auth/login",
-      });
-      return;
-    }
+    const profile = await GetMeProfile(context.auth);
+    if (!profile) return;
 
-    console.log("Checking profile status");
     const search = new URLSearchParams(location.search);
 
     if (
@@ -79,10 +74,10 @@ function RouteComponent() {
   const [profileData, setProfileData] = useState<UserProfile>(data);
 
   return (
-    <UserContext.Provider value={{ profileData, setProfileData }}>
-      <Navbar />
+    <UserContext.Provider value={{profileData, setProfileData}}>
+      <Navbar/>
       <Box flexGrow="1" p={5}>
-        <Outlet />
+        <Outlet/>
       </Box>
     </UserContext.Provider>
   );

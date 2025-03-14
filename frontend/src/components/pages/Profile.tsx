@@ -1,14 +1,12 @@
-import { Badge, Button, Flex, Text } from "@chakra-ui/react";
-import { DefaultAvatar, EditIcon, EditImages } from "@/components/Icons.tsx";
-import { UserImage } from "@/components/UserImage.tsx";
-import { UserProfile } from "@/lib/interface.ts";
-import { useNavigate } from "@tanstack/react-router";
-import { Route } from "@/routes/_app/profile.me.tsx";
+import {Badge, Button, Flex, Text} from "@chakra-ui/react";
+import {DefaultAvatar, EditIcon, EditImages} from "@/components/Icons.tsx";
+import {UserImage} from "@/components/UserImage.tsx";
+import {UserProfile} from "@/lib/interface.ts";
+import {useNavigate} from "@tanstack/react-router";
+import {Route} from "@/routes/_app/profile.me.tsx";
 
-export function Profile({ data, isMe }: { data: UserProfile; isMe: boolean }) {
-  const navigate = useNavigate({ from: Route.fullPath });
-
-  console.log("Profile data:", data);
+export function Profile({data, isMe}: { data: UserProfile; isMe: boolean }) {
+  const navigate = useNavigate({from: Route.fullPath});
 
   return (
     <Flex
@@ -32,7 +30,7 @@ export function Profile({ data, isMe }: { data: UserProfile; isMe: boolean }) {
           top={5}
           right={5}
         >
-          <EditIcon />
+          <EditIcon/>
         </Button>
       )}
       <Flex
@@ -51,7 +49,7 @@ export function Profile({ data, isMe }: { data: UserProfile; isMe: boolean }) {
             borderRadius={"full"}
           />
         ) : (
-          <DefaultAvatar />
+          <DefaultAvatar/>
         )}
         <Flex direction={"column"} alignItems="center" gap={4} maxW={"100%"}>
           <Flex direction="column" gap={2} maxW={"100%"}>
@@ -108,12 +106,12 @@ export function Profile({ data, isMe }: { data: UserProfile; isMe: boolean }) {
             top={5}
             right={5}
           >
-            <EditImages />
+            <EditImages/>
           </Button>
         )}
         {data.images.map((_image, index) => {
           if (index + 1 > 1)
-            return <UserImage key={index} imageName={_image} />;
+            return <UserImage key={index} imageName={_image}/>;
         })}
       </Flex>
     </Flex>

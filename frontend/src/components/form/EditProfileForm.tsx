@@ -10,18 +10,18 @@ import {
   Textarea,
   VStack,
 } from "@chakra-ui/react";
-import { Controller, useController, UseFormReturn } from "react-hook-form";
-import { FormEventHandler, useEffect, useState } from "react";
+import {Controller, useController, UseFormReturn} from "react-hook-form";
+import {FormEventHandler, useEffect, useState} from "react";
 import {
   GetAddressFromCoordinates,
   GetAddressFromString,
   GetCoordinates,
   useCoordinate,
 } from "@/lib/useCoordinate.ts";
-import { Radio, RadioGroup } from "@/components/ui/radio.tsx";
-import { UserProfileFormValue } from "@/routes/_app/profile.edit-info.tsx";
-import { Tags, UserProfile } from "@/lib/interface.ts";
-import { Checkbox } from "@/components/ui/checkbox.tsx";
+import {Radio, RadioGroup} from "@/components/ui/radio.tsx";
+import {UserProfileFormValue} from "@/routes/_app/profile.edit-info.tsx";
+import {Tags, UserProfile} from "@/lib/interface.ts";
+import {Checkbox} from "@/components/ui/checkbox.tsx";
 
 export function EditProfileForm(props: {
   profile: UserProfile;
@@ -29,8 +29,8 @@ export function EditProfileForm(props: {
   onSubmit: FormEventHandler<HTMLFormElement>;
   tagsData: Tags[];
 }) {
-  const { tagsData, form, profile, onSubmit } = props;
-  const { control, register, setValue, formState } = form;
+  const {tagsData, form, profile, onSubmit} = props;
+  const {control, register, setValue, formState} = form;
   const errors = formState.errors;
   const initCoordinates = useCoordinate();
   const [coordinates, setCoordinates] = useState<string>("");
@@ -40,9 +40,21 @@ export function EditProfileForm(props: {
     control,
     name: "tags",
     defaultValue: [],
+    rules: {
+      validate: (value: number[]) => {
+        if (value.length < 1) {
+          return "At least one tag is required";
+        }
+        if (value.length > 5) {
+          return "You can't have more than 5 tags";
+        }
+        return true;
+      },
+    }
   });
 
   const invalidTags = !!errors.tags;
+  console.log("invalidTags:", invalidTags);
 
   useEffect(() => {
     if (!profile.coordinates) return;
@@ -67,8 +79,8 @@ export function EditProfileForm(props: {
       setValue(
         "coordinates",
         initCoordinates.latitude.toString() +
-          "," +
-          initCoordinates.longitude.toString()
+        "," +
+        initCoordinates.longitude.toString()
       );
       GetAddressFromCoordinates(
         initCoordinates.latitude,
@@ -102,7 +114,7 @@ export function EditProfileForm(props: {
                 <Field.Root required invalid={!!errors.firstName}>
                   <Field.Label>
                     First name
-                    <Field.RequiredIndicator />
+                    <Field.RequiredIndicator/>
                   </Field.Label>
                   <Input {...register("firstName")} />
                   <Field.ErrorText>{errors.firstName?.message}</Field.ErrorText>
@@ -110,7 +122,7 @@ export function EditProfileForm(props: {
                 <Field.Root required invalid={!!errors.lastName}>
                   <Field.Label>
                     Last name
-                    <Field.RequiredIndicator />
+                    <Field.RequiredIndicator/>
                   </Field.Label>
                   <Input {...register("lastName")} />
                   <Field.ErrorText>{errors.lastName?.message}</Field.ErrorText>
@@ -146,7 +158,7 @@ export function EditProfileForm(props: {
               <Field.Root required invalid={!!errors.coordinates}>
                 <Field.Label>
                   City
-                  <Field.RequiredIndicator />
+                  <Field.RequiredIndicator/>
                 </Field.Label>
                 <Input
                   {...register("coordinates")}
@@ -158,8 +170,8 @@ export function EditProfileForm(props: {
                     setValue(
                       "coordinates",
                       result?.latitude.toString() +
-                        "," +
-                        result?.longitude.toString(),
+                      "," +
+                      result?.longitude.toString(),
                       {
                         shouldValidate: true,
                       }
@@ -196,20 +208,20 @@ export function EditProfileForm(props: {
                 >
                   {tagsData.length > 0
                     ? tagsData.map((tag: Tags) => (
-                        <Checkbox
-                          key={tag.id}
-                          value={tag.id.toString()}
-                          minW={"100px"}
-                        >
-                          {tag.name}
-                        </Checkbox>
-                      ))
+                      <Checkbox
+                        key={tag.id}
+                        value={tag.id.toString()}
+                        minW={"100px"}
+                      >
+                        {tag.name}
+                      </Checkbox>
+                    ))
                     : null}
                 </Flex>
               </Fieldset.Content>
             </CheckboxGroup>
-            {errors.tags && (
-              <Fieldset.ErrorText>{errors.tags.message}</Fieldset.ErrorText>
+            {invalidTags && (
+              <Fieldset.ErrorText>{tags.fieldState.error?.message}</Fieldset.ErrorText>
             )}
           </Stack>
           <Button type="submit" size="md" cursor="pointer">
