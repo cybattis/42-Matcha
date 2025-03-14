@@ -27,7 +27,7 @@ CREATE PROCEDURE UpdateUserProfile(
     IN lastName VARCHAR(50),
     IN genderID INT,
     IN sexualOrientation INT,
-    IN coordinates VARCHAR(100),
+    IN coordinates VARCHAR(50),
     IN biography VARCHAR(250),
     IN address VARCHAR(100)
 )
@@ -40,19 +40,22 @@ BEGIN
     START TRANSACTION;
 
     UPDATE users SET users.first_name = firstName 
-                 WHERE id = userID AND users.first_name != firstName;
+                 WHERE id = userID AND first_name != firstName;
     
     UPDATE users SET users.last_name = lastName 
-                 WHERE id = userID AND users.last_name != lastName;
+                 WHERE id = userID AND last_name != lastName;
     
     UPDATE users SET users.gender_id = genderID 
-                 WHERE id = userID AND users.gender_id != genderID;
+                 WHERE id = userID;
 
     UPDATE users SET users.sexual_orientation = sexualOrientation 
-                 WHERE id = userID AND users.sexual_orientation != users.sexual_orientation
-    
-    UPDATE users SET users.coordinates = coordinates 
-                 WHERE id = userID AND users.coordinates != coordinates;
+                 WHERE id = userID;
+     
+    UPDATE users SET users.coordinates = POINT(
+            CAST(SUBSTRING_INDEX(coordinates, ',', 1) AS DECIMAL(10,6)),
+            CAST(SUBSTRING_INDEX(coordinates, ',', -1) AS DECIMAL(10,6))
+         )
+         WHERE id = userID;
     
     UPDATE users SET users.biography = biography 
                  WHERE id = userID AND users.biography != biography;

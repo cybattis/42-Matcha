@@ -22,7 +22,7 @@ BEGIN
         u.last_name,
         u.birth_date,
         u.address,
-        GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ", ") AS tags,
+        GROUP_CONCAT(t.name ORDER BY t.name SEPARATOR ",") AS tags,
         ST_Distance_Sphere(ref_coordinates, u.coordinates) AS distance_to_ref,
         (
             u.fame 
