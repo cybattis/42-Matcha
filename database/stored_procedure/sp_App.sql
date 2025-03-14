@@ -30,7 +30,8 @@ BEGIN
                     WHERE ut2.user_id = u.id
                       AND t2.name IN (SELECT t3.name FROM users_tags ut3 JOIN tags t3 ON ut3.tag_id = t3.id WHERE ut3.user_id = ref_user_id)
                 ))
-            ) AS calculatedFame
+            ) AS calculatedFame,
+            p.image_url
         FROM users u
         JOIN pictures AS p
             ON p.user_id = u.id

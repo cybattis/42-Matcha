@@ -14,5 +14,8 @@ namespace backend.Models.App
         public required string address { get; set;}
         public required string [] tags { get; set; }
         public required string profileImageUrl { get; set;}
+        public required int distance { get; set;}
+        public required int fame { get; set;}
+        public required int calculatedFame { get; set;}
     }
 }

@@ -3,7 +3,7 @@ import { Center, VStack, Text } from '@chakra-ui/react';
 import { useEffect } from 'react';
 
 // Création de la route avec un loader
-export const Route = createFileRoute('/auth/verify/$id')({
+export const Route = createFileRoute('/_auth/verify/$id')({
   loader: async ({ params }) => {
     const { id } = params; // Extraire l'ID des paramètres
     const response = await fetch(`http://localhost:5163/Auth/VerifyAccount/${id}`, {

@@ -79,7 +79,10 @@ public class DatingController : ControllerBase
                     age = CalculateAge(readerProfiles.GetDateTime("birth_date")),
                     address = readerProfiles.GetString("address"),
                     tags = readerProfiles.GetString("tags").Split(','), // si tu as une colonne "tags" séparée par virgule
-                    profileImageUrl = readerProfiles.GetString("profileImageUrl")
+                    distance = readerProfiles.GetInt32("distance_to_ref"),
+                    fame = readerProfiles.GetInt32("fame"),
+                    calculatedFame = readerProfiles.GetInt32("calculatedFame"),
+                    profileImageUrl = readerProfiles.GetString("image_url")
                 });
             }
 
