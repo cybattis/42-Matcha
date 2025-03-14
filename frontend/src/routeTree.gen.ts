@@ -53,6 +53,12 @@ const AuthVerifyRoute = AuthVerifyImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
+const AuthVerifyRoute = AuthVerifyImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AuthRoute,
+} as any)
+
 const AuthNotVerifyRoute = AuthNotVerifyImport.update({
   id: '/not-verify',
   path: '/not-verify',
@@ -381,6 +387,11 @@ export interface FileRouteTypes {
     | '/profile/me'
     | '/auth/login'
     | '/auth/register'
+<<<<<<< Updated upstream
+    | '/auth/verify/$id'
+=======
+    | '/auth/verify'
+>>>>>>> Stashed changes
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -399,6 +410,11 @@ export interface FileRouteTypes {
     | '/profile/me'
     | '/auth/login'
     | '/auth/register'
+<<<<<<< Updated upstream
+    | '/auth/verify/$id'
+=======
+    | '/auth/verify'
+>>>>>>> Stashed changes
   id:
     | '__root__'
     | '/'

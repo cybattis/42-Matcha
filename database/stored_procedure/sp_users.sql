@@ -6,7 +6,7 @@ BEGIN
     SELECT id INTO @userID FROM users WHERE users.username = username;
     
     SELECT first_name, last_name, birth_date, gender_id, sexual_orientation, biography,
-           profile_completion_percentage, coordinates, fame, is_verified, profile_completion_percentage, 
+           profile_completion_percentage, ST_AsText(coordinates) AS coordinates, fame, is_verified, profile_completion_percentage, 
            profile_status, users.address, users.username
     FROM users WHERE users.id = @userID;
 
@@ -39,25 +39,25 @@ BEGIN
     
     START TRANSACTION;
 
-    UPDATE users SET first_name = firstName 
-                 WHERE id = userID AND first_name != firstName;
+    UPDATE users SET users.first_name = firstName 
+                 WHERE id = userID AND users.first_name != firstName;
     
-    UPDATE users SET last_name = lastName 
-                 WHERE id = userID AND last_name != lastName;
+    UPDATE users SET users.last_name = lastName 
+                 WHERE id = userID AND users.last_name != lastName;
     
-    UPDATE users SET gender_id = genderID 
-                 WHERE id = userID;
+    UPDATE users SET users.gender_id = genderID 
+                 WHERE id = userID AND users.gender_id != genderID;
 
     UPDATE users SET users.sexual_orientation = sexualOrientation 
-                 WHERE id = userID;
+                 WHERE id = userID AND users.sexual_orientation != users.sexual_orientation
     
     UPDATE users SET users.coordinates = coordinates 
                  WHERE id = userID AND users.coordinates != coordinates;
     
-    UPDATE users SET biography = biography 
+    UPDATE users SET users.biography = biography 
                  WHERE id = userID AND users.biography != biography;
     
-    UPDATE users SET address = address 
+    UPDATE users SET users.address = address 
                  WHERE id = userID AND users.address != address;
     
     COMMIT;

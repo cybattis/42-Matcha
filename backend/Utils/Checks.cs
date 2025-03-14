@@ -58,7 +58,7 @@ public static class Checks {
         if (userName != null && password.Contains(userName))
             return false;
         
-        string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,32}$";
+        string pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*+\-?&])[A-Za-z\d@$!%*+\-?&]{8,32}$"; // caractere speciaux : @$!%*+-?&
         if (!Regex.IsMatch(password, pattern))
             return false;
         return true;

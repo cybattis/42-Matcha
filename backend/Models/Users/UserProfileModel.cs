@@ -43,6 +43,9 @@ public class UserProfileModel
     public List<string> Images {get;set;} = new();
     
     [SwaggerIgnore]
+    public DateTime birthDate {get;set;}
+    
+    [SwaggerIgnore]
     public string? Username {get;set;}
     
     [SwaggerIgnore]

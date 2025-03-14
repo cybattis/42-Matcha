@@ -1,3 +1,4 @@
+using System.Data;
 using System.Diagnostics;
 using backend.Database;
 using backend.Models.Users;
@@ -109,10 +110,9 @@ public class NewAccountController : ControllerBase
                 return BadRequest("Verification link not found or invalid.");
             
             // Extraire les colonnes retournées
-            int userId = reader.GetInt32("user_id");
+            int userId = reader.GetInt32("id");
             bool isVerified = reader.GetBoolean("is_verified");
             string emailVerificationLink = reader.GetString("email_verification_link");
-            bool profileCompleted = reader.GetBoolean("profile_completed");
             string email = reader.GetString("email");
             DateTime forgottenPasswordLinkExpiration = reader.GetDateTime("forgotten_password_link_expiration");
             // Vérifier l'état de l'utilisateur
@@ -126,7 +126,8 @@ public class NewAccountController : ControllerBase
             }
             // Mettez à jour l'état de vérification ici si nécessaire
             using MySqlCommand updateCmd = new MySqlCommand("assertAccountVerification", dbClient);
-            updateCmd.Parameters.AddWithValue("userId", userId);
+            updateCmd.CommandType = System.Data.CommandType.StoredProcedure;
+            updateCmd.Parameters.AddWithValue("user_id", userId);
             updateCmd.ExecuteNonQuery();
 
             return Ok("Verification completed successfully.");
