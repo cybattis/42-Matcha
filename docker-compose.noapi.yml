@@ -18,6 +18,7 @@
       - db:/var/lib/mysql
       - "./database/init/init.sql:/docker-entrypoint-initdb.d/init.sql"
       - "./database/init/seed.sql:/docker-entrypoint-initdb.d/seed.sql"
+      - "./database/stored_procedure/sp_App.sql:/docker-entrypoint-initdb.d/sp_App.sql"
       - "./database/stored_procedure/sp_users.sql:/docker-entrypoint-initdb.d/sp_users.sql"
       - "./database/stored_procedure/sp_Auth.sql:/docker-entrypoint-initdb.d/sp_Auth.sql"
       - "./database/stored_procedure/sp_Checks.sql:/docker-entrypoint-initdb.d/sp_Checks.sql"

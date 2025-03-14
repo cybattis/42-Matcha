@@ -160,6 +160,9 @@ public class UserProfileController(ILogger<UserProfileController> logger) : Cont
         var result = Checks.ValidateProfileData(data);
         var token = JwtHelper.DecodeJwtToken(authorization);
         
+        Console.WriteLine("COORDIANTES: " + data.Coordinates);
+        Console.WriteLine("ADDRESS: " + data.Address);
+        
         if (!result.IsValid)
             return BadRequest(result.Message);
         
