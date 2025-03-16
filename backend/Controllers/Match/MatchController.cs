@@ -37,6 +37,7 @@ public class MatchController(ILogger<MatchController> logger): ControllerBase
             while (await reader.Result.ReadAsync()) {
                 var match = new MatchModel
                 {
+                    Username = reader.Result["username"].ToString() ?? "",
                     FirstName = reader.Result["first_name"].ToString() ?? "",
                     LastName = reader.Result["last_name"].ToString() ?? "",
                     ImageUrl = reader.Result["image_url"].ToString() ?? ""

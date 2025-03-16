@@ -337,6 +337,7 @@ END //
 CREATE PROCEDURE GetUserMatches(IN userID INT)
 BEGIN
     SELECT
+        u.username,
         u.first_name,
         u.last_name,
         p.image_url
