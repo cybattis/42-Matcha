@@ -17,11 +17,9 @@ public static class GenerateUser
         var lorem = new Bogus.DataSets.Lorem("en");
         var random = new Bogus.Randomizer();
         
-            Console.WriteLine(users.ToString());
         foreach (var user in users.Results)
         {
             user.Login.Password = "1234578Jjklrfe!";
-            
             
             try
             {
@@ -48,8 +46,6 @@ public static class GenerateUser
                 // Random Bio
                 var bio = lorem.Sentences(RandomNumberGenerator.GetInt32(1, 2));
                 cmd.Parameters.AddWithValue("@_biography", bio);
-                
-                Console.WriteLine("Biography: " + bio);
 
                 var fame = 1000;
                 var isBad = random.Bool();
@@ -57,8 +53,6 @@ public static class GenerateUser
                 if (isBad) fame -= fameVariation;
                 else fame += fameVariation;
                 cmd.Parameters.AddWithValue("@_fame", fame);
-                
-                Console.WriteLine("Fame: " + fame);
                 
                 // Random tags
                 var tags = new List<int>();
@@ -72,13 +66,13 @@ public static class GenerateUser
                 }
                 
                 for (int i = 0; i < numberOfTags; i++) {
-                    Console.WriteLine($"Adding tag{i+1} {tags[i]}");
+                    // Console.WriteLine($"Adding tag{i+1} {tags[i]}");
                     cmd.Parameters.AddWithValue("@tag"+ (i + 1), tags[i]);
                 }
                 
                 if (tags.Count < 5) {
                     for (int i = tags.Count; i < 5; i++) {
-                        Console.WriteLine($"Adding null tag {i+1}");
+                        // Console.WriteLine($"Adding null tag {i+1}");
                         cmd.Parameters.AddWithValue("@tag"+ (i + 1), null);
                     }
                 }
@@ -88,7 +82,6 @@ public static class GenerateUser
                 // Insert images
                 // TODO: Add Human face pictures cartoon pictures
                 var numberOfImages = random.Int(1, 4);
-                Console.WriteLine("Number of images: " + numberOfImages);
                 for (int i = 0; i < numberOfImages; i++) {
                     var imageUrl = $"https://picsum.photos/400/500.jpg?random={random.Int(1, 1000)}";
                     
@@ -96,7 +89,7 @@ public static class GenerateUser
                     var image = await client.GetByteArrayAsync(imageUrl);
                     var url = imagesPath + Guid.NewGuid() + ".jpg";
                     try {
-                        Console.WriteLine($"Saving image {i+1} to disk at {url}");
+                        // Console.WriteLine($"Saving image {i+1} to disk at {url}");
                         await File.WriteAllBytesAsync(url, image);
                         cmd.Parameters.AddWithValue("@image"+ (i + 1), url);
                     } catch (Exception e) {
@@ -109,11 +102,10 @@ public static class GenerateUser
                     cmd.Parameters.AddWithValue("@image"+ (i + 1), null);
                 }
 
-                var result = cmd.ExecuteNonQuery();
-                if (result == 0)
-                    throw new Exception("Failed to add user to the database.");
-                
-                Console.WriteLine($"User {user.Name.First} {user.Name.Last} added to the database! Password: {user.Login.Password}");
+                var result = await cmd.ExecuteNonQueryAsync();
+                Console.WriteLine(result == 0
+                    ? $"User {user.Name.First} {user.Name.Last} failed to be added to the database!"
+                    : $"User {user.Name.First} {user.Name.Last} added to the database! Password: {user.Login.Password}");
             }
             catch (Exception e)
             {
