@@ -14,8 +14,6 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as AppImport } from './routes/_app'
 import { Route as IndexImport } from './routes/index'
-import { Route as AuthVerifyImport } from './routes/_auth/verify'
-import { Route as AuthNotVerifyImport } from './routes/_auth/not-verify'
 import { Route as AuthAuthImport } from './routes/_auth/auth_'
 import { Route as AppSearchImport } from './routes/_app/search'
 import { Route as AppMatchImport } from './routes/_app/match'
@@ -23,11 +21,14 @@ import { Route as AppLikesImport } from './routes/_app/likes'
 import { Route as AppHomeImport } from './routes/_app/home'
 import { Route as AppTestWsImport } from './routes/_app/TestWs'
 import { Route as AuthAuthRegisterImport } from './routes/_auth/auth.register'
+import { Route as AuthAuthNotVerifyImport } from './routes/_auth/auth.not-verify'
 import { Route as AuthAuthLoginImport } from './routes/_auth/auth.login'
+import { Route as AuthAuthForgottenpasswordImport } from './routes/_auth/auth.forgottenpassword'
 import { Route as AppProfileMeImport } from './routes/_app/profile.me'
 import { Route as AppProfileEditInfoImport } from './routes/_app/profile.edit-info'
 import { Route as AppProfileEditImagesImport } from './routes/_app/profile.edit-images'
 import { Route as AppProfileUsernameImport } from './routes/_app/profile.$username'
+import { Route as AuthAuthVerifyIdImport } from './routes/_auth/auth.verify.$id'
 
 // Create/Update Routes
 
@@ -45,24 +46,6 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
-} as any)
-
-const AuthVerifyRoute = AuthVerifyImport.update({
-  id: '/verify',
-  path: '/verify',
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthVerifyRoute = AuthVerifyImport.update({
-  id: '/verify',
-  path: '/verify',
-  getParentRoute: () => AuthRoute,
-} as any)
-
-const AuthNotVerifyRoute = AuthNotVerifyImport.update({
-  id: '/not-verify',
-  path: '/not-verify',
-  getParentRoute: () => AuthRoute,
 } as any)
 
 const AuthAuthRoute = AuthAuthImport.update({
@@ -107,9 +90,21 @@ const AuthAuthRegisterRoute = AuthAuthRegisterImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
+const AuthAuthNotVerifyRoute = AuthAuthNotVerifyImport.update({
+  id: '/auth/not-verify',
+  path: '/auth/not-verify',
+  getParentRoute: () => AuthRoute,
+} as any)
+
 const AuthAuthLoginRoute = AuthAuthLoginImport.update({
   id: '/auth/login',
   path: '/auth/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthAuthForgottenpasswordRoute = AuthAuthForgottenpasswordImport.update({
+  id: '/auth/forgottenpassword',
+  path: '/auth/forgottenpassword',
   getParentRoute: () => AuthRoute,
 } as any)
 
@@ -135,6 +130,12 @@ const AppProfileUsernameRoute = AppProfileUsernameImport.update({
   id: '/profile/$username',
   path: '/profile/$username',
   getParentRoute: () => AppRoute,
+} as any)
+
+const AuthAuthVerifyIdRoute = AuthAuthVerifyIdImport.update({
+  id: '/auth/verify/$id',
+  path: '/auth/verify/$id',
+  getParentRoute: () => AuthRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -204,20 +205,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAuthImport
       parentRoute: typeof AuthImport
     }
-    '/_auth/not-verify': {
-      id: '/_auth/not-verify'
-      path: '/not-verify'
-      fullPath: '/not-verify'
-      preLoaderRoute: typeof AuthNotVerifyImport
-      parentRoute: typeof AuthImport
-    }
-    '/_auth/verify': {
-      id: '/_auth/verify'
-      path: '/verify'
-      fullPath: '/verify'
-      preLoaderRoute: typeof AuthVerifyImport
-      parentRoute: typeof AuthImport
-    }
     '/_app/profile/$username': {
       id: '/_app/profile/$username'
       path: '/profile/$username'
@@ -246,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileMeImport
       parentRoute: typeof AppImport
     }
+    '/_auth/auth/forgottenpassword': {
+      id: '/_auth/auth/forgottenpassword'
+      path: '/auth/forgottenpassword'
+      fullPath: '/auth/forgottenpassword'
+      preLoaderRoute: typeof AuthAuthForgottenpasswordImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/auth/login': {
       id: '/_auth/auth/login'
       path: '/auth/login'
@@ -253,11 +247,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthAuthLoginImport
       parentRoute: typeof AuthImport
     }
+    '/_auth/auth/not-verify': {
+      id: '/_auth/auth/not-verify'
+      path: '/auth/not-verify'
+      fullPath: '/auth/not-verify'
+      preLoaderRoute: typeof AuthAuthNotVerifyImport
+      parentRoute: typeof AuthImport
+    }
     '/_auth/auth/register': {
       id: '/_auth/auth/register'
       path: '/auth/register'
       fullPath: '/auth/register'
       preLoaderRoute: typeof AuthAuthRegisterImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/auth/verify/$id': {
+      id: '/_auth/auth/verify/$id'
+      path: '/auth/verify/$id'
+      fullPath: '/auth/verify/$id'
+      preLoaderRoute: typeof AuthAuthVerifyIdImport
       parentRoute: typeof AuthImport
     }
   }
@@ -293,18 +301,20 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface AuthRouteChildren {
   AuthAuthRoute: typeof AuthAuthRoute
-  AuthNotVerifyRoute: typeof AuthNotVerifyRoute
-  AuthVerifyRoute: typeof AuthVerifyRoute
+  AuthAuthForgottenpasswordRoute: typeof AuthAuthForgottenpasswordRoute
   AuthAuthLoginRoute: typeof AuthAuthLoginRoute
+  AuthAuthNotVerifyRoute: typeof AuthAuthNotVerifyRoute
   AuthAuthRegisterRoute: typeof AuthAuthRegisterRoute
+  AuthAuthVerifyIdRoute: typeof AuthAuthVerifyIdRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAuthRoute: AuthAuthRoute,
-  AuthNotVerifyRoute: AuthNotVerifyRoute,
-  AuthVerifyRoute: AuthVerifyRoute,
+  AuthAuthForgottenpasswordRoute: AuthAuthForgottenpasswordRoute,
   AuthAuthLoginRoute: AuthAuthLoginRoute,
+  AuthAuthNotVerifyRoute: AuthAuthNotVerifyRoute,
   AuthAuthRegisterRoute: AuthAuthRegisterRoute,
+  AuthAuthVerifyIdRoute: AuthAuthVerifyIdRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
@@ -318,14 +328,15 @@ export interface FileRoutesByFullPath {
   '/match': typeof AppMatchRoute
   '/search': typeof AppSearchRoute
   '/auth': typeof AuthAuthRoute
-  '/not-verify': typeof AuthNotVerifyRoute
-  '/verify': typeof AuthVerifyRoute
   '/profile/$username': typeof AppProfileUsernameRoute
   '/profile/edit-images': typeof AppProfileEditImagesRoute
   '/profile/edit-info': typeof AppProfileEditInfoRoute
   '/profile/me': typeof AppProfileMeRoute
+  '/auth/forgottenpassword': typeof AuthAuthForgottenpasswordRoute
   '/auth/login': typeof AuthAuthLoginRoute
+  '/auth/not-verify': typeof AuthAuthNotVerifyRoute
   '/auth/register': typeof AuthAuthRegisterRoute
+  '/auth/verify/$id': typeof AuthAuthVerifyIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -337,14 +348,15 @@ export interface FileRoutesByTo {
   '/match': typeof AppMatchRoute
   '/search': typeof AppSearchRoute
   '/auth': typeof AuthAuthRoute
-  '/not-verify': typeof AuthNotVerifyRoute
-  '/verify': typeof AuthVerifyRoute
   '/profile/$username': typeof AppProfileUsernameRoute
   '/profile/edit-images': typeof AppProfileEditImagesRoute
   '/profile/edit-info': typeof AppProfileEditInfoRoute
   '/profile/me': typeof AppProfileMeRoute
+  '/auth/forgottenpassword': typeof AuthAuthForgottenpasswordRoute
   '/auth/login': typeof AuthAuthLoginRoute
+  '/auth/not-verify': typeof AuthAuthNotVerifyRoute
   '/auth/register': typeof AuthAuthRegisterRoute
+  '/auth/verify/$id': typeof AuthAuthVerifyIdRoute
 }
 
 export interface FileRoutesById {
@@ -358,14 +370,15 @@ export interface FileRoutesById {
   '/_app/match': typeof AppMatchRoute
   '/_app/search': typeof AppSearchRoute
   '/_auth/auth_': typeof AuthAuthRoute
-  '/_auth/not-verify': typeof AuthNotVerifyRoute
-  '/_auth/verify': typeof AuthVerifyRoute
   '/_app/profile/$username': typeof AppProfileUsernameRoute
   '/_app/profile/edit-images': typeof AppProfileEditImagesRoute
   '/_app/profile/edit-info': typeof AppProfileEditInfoRoute
   '/_app/profile/me': typeof AppProfileMeRoute
+  '/_auth/auth/forgottenpassword': typeof AuthAuthForgottenpasswordRoute
   '/_auth/auth/login': typeof AuthAuthLoginRoute
+  '/_auth/auth/not-verify': typeof AuthAuthNotVerifyRoute
   '/_auth/auth/register': typeof AuthAuthRegisterRoute
+  '/_auth/auth/verify/$id': typeof AuthAuthVerifyIdRoute
 }
 
 export interface FileRouteTypes {
@@ -379,19 +392,15 @@ export interface FileRouteTypes {
     | '/match'
     | '/search'
     | '/auth'
-    | '/not-verify'
-    | '/verify'
     | '/profile/$username'
     | '/profile/edit-images'
     | '/profile/edit-info'
     | '/profile/me'
+    | '/auth/forgottenpassword'
     | '/auth/login'
+    | '/auth/not-verify'
     | '/auth/register'
-<<<<<<< Updated upstream
     | '/auth/verify/$id'
-=======
-    | '/auth/verify'
->>>>>>> Stashed changes
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -402,19 +411,15 @@ export interface FileRouteTypes {
     | '/match'
     | '/search'
     | '/auth'
-    | '/not-verify'
-    | '/verify'
     | '/profile/$username'
     | '/profile/edit-images'
     | '/profile/edit-info'
     | '/profile/me'
+    | '/auth/forgottenpassword'
     | '/auth/login'
+    | '/auth/not-verify'
     | '/auth/register'
-<<<<<<< Updated upstream
     | '/auth/verify/$id'
-=======
-    | '/auth/verify'
->>>>>>> Stashed changes
   id:
     | '__root__'
     | '/'
@@ -426,14 +431,15 @@ export interface FileRouteTypes {
     | '/_app/match'
     | '/_app/search'
     | '/_auth/auth_'
-    | '/_auth/not-verify'
-    | '/_auth/verify'
     | '/_app/profile/$username'
     | '/_app/profile/edit-images'
     | '/_app/profile/edit-info'
     | '/_app/profile/me'
+    | '/_auth/auth/forgottenpassword'
     | '/_auth/auth/login'
+    | '/_auth/auth/not-verify'
     | '/_auth/auth/register'
+    | '/_auth/auth/verify/$id'
   fileRoutesById: FileRoutesById
 }
 
@@ -485,10 +491,11 @@ export const routeTree = rootRoute
       "filePath": "_auth.tsx",
       "children": [
         "/_auth/auth_",
-        "/_auth/not-verify",
-        "/_auth/verify",
+        "/_auth/auth/forgottenpassword",
         "/_auth/auth/login",
-        "/_auth/auth/register"
+        "/_auth/auth/not-verify",
+        "/_auth/auth/register",
+        "/_auth/auth/verify/$id"
       ]
     },
     "/_app/TestWs": {
@@ -515,14 +522,6 @@ export const routeTree = rootRoute
       "filePath": "_auth/auth_.tsx",
       "parent": "/_auth"
     },
-    "/_auth/not-verify": {
-      "filePath": "_auth/not-verify.tsx",
-      "parent": "/_auth"
-    },
-    "/_auth/verify": {
-      "filePath": "_auth/verify.tsx",
-      "parent": "/_auth"
-    },
     "/_app/profile/$username": {
       "filePath": "_app/profile.$username.tsx",
       "parent": "/_app"
@@ -539,12 +538,24 @@ export const routeTree = rootRoute
       "filePath": "_app/profile.me.tsx",
       "parent": "/_app"
     },
+    "/_auth/auth/forgottenpassword": {
+      "filePath": "_auth/auth.forgottenpassword.tsx",
+      "parent": "/_auth"
+    },
     "/_auth/auth/login": {
       "filePath": "_auth/auth.login.tsx",
       "parent": "/_auth"
     },
+    "/_auth/auth/not-verify": {
+      "filePath": "_auth/auth.not-verify.tsx",
+      "parent": "/_auth"
+    },
     "/_auth/auth/register": {
       "filePath": "_auth/auth.register.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/auth/verify/$id": {
+      "filePath": "_auth/auth.verify.$id.tsx",
       "parent": "/_auth"
     }
   }
